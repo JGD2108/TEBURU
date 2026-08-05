@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { getPoolClient, query } from '@/lib/db';
 
 export async function POST(request: Request) {
+  let client;
   try {
     const { table_id, code, name } = await request.json();
     if (!table_id || !code || !name) {
@@ -14,29 +15,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ID de mesa inválido. Asegúrate de escanear el QR correcto.' }, { status: 400 });
     }
 
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
-
     // 1. Verificar el código de la mesa
-    const tableRes = await client.query('SELECT id, access_code, current_session_id, assigned_waiter_id FROM tables WHERE id = $1', [table_id]);
+    const tableRes = await query('SELECT id, access_code, current_session_id, assigned_waiter_id FROM tables WHERE id = $1', [table_id]);
     
     if (tableRes.rows.length === 0) {
-      await client.end();
       return NextResponse.json({ error: 'Mesa no encontrada' }, { status: 404 });
     }
 
     const table = tableRes.rows[0];
 
     if (table.access_code !== code) {
-      await client.end();
       return NextResponse.json({ error: 'PIN incorrecto o la mesa no está habilitada' }, { status: 403 });
     }
 
     let sessionId = table.current_session_id;
 
+    client = await getPoolClient();
     await client.query('BEGIN');
 
     // 2. Si no hay sesión activa, crearla
@@ -67,7 +61,6 @@ export async function POST(request: Request) {
     const sessionUserId = userRes.rows[0].id;
 
     await client.query('COMMIT');
-    await client.end();
 
     return NextResponse.json({ 
       success: true, 
@@ -76,7 +69,14 @@ export async function POST(request: Request) {
     });
 
   } catch (error: any) {
+    if (client) {
+      await client.query('ROLLBACK').catch(() => {});
+    }
     console.error("Join Table Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }

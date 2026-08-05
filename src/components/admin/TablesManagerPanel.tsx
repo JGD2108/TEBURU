@@ -62,7 +62,21 @@ export default function TablesManagerPanel() {
     el.style.display = 'flex';
     
     try {
-      const canvas = await html2canvas(el, { scale: 3, useCORS: true, logging: false });
+      const canvas = await html2canvas(el, { 
+        scale: 2, 
+        useCORS: true, 
+        allowTaint: true,
+        logging: false,
+        onclone: (clonedDoc) => {
+          const printEl = clonedDoc.getElementById(`qr-print-${tableId}`);
+          if (printEl) {
+            printEl.style.display = 'flex';
+            printEl.style.position = 'relative';
+            printEl.style.top = '0';
+            printEl.style.left = '0';
+          }
+        }
+      });
       const imgData = canvas.toDataURL('image/png');
       
       // Tamaño A6 vertical (105 x 148 mm aprox)
@@ -110,7 +124,7 @@ export default function TablesManagerPanel() {
                   <button onClick={() => setShowQrFor(showQrFor === table.id ? null : table.id)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px' }}>
                     <QrCode size={20} />
                   </button>
-                  <button onClick={() => handleDelete(table.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}>
+                  <button onClick={() => handleDelete(table.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'padding', padding: '8px' }}>
                     <Trash2 size={20} />
                   </button>
                 </div>

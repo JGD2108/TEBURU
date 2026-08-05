@@ -1,16 +1,9 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { query } from '@/lib/db';
 
 export async function GET() {
   try {
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
-
-    // Query para obtener todas las mesas con su sesión activa y pedidos
-    const { rows } = await client.query(`
+    const { rows } = await query(`
       SELECT 
         t.id, t.table_number, t.status, t.access_code, t.needs_attention, t.current_session_id,
         (
@@ -35,8 +28,6 @@ export async function GET() {
       FROM tables t
       ORDER BY t.table_number ASC;
     `);
-
-    await client.end();
 
     return NextResponse.json({ success: true, data: rows });
   } catch (error: any) {

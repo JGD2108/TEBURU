@@ -97,11 +97,13 @@ export default function TableMenu() {
 
     if (data) {
       const flattenedOrders: any[] = [];
-      data.forEach(order => {
-        order.items.forEach((item: any) => {
+      data.forEach((order: any) => {
+        order.items?.forEach((item: any) => {
+          const userName = Array.isArray(order.session_users) ? order.session_users[0]?.name : order.session_users?.name;
+          const itemName = Array.isArray(item.menu_items) ? item.menu_items[0]?.name : item.menu_items?.name;
           flattenedOrders.push({
-            user: order.session_users?.name || 'Invitado',
-            item: item.menu_items?.name,
+            user: userName || 'Invitado',
+            item: itemName,
             qty: item.quantity,
             price: item.unit_price,
             status: order.status,

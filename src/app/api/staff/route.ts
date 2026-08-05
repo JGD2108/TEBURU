@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { getPoolClient, query } from '@/lib/db';
 import crypto from 'crypto';
 
 export async function POST(request: Request) {
+  let client;
   try {
     const { email, password, name, role } = await request.json();
     if (!email || !name || !role) {
@@ -11,19 +12,13 @@ export async function POST(request: Request) {
 
     const finalPassword = password || 'Teburu2026_';
 
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
-
     // 1. Verificar si el usuario ya existe en auth.users
-    const userExists = await client.query('SELECT id FROM auth.users WHERE email = $1', [email]);
+    const userExists = await query('SELECT id FROM auth.users WHERE email = $1', [email]);
     if (userExists.rows.length > 0) {
-      await client.end();
       return NextResponse.json({ error: 'El usuario ya existe' }, { status: 400 });
     }
 
+    client = await getPoolClient();
     await client.query('BEGIN');
 
     // 2. Insertar en auth.users
@@ -55,12 +50,18 @@ export async function POST(request: Request) {
     `, [userId, name, role, sha1Password, email]);
 
     await client.query('COMMIT');
-    await client.end();
 
     return NextResponse.json({ success: true });
 
   } catch (error: any) {
+    if (client) {
+      await client.query('ROLLBACK').catch(() => {});
+    }
     console.error("Staff Creation Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }

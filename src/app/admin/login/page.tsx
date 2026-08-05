@@ -29,8 +29,8 @@ export default function AdminLogin() {
     async function checkAuth() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        const { data: { currentLevel } } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        if (currentLevel === 'aal2') {
+        const mfaRes = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (mfaRes.data?.currentLevel === 'aal2') {
           router.push('/admin');
         }
       }

@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { getPoolClient } from '@/lib/db';
 
-export async function POST(request: Request) {
+export async function POST() {
+  let client;
   try {
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
-
-    // Iniciar transacción
+    client = await getPoolClient();
     await client.query('BEGIN');
 
     // 1. Eliminar items de los pedidos
@@ -33,15 +28,21 @@ export async function POST(request: Request) {
           needs_attention = false;
     `);
 
-    // Nota: Mantenemos el staff intacto (tanto admins como meseros/cocina) 
-    // para que no tengas que crear cuentas de empleados cada vez que quieras probar.
-
     await client.query('COMMIT');
-    await client.end();
 
-    return NextResponse.json({ success: true, message: "Datos transaccionales limpiados exitosamente. Las mesas están libres." });
+    return NextResponse.json({ 
+      success: true, 
+      message: "Datos transaccionales limpiados exitosamente. Las mesas están libres." 
+    });
   } catch (error: any) {
+    if (client) {
+      await client.query('ROLLBACK').catch(() => {});
+    }
     console.error("API Reset Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }

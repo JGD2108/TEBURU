@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { query } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -8,19 +8,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Falta el ID de la mesa' }, { status: 400 });
     }
 
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
-
-    await client.query(`
+    await query(`
       UPDATE tables 
       SET needs_attention = $1 
       WHERE id = $2
     `, [Boolean(needs_attention), table_id]);
-
-    await client.end();
 
     return NextResponse.json({ success: true });
 

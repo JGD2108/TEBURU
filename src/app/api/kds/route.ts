@@ -1,16 +1,9 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { query } from '@/lib/db';
 
 export async function GET() {
   try {
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
-
-    // Obtener órdenes que están pending o cooking
-    const { rows } = await client.query(`
+    const { rows } = await query(`
       SELECT 
         o.id as order_id,
         o.status,
@@ -34,8 +27,6 @@ export async function GET() {
       WHERE o.status IN ('pending', 'cooking')
       ORDER BY o.created_at ASC;
     `);
-
-    await client.end();
 
     return NextResponse.json({ success: true, data: rows });
   } catch (error: any) {

@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { getPoolClient } from '@/lib/db';
 
 export async function POST(request: Request) {
+  let client;
   try {
     const { table_id } = await request.json();
     if (!table_id) {
       return NextResponse.json({ error: 'Falta el ID de la mesa' }, { status: 400 });
     }
 
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
+    client = await getPoolClient();
     await client.query('BEGIN');
 
     // Cerrar la sesión activa de la mesa
@@ -30,11 +27,17 @@ export async function POST(request: Request) {
     `, [table_id]);
 
     await client.query('COMMIT');
-    await client.end();
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
+    if (client) {
+      await client.query('ROLLBACK').catch(() => {});
+    }
     console.error("Checkout API Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }

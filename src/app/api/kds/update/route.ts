@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { query } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -13,22 +13,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Estado inválido' }, { status: 400 });
     }
 
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
-
-    // Si status es 'served', también actualizamos la tabla (si la mesa estuviera en 'needs_attention')
-    // Aunque usualmente el 'served' solo notifica al mesero.
-
-    await client.query(`
+    await query(`
       UPDATE orders 
       SET status = $1 
       WHERE id = $2
     `, [status, order_id]);
-
-    await client.end();
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

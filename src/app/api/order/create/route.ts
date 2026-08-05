@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'pg';
+import { getPoolClient } from '@/lib/db';
 
 export async function POST(request: Request) {
+  let client;
   try {
     const { session_id, session_user_id, items } = await request.json();
     
@@ -9,11 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Faltan parámetros o el carrito está vacío' }, { status: 400 });
     }
 
-    const client = new Client({
-      connectionString: 'postgresql://postgres:qy0x7Kse76ZIBJmG@db.jobdlmjfcxmyzwhkdank.supabase.co:5432/postgres'
-    });
-    
-    await client.connect();
+    client = await getPoolClient();
     await client.query('BEGIN');
 
     // 1. Crear el pedido principal
@@ -34,12 +31,18 @@ export async function POST(request: Request) {
     }
 
     await client.query('COMMIT');
-    await client.end();
 
     return NextResponse.json({ success: true, order_id: orderId });
 
   } catch (error: any) {
+    if (client) {
+      await client.query('ROLLBACK').catch(() => {});
+    }
     console.error("Create Order Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }

@@ -13,7 +13,7 @@ export default function OverviewPanel() {
     const [tRes, sRes, oRes] = await Promise.all([
       supabase.from('tables').select('*, assigned_waiter:staff(name)').order('table_number', { ascending: true }),
       supabase.from('staff').select('user_id, name').eq('role', 'waiter'),
-      supabase.from('orders').select('id, status, created_at, session:sessions(tables(table_number)), items:order_items(quantity, menu_items(name))').in('status', ['pending', 'cooking']).order('created_at', { ascending: false })
+      supabase.from('orders').select('id, status, created_at, session:sessions(tables(table_number)), items:order_items(quantity, menu_items(name))').in('status', ['pending', 'preparing']).order('created_at', { ascending: false })
     ]);
     if (tRes.data) setTables(tRes.data);
     if (sRes.data) setWaiters(sRes.data);
@@ -125,10 +125,10 @@ export default function OverviewPanel() {
             {orders.map(order => {
               const tableNum = order.session?.tables?.table_number || '?';
               return (
-                <div key={order.id} style={{ padding: '16px', background: 'var(--bg-base)', borderRadius: '8px', borderLeft: order.status === 'cooking' ? '3px solid #ffa502' : '3px solid var(--primary)' }}>
+                <div key={order.id} style={{ padding: '16px', background: 'var(--bg-base)', borderRadius: '8px', borderLeft: order.status === 'preparing' ? '3px solid #ffa502' : '3px solid var(--primary)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontWeight: 'bold' }}>Mesa {tableNum}</span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{order.status === 'cooking' ? 'En Cocina' : 'Pendiente'}</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{order.status === 'preparing' ? 'En preparación' : 'Pendiente'}</span>
                   </div>
                   <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                     {order.items?.map((item: any, idx: number) => (

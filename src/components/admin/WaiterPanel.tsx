@@ -112,7 +112,7 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
                         <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{order.customer_name}: </span>
                         {order.items?.map((item: any) => `${item.quantity}x ${item.menu_item}`).join(', ')}
                         <br/>
-                        <span style={{ fontSize: '0.75rem', color: order.status === 'pending' ? '#ffa502' : order.status === 'cooking' ? '#2ed573' : 'var(--text-muted)' }}>
+                        <span style={{ fontSize: '0.75rem', color: order.status === 'pending' ? '#ffa502' : order.status === 'preparing' ? '#2ed573' : 'var(--text-muted)' }}>
                           Estado: {order.status}
                         </span>
                       </li>

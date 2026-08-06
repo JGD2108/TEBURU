@@ -82,7 +82,7 @@ export default function TableMenu() {
     loadMenu();
   }, []);
 
-  const loadTableOrders = async (sessionId: string) => {
+  async function loadTableOrders(sessionId: string) {
     // Join de orders, order_items, menu_items y session_users
     const { data, error } = await supabase
       .from('orders')
@@ -113,7 +113,7 @@ export default function TableMenu() {
       });
       setTableOrders(flattenedOrders);
     }
-  };
+  }
 
   const handleAddClick = (item: any) => {
     if (item.ingredients && item.ingredients.length > 0) {

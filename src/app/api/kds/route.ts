@@ -24,7 +24,7 @@ export async function GET() {
       JOIN sessions s ON o.session_id = s.id
       JOIN tables t ON s.table_id = t.id
       JOIN session_users su ON o.user_id = su.id
-      WHERE o.status IN ('pending', 'cooking')
+      WHERE o.status IN ('pending', 'preparing')
       ORDER BY o.created_at ASC;
     `);
 

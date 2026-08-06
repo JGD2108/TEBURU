@@ -48,7 +48,7 @@ export default function KitchenPanel() {
   if (loading && orders.length === 0) return <div>Cargando comandas...</div>;
 
   const pendingOrders = orders.filter(o => o.status === 'pending');
-  const cookingOrders = orders.filter(o => o.status === 'cooking');
+  const preparingOrders = orders.filter(o => o.status === 'preparing');
 
   const Ticket = ({ order }: { order: any }) => (
     <div style={{ 
@@ -92,7 +92,7 @@ export default function KitchenPanel() {
           <button 
             className="btn-primary" 
             style={{ width: '100%', height: '56px', fontSize: '1.1rem', background: '#ffa502', color: 'black' }}
-            onClick={() => updateStatus(order.order_id, 'cooking')}
+            onClick={() => updateStatus(order.order_id, 'preparing')}
           >
             <ChefHat size={20} style={{ marginRight: '8px' }}/>
             Empezar a Cocinar
@@ -101,7 +101,7 @@ export default function KitchenPanel() {
           <button 
             className="btn-primary" 
             style={{ width: '100%', height: '56px', fontSize: '1.1rem', background: '#2ed573', color: 'black' }}
-            onClick={() => updateStatus(order.order_id, 'served')}
+            onClick={() => updateStatus(order.order_id, 'ready')}
           >
             <CheckCircle2 size={20} style={{ marginRight: '8px' }}/>
             ¡Listo para Entregar!
@@ -121,7 +121,7 @@ export default function KitchenPanel() {
         </div>
         <div style={{ display: 'flex', gap: '24px', fontSize: '1.2rem', fontWeight: 600 }}>
           <span style={{ color: '#ffa502' }}>{pendingOrders.length} Nuevas</span>
-          <span style={{ color: '#2ed573' }}>{cookingOrders.length} En Preparación</span>
+          <span style={{ color: '#2ed573' }}>{preparingOrders.length} En Preparación</span>
         </div>
       </div>
 
@@ -147,10 +147,10 @@ export default function KitchenPanel() {
             <ChefHat size={24} /> En Preparación
           </h3>
           <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '8px' }}>
-            {cookingOrders.length === 0 ? (
+            {preparingOrders.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '40px' }}>No hay platillos en preparación.</p>
             ) : (
-              cookingOrders.map(order => <Ticket key={order.order_id} order={order} />)
+              preparingOrders.map(order => <Ticket key={order.order_id} order={order} />)
             )}
           </div>
         </div>

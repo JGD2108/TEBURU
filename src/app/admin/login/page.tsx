@@ -25,14 +25,11 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Si ya tiene aal2, redirigir
+    // Redirigir si ya tiene sesión activa (2FA desactivado para desarrollo)
     async function checkAuth() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        const mfaRes = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        if (mfaRes.data?.currentLevel === 'aal2') {
-          router.push('/admin');
-        }
+        router.push('/admin');
       }
     }
     checkAuth();
@@ -54,32 +51,8 @@ export default function AdminLogin() {
       return;
     }
 
-    // Check MFA status
-    const { data: mfaData, error: mfaError } = await supabase.auth.mfa.listFactors();
-    
-    if (mfaData && mfaData.totp && mfaData.totp.length > 0) {
-      // Ya tiene 2FA configurado, proceder a verificar
-      const totpFactor = mfaData.totp[0];
-      setFactorId(totpFactor.id);
-      setStep('verify_2fa');
-    } else {
-      // Necesita configurar 2FA por primera vez
-      const { data: enrollData, error: enrollError } = await supabase.auth.mfa.enroll({
-        factorType: 'totp',
-        friendlyName: `Teburu Admin ${Date.now()}`
-      });
-      
-      if (enrollError) {
-        setError("Error al iniciar 2FA: " + enrollError.message);
-      } else {
-        setFactorId(enrollData.id);
-        // Usar uri en lugar de qr_code, ya que qrcode.react espera una URL (otpauth://...)
-        // y no un string con el código SVG completo
-        setQrCodeUrl(enrollData.totp.uri);
-        setStep('setup_2fa');
-      }
-    }
-    
+    // 2FA desactivado temporalmente para desarrollo: ingresar directamente
+    router.push('/admin');
     setLoading(false);
   };
 

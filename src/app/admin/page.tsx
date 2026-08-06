@@ -29,9 +29,6 @@ export default function AdminDashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { router.push('/admin/login'); return; }
 
-      const mfaRes = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (mfaRes.data?.currentLevel !== 'aal2') { router.push('/admin/login'); return; }
-
       const { data: staff } = await supabase.from('staff').select('name, role').eq('user_id', session.user.id).single();
 
       if (staff) {

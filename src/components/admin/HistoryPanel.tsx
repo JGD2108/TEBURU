@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { staffFetch } from '@/lib/api-client';
 import { RefreshCw, Clock, DollarSign, User, ReceiptText } from 'lucide-react';
 
 export default function HistoryPanel() {
@@ -9,7 +10,7 @@ export default function HistoryPanel() {
   const loadHistory = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/history');
+      const res = await staffFetch('/api/history');
       const { data } = await res.json();
       if (data) setSessions(data);
     } catch (err) {

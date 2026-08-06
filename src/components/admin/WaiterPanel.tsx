@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { RefreshCw, QrCode, Key, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { staffFetch } from '@/lib/api-client';
+import { RefreshCw, QrCode, Key, AlertCircle, CheckCircle2, PackageCheck } from 'lucide-react';
 
 export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) {
   const [tables, setTables] = useState<any[]>([]);
@@ -8,7 +9,7 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
   const loadTables = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/salon');
+      const res = await staffFetch('/api/salon');
       const { data } = await res.json();
       if (data) setTables(data);
     } catch (err) {
@@ -25,7 +26,7 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
 
   const generatePin = async (tableId: string) => {
     try {
-      const res = await fetch('/api/table/generate-pin', {
+      const res = await staffFetch('/api/table/generate-pin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ table_id: tableId, waiter_id: waiterId })
@@ -38,7 +39,7 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
 
   const clearNeedsAttention = async (tableId: string) => {
     try {
-      const res = await fetch('/api/table/attention', {
+      const res = await staffFetch('/api/table/attention', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ table_id: tableId, needs_attention: false })
@@ -52,7 +53,7 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
   const handleCheckout = async (tableId: string) => {
     if (!window.confirm("¿Estás seguro de cerrar la mesa? Esto borrará el PIN y la dejará disponible para nuevos clientes.")) return;
     try {
-      const res = await fetch('/api/table/checkout', {
+      const res = await staffFetch('/api/table/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ table_id: tableId })
@@ -60,6 +61,21 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
       if (res.ok) loadTables();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const deliverOrder = async (orderId: string) => {
+    try {
+      const res = await staffFetch('/api/orders/deliver', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId })
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error || 'No se pudo confirmar la entrega');
+      await loadTables();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'No se pudo confirmar la entrega');
     }
   };
 
@@ -115,6 +131,11 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
                         <span style={{ fontSize: '0.75rem', color: order.status === 'pending' ? '#ffa502' : order.status === 'preparing' ? '#2ed573' : 'var(--text-muted)' }}>
                           Estado: {order.status}
                         </span>
+                        {order.status === 'ready' && (
+                          <button className="btn-primary" onClick={() => void deliverOrder(order.order_id)} style={{ width: '100%', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                            <PackageCheck size={16} /> Confirmar entrega
+                          </button>
+                        )}
                       </li>
                     ))}
                   </ul>

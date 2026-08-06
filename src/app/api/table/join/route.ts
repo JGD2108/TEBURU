@@ -1,82 +1,50 @@
 import { NextResponse } from 'next/server';
 import { getPoolClient, query } from '@/lib/db';
+import { newGuestToken, setGuestCookie } from '@/lib/guest-session';
+
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(request: Request) {
   let client;
   try {
-    const { table_id, code, name } = await request.json();
-    if (!table_id || !code || !name) {
-      return NextResponse.json({ error: 'Faltan parámetros' }, { status: 400 });
+    const { table_id: tableId, code, name } = await request.json();
+    if (!uuid.test(tableId) || typeof code !== 'string' || !/^\d{4}$/.test(code) || typeof name !== 'string' || !name.trim()) {
+      return NextResponse.json({ error: 'Datos de acceso inválidos' }, { status: 400 });
     }
-
-    // Validación básica de UUID para evitar crash de Postgres
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(table_id)) {
-      return NextResponse.json({ error: 'ID de mesa inválido. Asegúrate de escanear el QR correcto.' }, { status: 400 });
-    }
-
-    // 1. Verificar el código de la mesa
-    const tableRes = await query('SELECT id, access_code, current_session_id, assigned_waiter_id FROM tables WHERE id = $1', [table_id]);
-    
-    if (tableRes.rows.length === 0) {
-      return NextResponse.json({ error: 'Mesa no encontrada' }, { status: 404 });
-    }
-
-    const table = tableRes.rows[0];
-
-    if (table.access_code !== code) {
-      return NextResponse.json({ error: 'PIN incorrecto o la mesa no está habilitada' }, { status: 403 });
-    }
-
-    let sessionId = table.current_session_id;
+    const tableResult = await query<{ id: string; access_code: string | null; current_session_id: string | null; assigned_waiter_id: string | null }>(
+      'SELECT id, access_code, current_session_id, assigned_waiter_id FROM tables WHERE id = $1', [tableId]
+    );
+    const table = tableResult.rows[0];
+    if (!table) return NextResponse.json({ error: 'Mesa no encontrada' }, { status: 404 });
+    if (table.access_code !== code) return NextResponse.json({ error: 'PIN incorrecto o la mesa no está habilitada' }, { status: 403 });
 
     client = await getPoolClient();
     await client.query('BEGIN');
-
-    // 2. Si no hay sesión activa, crearla
+    let sessionId = table.current_session_id;
     if (!sessionId) {
-      const sessionRes = await client.query(`
-        INSERT INTO sessions (table_id, status, code, waiter_id) 
-        VALUES ($1, 'active', $2, $3) 
-        RETURNING id
-      `, [table_id, code, table.assigned_waiter_id]);
-      
-      sessionId = sessionRes.rows[0].id;
-
-      // Actualizar estado de la mesa
-      await client.query(`
-        UPDATE tables 
-        SET status = 'occupied', current_session_id = $1 
-        WHERE id = $2
-      `, [sessionId, table_id]);
+      const created = await client.query(
+        `INSERT INTO sessions (table_id, status, code, waiter_id) VALUES ($1, 'active', $2, $3) RETURNING id`,
+        [tableId, code, table.assigned_waiter_id]
+      );
+      sessionId = created.rows[0].id;
+      await client.query(`UPDATE tables SET status = 'occupied', current_session_id = $1 WHERE id = $2`, [sessionId, tableId]);
     }
-
-    // 3. Crear el usuario en esta sesión
-    const userRes = await client.query(`
-      INSERT INTO session_users (session_id, name) 
-      VALUES ($1, $2) 
-      RETURNING id
-    `, [sessionId, name]);
-    
-    const sessionUserId = userRes.rows[0].id;
-
+    const guest = await client.query(`INSERT INTO session_users (session_id, name) VALUES ($1, $2) RETURNING id`, [sessionId, name.trim().slice(0, 100)]);
+    const accessToken = newGuestToken();
+    await client.query(
+      `INSERT INTO guest_access_tokens (session_id, session_user_id, token_hash, expires_at)
+       VALUES ($1, $2, encode(digest($3, 'sha256'), 'hex'), now() + interval '12 hours')`,
+      [sessionId, guest.rows[0].id, accessToken]
+    );
     await client.query('COMMIT');
-
-    return NextResponse.json({ 
-      success: true, 
-      session_id: sessionId, 
-      session_user_id: sessionUserId 
-    });
-
-  } catch (error: any) {
-    if (client) {
-      await client.query('ROLLBACK').catch(() => {});
-    }
-    console.error("Join Table Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const response = NextResponse.json({ success: true });
+    setGuestCookie(response, accessToken);
+    return response;
+  } catch (error) {
+    if (client) await client.query('ROLLBACK').catch(() => undefined);
+    console.error('Table join error:', error);
+    return NextResponse.json({ error: 'No se pudo abrir la sesión de mesa' }, { status: 500 });
   } finally {
-    if (client) {
-      client.release();
-    }
+    client?.release();
   }
 }

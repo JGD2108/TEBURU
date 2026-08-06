@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { isAuthorizationFailure, requireRole } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const staff = await requireRole(request, 'admin', 'waiter');
+  if (isAuthorizationFailure(staff)) return staff;
   try {
     const { rows } = await query(`
       SELECT 
@@ -24,6 +27,7 @@ export async function GET() {
           FROM orders o
           JOIN session_users su ON o.user_id = su.id
           WHERE o.session_id = t.current_session_id
+            AND o.status NOT IN ('delivered', 'cancelled')
         ) as active_orders
       FROM tables t
       ORDER BY t.table_number ASC;

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { LogOut, LayoutDashboard, Settings, UtensilsCrossed, Users, Grid, ChefHat, BookOpen, Armchair } from 'lucide-react';
+import { LogOut, LayoutDashboard, Settings, UtensilsCrossed, Users, Grid, ChefHat, BookOpen, Armchair, Workflow } from 'lucide-react';
 
 import MenuPanel from '@/components/admin/MenuPanel';
 import StaffPanel from '@/components/admin/StaffPanel';
@@ -13,6 +13,7 @@ import OverviewPanel from '@/components/admin/OverviewPanel';
 import WaiterPanel from '@/components/admin/WaiterPanel';
 import HistoryPanel from '@/components/admin/HistoryPanel';
 import KitchenPanel from '@/components/admin/KitchenPanel';
+import StationsPanel from '@/components/admin/StationsPanel';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -93,6 +94,7 @@ export default function AdminDashboard() {
               <NavButton id="admin_tables" icon={Armchair} label="Estructura de Mesas" />
               <NavButton id="history" icon={BookOpen} label="Historial de Cajas" />
               <NavButton id="kds" icon={ChefHat} label="Monitor Cocina (KDS)" />
+              <NavButton id="stations" icon={Workflow} label="Estaciones de Cocina" />
               <NavButton id="settings" icon={Settings} label="Ajustes Globales" />
             </>
           )}
@@ -122,6 +124,7 @@ export default function AdminDashboard() {
         {staffData?.role === 'admin' && activeTab === 'admin_tables' && <TablesManagerPanel />}
         {staffData?.role === 'admin' && activeTab === 'history' && <HistoryPanel />}
         {staffData?.role === 'admin' && activeTab === 'kds' && <KitchenPanel />}
+        {staffData?.role === 'admin' && activeTab === 'stations' && <StationsPanel />}
 
         {/* Waiter View */}
         {staffData?.role === 'waiter' && activeTab === 'tables' && <WaiterPanel waiterId={userId} />}

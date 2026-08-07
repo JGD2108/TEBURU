@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/lib/supabase';
-import { Lock, Mail, Key, ShieldCheck, ArrowRight, UserPlus } from 'lucide-react';
+import { Lock, Mail, Key, ShieldCheck } from 'lucide-react';
 import styles from './login.module.css';
 
-type AuthStep = 'login' | 'setup_2fa' | 'verify_2fa' | 'signup' | 'forgot_password';
+type AuthStep = 'login' | 'setup_2fa' | 'verify_2fa' | 'forgot_password';
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -53,25 +53,6 @@ export default function AdminLogin() {
 
     // 2FA desactivado temporalmente para desarrollo: ingresar directamente
     router.push('/admin');
-    setLoading(false);
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password
-    });
-
-    if (signUpError) {
-      setError(signUpError.message);
-    } else {
-      setError('¡Usuario creado! Por favor vuelve a la pestaña de Iniciar Sesión.');
-      setStep('login');
-    }
     setLoading(false);
   };
 
@@ -132,8 +113,8 @@ export default function AdminLogin() {
 
         {error && <div className={styles.errorAlert}>{error}</div>}
 
-        {(step === 'login' || step === 'signup') && (
-          <form onSubmit={step === 'login' ? handleLogin : handleSignUp} className={styles.form}>
+        {step === 'login' && (
+          <form onSubmit={handleLogin} className={styles.form}>
             <div className={styles.inputGroup}>
               <label>Correo Electrónico</label>
               <div className={styles.inputWrapper}>
@@ -168,15 +149,7 @@ export default function AdminLogin() {
             </div>
 
             <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', marginTop: '16px' }}>
-              {loading ? 'Procesando...' : step === 'login' ? 'Iniciar Sesión' : 'Crear Usuario'}
-            </button>
-
-            <button 
-              type="button" 
-              className={styles.textBtn} 
-              onClick={() => { setStep(step === 'login' ? 'signup' : 'login'); setError(''); }}
-            >
-              {step === 'login' ? '¿No tienes cuenta? Crear una de prueba' : 'Volver a Iniciar Sesión'}
+              {loading ? 'Procesando...' : 'Iniciar Sesión'}
             </button>
           </form>
         )}

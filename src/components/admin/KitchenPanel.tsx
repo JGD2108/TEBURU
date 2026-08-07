@@ -6,6 +6,7 @@ import {
   Volume2, VolumeX, Wifi, WifiOff, X, Zap,
 } from 'lucide-react';
 import { staffFetch } from '@/lib/api-client';
+import { supabase } from '@/lib/supabase';
 import styles from './KitchenPanel.module.css';
 
 type Station = {
@@ -102,44 +103,29 @@ export default function KitchenPanel() {
   }, [loadItems, refresh]);
 
   useEffect(() => {
-    let active = true;
-    let controller: AbortController | undefined;
-    const connect = async () => {
-      while (active) {
-        try {
-          setConnection(navigator.onLine ? 'connecting' : 'offline');
-          if (!navigator.onLine) throw new Error('offline');
-          controller = new AbortController();
-          const response = await staffFetch('/api/kds/stream', { signal: controller.signal });
-          if (!response.ok || !response.body) throw new Error('stream unavailable');
-          setConnection('live');
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
-          while (active) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            const events = buffer.split('\n\n');
-            buffer = events.pop() || '';
-            for (const event of events) {
-              if (event.startsWith('event: change')) void Promise.all([loadItems(), loadStations()]);
-            }
-          }
-        } catch {
-          if (active) setConnection('offline');
-        }
-        if (active) await new Promise((resolve) => window.setTimeout(resolve, 3000));
-      }
+    let refreshTimer: number | undefined;
+    const refreshFromRealtime = () => {
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => void Promise.all([loadItems(), loadStations()]), 250);
     };
-    const onOffline = () => { setConnection('offline'); controller?.abort(); };
-    const onOnline = () => { setConnection('connecting'); controller?.abort(); };
+    const channel = supabase
+      .channel('teburu-kds')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, refreshFromRealtime)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'kitchen_stations' }, refreshFromRealtime)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_item_stations' }, refreshFromRealtime)
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') setConnection('live');
+        else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') setConnection('offline');
+        else setConnection('connecting');
+      });
+
+    const onOffline = () => setConnection('offline');
+    const onOnline = () => setConnection('connecting');
     window.addEventListener('offline', onOffline);
     window.addEventListener('online', onOnline);
-    void connect();
     return () => {
-      active = false;
-      controller?.abort();
+      window.clearTimeout(refreshTimer);
+      void supabase.removeChannel(channel);
       window.removeEventListener('offline', onOffline);
       window.removeEventListener('online', onOnline);
     };

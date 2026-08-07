@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
+import { staffFetch } from '@/lib/api-client';
 import { Trash2, Plus, QrCode, Download } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
@@ -15,12 +15,12 @@ export default function TablesManagerPanel() {
 
   const loadTablesAndSettings = async () => {
     setLoading(true);
-    const [tRes, sRes] = await Promise.all([
-      supabase.from('tables').select('*').order('table_number', { ascending: true }),
-      supabase.from('restaurant_settings').select('*').limit(1).single()
-    ]);
-    if (tRes.data) setTables(tRes.data);
-    if (sRes.data) setSettings(sRes.data);
+    const response = await staffFetch('/api/admin/tables');
+    const payload = await response.json();
+    if (response.ok) {
+      setTables(payload.tables);
+      if (payload.settings) setSettings(payload.settings);
+    }
     setLoading(false);
   };
 
@@ -38,18 +38,23 @@ export default function TablesManagerPanel() {
       return;
     }
 
-    const { error } = await supabase.from('tables').insert([{ 
-      table_number: parseInt(newTableNumber),
-      status: 'available'
-    }]);
+    const response = await staffFetch('/api/admin/tables', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table_number: parseInt(newTableNumber) }),
+    });
+    const result = await response.json();
     
-    if (error) alert("Error agregando mesa: " + error.message);
+    if (!response.ok) alert("Error agregando mesa: " + (result.error || 'Error desconocido'));
     else { setNewTableNumber(''); loadTablesAndSettings(); }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar esta mesa?")) {
-      await supabase.from('tables').delete().eq('id', id);
+      const response = await staffFetch(`/api/admin/tables?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!response.ok) {
+        const result = await response.json();
+        alert(result.error || 'No se pudo eliminar la mesa');
+      }
       loadTablesAndSettings();
     }
   };

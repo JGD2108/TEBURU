@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { staffFetch } from '@/lib/api-client';
 import { Save } from 'lucide-react';
 
 export default function SettingsPanel() {
@@ -9,8 +9,9 @@ export default function SettingsPanel() {
 
   const loadSettings = async () => {
     setLoading(true);
-    const { data } = await supabase.from('restaurant_settings').select('*').limit(1).single();
-    if (data) setSettings(data);
+    const response = await staffFetch('/api/admin/settings');
+    const payload = await response.json();
+    if (response.ok && payload.data) setSettings(payload.data);
     setLoading(false);
   };
 
@@ -21,11 +22,15 @@ export default function SettingsPanel() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    await supabase.from('restaurant_settings').update({
-      name: settings.name,
-      logo_url: settings.logo_url,
-      primary_color: settings.primary_color
-    }).eq('id', settings.id);
+    const response = await staffFetch('/api/admin/settings', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings),
+    });
+    if (!response.ok) {
+      const payload = await response.json();
+      alert(payload.error || 'No se pudieron guardar los ajustes.');
+      setSaving(false);
+      return;
+    }
     
     // Inyectar el color en vivo en el admin también para que vea el cambio inmediato
     if (settings.primary_color) {
@@ -108,7 +113,7 @@ export default function SettingsPanel() {
           type="button"
           onClick={async () => {
             if (confirm("¿Estás seguro de que quieres eliminar todos los pedidos y liberar todas las mesas?")) {
-              const res = await fetch('/api/reset-test-data', { method: 'POST' });
+              const res = await staffFetch('/api/reset-test-data', { method: 'POST' });
               if (res.ok) alert("¡Limpieza completada! El restaurante está como nuevo.");
               else alert("Error al limpiar la base de datos.");
             }

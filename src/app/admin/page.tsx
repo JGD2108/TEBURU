@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { staffFetch } from '@/lib/api-client';
 import { LogOut, LayoutDashboard, Settings, UtensilsCrossed, Users, Grid, ChefHat, BookOpen, Armchair, Workflow } from 'lucide-react';
 
 import MenuPanel from '@/components/admin/MenuPanel';
@@ -30,15 +31,18 @@ export default function AdminDashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { router.push('/admin/login'); return; }
 
-      const { data: staff } = await supabase.from('staff').select('name, role').eq('user_id', session.user.id).single();
+      const response = await staffFetch('/api/staff/me');
 
-      if (staff) {
+      if (response.ok) {
+        const { data: staff } = await response.json();
         setStaffData(staff as { name: string, role: string });
         // Set default tab based on role
         if (staff.role === 'waiter') setActiveTab('tables');
         if (staff.role === 'kitchen') setActiveTab('kds');
       } else {
-        setStaffData({ name: 'Usuario Nuevo', role: 'admin' });
+        await supabase.auth.signOut();
+        router.replace('/admin/login?error=unauthorized');
+        return;
       }
 
       setUserEmail(session.user.email ?? null);

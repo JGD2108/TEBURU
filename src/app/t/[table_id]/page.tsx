@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowRight, ChevronLeft, Building2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import styles from './table.module.css';
 
 export default function TableLogin() {
@@ -15,24 +14,33 @@ export default function TableLogin() {
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState('');
 
   const [restaurantLogo, setRestaurantLogo] = useState<string | null>(null);
   const [restaurantName, setRestaurantName] = useState<string>('Cargando...');
 
-  // Cargar configuración global (Logo del restaurante)
+  // Load branding and restore a valid HttpOnly guest session on this device.
   useEffect(() => {
-    async function loadSettings() {
-      const { data } = await supabase.from('restaurant_settings').select('*').limit(1).single();
-      if (data) {
-        setRestaurantLogo(data.logo_url);
-        setRestaurantName(data.name);
-      } else {
-        setRestaurantName('Teburu');
+    async function initialize() {
+      const [settingsResponse, sessionResponse] = await Promise.all([
+        fetch('/api/public/settings'),
+        fetch(`/api/table/session?table_id=${encodeURIComponent(table_id)}`),
+      ]);
+      const settingsResult = await settingsResponse.json();
+      if (settingsResponse.ok && settingsResult.data) {
+        setRestaurantLogo(settingsResult.data.logo_url);
+        setRestaurantName(settingsResult.data.name);
+      } else setRestaurantName('Teburu');
+
+      if (sessionResponse.ok) {
+        router.replace(`/t/${table_id}/menu`);
+        return;
       }
+      setCheckingSession(false);
     }
-    loadSettings();
-  }, []);
+    void initialize();
+  }, [router, table_id]);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,11 +63,6 @@ export default function TableLogin() {
       const data = await res.json();
 
       if (res.ok) {
-        // Guardar la sesión real en el navegador
-        sessionStorage.setItem('teburu_customer_name', name);
-        sessionStorage.setItem('teburu_session_id', data.session_id);
-        sessionStorage.setItem('teburu_session_user_id', data.session_user_id);
-        
         router.push(`/t/${table_id}/menu`);
       } else {
         setError(data.error || 'Código incorrecto. Verifica con tu mesero.');
@@ -70,6 +73,8 @@ export default function TableLogin() {
       setIsLoading(false);
     }
   };
+
+  if (checkingSession) return <main className="screen-centered"><p>Recuperando tu mesa…</p></main>;
 
   return (
     <main className="screen-centered">

@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { isAuthorizationFailure, requireRole } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const staff = await requireRole(request, 'admin');
+  if (isAuthorizationFailure(staff)) return staff;
   try {
     const { rows } = await query(`
       SELECT 

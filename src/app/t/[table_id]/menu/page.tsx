@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useCallback, useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { Bell, Users, ShoppingBag, Receipt, Search, ArrowRight, UserCircle2, Star, Minus, Plus, X, Dices } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import styles from './menu.module.css';
 
 type CartItem = {
@@ -17,6 +16,7 @@ type CartItem = {
 
 export default function TableMenu() {
   const params = useParams();
+  const router = useRouter();
   const table_id = params.table_id as string;
   
   const [activeCategory, setActiveCategory] = useState('Recomendados');
@@ -30,7 +30,7 @@ export default function TableMenu() {
 
   const [myCart, setMyCart] = useState<CartItem[]>([]);
   const [tableOrders, setTableOrders] = useState<any[]>([]);
-  const [sessionInfo, setSessionInfo] = useState<{ sessionId: string, userId: string } | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
   
   const [toastMessage, setToastMessage] = useState('');
   const [customizationItem, setCustomizationItem] = useState<any | null>(null);
@@ -44,18 +44,28 @@ export default function TableMenu() {
   const [showMinigame, setShowMinigame] = useState(false);
   const [minigameWinner, setMinigameWinner] = useState('');
 
+  const loadTableOrders = useCallback(async () => {
+    const response = await fetch('/api/table/orders');
+    if (response.status === 401) {
+      router.replace(`/t/${table_id}`);
+      return;
+    }
+    if (!response.ok) throw new Error('No se pudieron cargar los pedidos de la mesa');
+    const payload = await response.json();
+    setTableOrders(payload.data);
+  }, [router, table_id]);
+
   useEffect(() => {
     async function loadMenu() {
-      const { data: catsData } = await supabase.from('menu_categories').select('*').order('sort_order');
-      if (catsData) setDbCategories(catsData.map(c => c.name));
+      const catalogResponse = await fetch('/api/public/catalog');
+      const catalog = await catalogResponse.json();
+      const catsData = catalogResponse.ok ? catalog.categories : [];
+      if (catsData) setDbCategories(catsData.map((c: { name: string }) => c.name));
 
-      const { data: itemsData } = await supabase
-        .from('menu_items')
-        .select('*, category:menu_categories(name)')
-        .eq('is_available', true);
+      const itemsData = catalogResponse.ok ? catalog.items : [];
         
       if (itemsData) {
-        const formattedItems = itemsData.map(item => ({
+        const formattedItems = itemsData.map((item: any) => ({
           id: item.id,
           name: item.name,
           desc: item.description,
@@ -69,51 +79,18 @@ export default function TableMenu() {
       }
       setLoadingDb(false);
       
-      const savedName = sessionStorage.getItem('teburu_customer_name');
-      const sId = sessionStorage.getItem('teburu_session_id');
-      const uId = sessionStorage.getItem('teburu_session_user_id');
-      
-      if (savedName) setCustomerName(savedName);
-      if (sId && uId) {
-        setSessionInfo({ sessionId: sId, userId: uId });
-        loadTableOrders(sId);
+      const sessionResponse = await fetch(`/api/table/session?table_id=${encodeURIComponent(table_id)}`);
+      if (!sessionResponse.ok) {
+        router.replace(`/t/${table_id}`);
+        return;
       }
+      const session = await sessionResponse.json();
+      setCustomerName(session.name);
+      setSessionReady(true);
+      await loadTableOrders();
     }
-    loadMenu();
-  }, []);
-
-  async function loadTableOrders(sessionId: string) {
-    // Join de orders, order_items, menu_items y session_users
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        id, status, session_users(name),
-        items:order_items(quantity, notes, unit_price, menu_items(name))
-      `)
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true });
-
-    if (error) console.error("Error cargando pedidos:", error);
-
-    if (data) {
-      const flattenedOrders: any[] = [];
-      data.forEach((order: any) => {
-        order.items?.forEach((item: any) => {
-          const userName = Array.isArray(order.session_users) ? order.session_users[0]?.name : order.session_users?.name;
-          const itemName = Array.isArray(item.menu_items) ? item.menu_items[0]?.name : item.menu_items?.name;
-          flattenedOrders.push({
-            user: userName || 'Invitado',
-            item: itemName,
-            qty: item.quantity,
-            price: item.unit_price,
-            status: order.status,
-            notes: item.notes
-          });
-        });
-      });
-      setTableOrders(flattenedOrders);
-    }
-  }
+    void loadMenu();
+  }, [loadTableOrders, router, table_id]);
 
   const handleAddClick = (item: any) => {
     if (item.ingredients && item.ingredients.length > 0) {
@@ -157,7 +134,7 @@ export default function TableMenu() {
   };
 
   const confirmSendOrder = async () => {
-    if (!sessionInfo) {
+    if (!sessionReady) {
       alert("No hay una sesión activa. Vuelve a escanear el código QR.");
       return;
     }
@@ -166,18 +143,14 @@ export default function TableMenu() {
       const res = await fetch('/api/order/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: sessionInfo.sessionId,
-          session_user_id: sessionInfo.userId,
-          items: myCart
-        })
+        body: JSON.stringify({ items: myCart })
       });
 
       if (res.ok) {
         setMyCart([]);
         setIsConfirmModalOpen(false);
         setToastMessage("¡Pedido enviado a cocina!");
-        loadTableOrders(sessionInfo.sessionId); // Recargar pedidos de la mesa
+        await loadTableOrders();
         setTimeout(() => setToastMessage(''), 2500);
       } else {
         alert("Error al enviar el pedido.");

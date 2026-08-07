@@ -1,0 +1,74 @@
+image: node:22
+
+definitions:
+  services:
+    postgres:
+      image: postgres:17-alpine
+      variables:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: teburu_test
+    docker:
+      memory: 3072
+  steps:
+    - step: &quality
+        name: Quality, migrations, and container
+        caches:
+          - node
+        services:
+          - postgres
+          - docker
+        script:
+          - npm ci
+          - npm run lint
+          - npx tsc --noEmit
+          - npm test
+          - DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/teburu_test npm run test:integration
+          - DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=ci-placeholder-anon-key npm run build
+          - docker build -t teburu:${BITBUCKET_COMMIT} .
+    - step: &staging
+        name: Migrate, deploy, and verify staging
+        deployment: staging
+        caches:
+          - node
+        script:
+          - npm ci
+          - npx supabase@2.111.0 db push --db-url "$STAGING_DATABASE_URL" --include-all --yes
+          - npx vercel@58.7.1 pull --yes --environment=preview --token="$VERCEL_TOKEN"
+          - npx vercel@58.7.1 build --token="$VERCEL_TOKEN"
+          - export PLAYWRIGHT_BASE_URL=$(npx vercel@58.7.1 deploy --prebuilt --token="$VERCEL_TOKEN")
+          - npx playwright install --with-deps chromium
+          - E2E_REQUIRE_FULL=true npm run test:e2e
+        artifacts:
+          - playwright-report/**
+    - step: &production
+        name: Migrate, deploy, and verify production
+        deployment: production
+        trigger: manual
+        caches:
+          - node
+        script:
+          - npm ci
+          - npx supabase@2.111.0 db push --db-url "$PRODUCTION_DATABASE_URL" --include-all --yes
+          - npx vercel@58.7.1 pull --yes --environment=production --token="$VERCEL_TOKEN"
+          - npx vercel@58.7.1 build --prod --token="$VERCEL_TOKEN"
+          - export PLAYWRIGHT_BASE_URL=$(npx vercel@58.7.1 deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          - npx playwright install --with-deps chromium
+          - E2E_REQUIRE_FULL=true npm run test:e2e
+        artifacts:
+          - playwright-report/**
+
+pipelines:
+  pull-requests:
+    '**':
+      - step: *quality
+  branches:
+    main:
+      - step: *quality
+    staging:
+      - step: *quality
+      - step: *staging
+  custom:
+    deploy-production:
+      - step: *quality
+      - step: *production

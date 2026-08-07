@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { staffFetch } from '@/lib/api-client';
 import { UserPlus, UserCircle2 } from 'lucide-react';
 
 export default function StaffPanel() {
@@ -8,13 +8,14 @@ export default function StaffPanel() {
   
   // Form state
   const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'waiter' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'waiter' });
   const [apiMessage, setApiMessage] = useState('');
 
   const loadStaff = async () => {
     setLoading(true);
-    const { data } = await supabase.from('staff').select('*').order('created_at', { ascending: true });
-    if (data) setStaff(data);
+    const response = await staffFetch('/api/staff');
+    const payload = await response.json();
+    if (response.ok) setStaff(payload.data);
     setLoading(false);
   };
 
@@ -27,7 +28,7 @@ export default function StaffPanel() {
     setApiMessage('Creando empleado... esto no cerrará tu sesión.');
     
     try {
-      const res = await fetch('/api/staff', {
+      const res = await staffFetch('/api/staff', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -35,8 +36,8 @@ export default function StaffPanel() {
       const data = await res.json();
       
       if (res.ok) {
-        setApiMessage(`¡Éxito! El empleado fue creado. Contraseña temporal: Teburu2026_`);
-        setFormData({ name: '', email: '', role: 'waiter' });
+        setApiMessage('Empleado creado con acceso de Supabase Auth.');
+        setFormData({ name: '', email: '', password: '', role: 'waiter' });
         loadStaff();
       } else {
         setApiMessage(`Error: ${data.error}`);
@@ -89,6 +90,10 @@ export default function StaffPanel() {
                 <option value="kitchen">Cocinero (KDS)</option>
                 <option value="admin">Administrador</option>
               </select>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Contraseña temporal</label>
+              <input required minLength={12} type="password" autoComplete="new-password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
             </div>
           </div>
           

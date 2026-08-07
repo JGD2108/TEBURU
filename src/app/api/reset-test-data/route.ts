@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getPoolClient } from '@/lib/db';
+import { isAuthorizationFailure, requireRole } from '@/lib/auth';
 
-export async function POST() {
+export async function POST(request: Request) {
   if (process.env.NODE_ENV !== 'development' || process.env.ENABLE_TEST_DATA_RESET !== 'true') {
     return new NextResponse(null, { status: 404 });
   }
+  const staff = await requireRole(request, 'admin');
+  if (isAuthorizationFailure(staff)) return staff;
 
   let client;
   try {

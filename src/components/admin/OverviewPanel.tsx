@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { staffFetch } from '@/lib/api-client';
 import { Users, AlertCircle, BellRing, UserCheck } from 'lucide-react';
 
 export default function OverviewPanel() {
@@ -10,14 +10,13 @@ export default function OverviewPanel() {
 
   const loadData = async () => {
     setLoading(true);
-    const [tRes, sRes, oRes] = await Promise.all([
-      supabase.from('tables').select('*, assigned_waiter:staff(name)').order('table_number', { ascending: true }),
-      supabase.from('staff').select('user_id, name').eq('role', 'waiter'),
-      supabase.from('orders').select('id, status, created_at, session:sessions(tables(table_number)), items:order_items(quantity, menu_items(name))').in('status', ['pending', 'preparing']).order('created_at', { ascending: false })
-    ]);
-    if (tRes.data) setTables(tRes.data);
-    if (sRes.data) setWaiters(sRes.data);
-    if (oRes.data) setOrders(oRes.data);
+    const response = await staffFetch('/api/admin/overview');
+    const payload = await response.json();
+    if (response.ok) {
+      setTables(payload.tables);
+      setWaiters(payload.waiters);
+      setOrders(payload.orders);
+    }
     setLoading(false);
   };
 
@@ -29,12 +28,18 @@ export default function OverviewPanel() {
   }, []);
 
   const handleAssignWaiter = async (tableId: string, waiterId: string) => {
-    await supabase.from('tables').update({ assigned_waiter_id: waiterId || null }).eq('id', tableId);
+    await staffFetch('/api/admin/overview', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table_id: tableId, assigned_waiter_id: waiterId || null }),
+    });
     loadData();
   };
 
   const handleCallWaiter = async (tableId: string, currentState: boolean) => {
-    await supabase.from('tables').update({ needs_attention: !currentState }).eq('id', tableId);
+    await staffFetch('/api/admin/overview', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table_id: tableId, needs_attention: !currentState }),
+    });
     loadData();
   };
 

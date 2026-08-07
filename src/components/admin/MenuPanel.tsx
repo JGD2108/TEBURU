@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { staffFetch } from '@/lib/api-client';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 
 export default function MenuPanel() {
@@ -20,12 +20,12 @@ export default function MenuPanel() {
 
   const loadData = async () => {
     setLoading(true);
-    const [catsRes, itemsRes] = await Promise.all([
-      supabase.from('menu_categories').select('*').order('sort_order'),
-      supabase.from('menu_items').select('*, category:menu_categories(name)').order('name', { ascending: true })
-    ]);
-    if (catsRes.data) setCategories(catsRes.data);
-    if (itemsRes.data) setItems(itemsRes.data);
+    const response = await staffFetch('/api/admin/menu');
+    const payload = await response.json();
+    if (response.ok) {
+      setCategories(payload.categories);
+      setItems(payload.items);
+    }
     setLoading(false);
   };
 
@@ -41,9 +41,12 @@ export default function MenuPanel() {
       modifiable_ingredients: formData.modifiable_ingredients || null
     };
 
-    const { error } = await supabase.from('menu_items').insert([payload]);
-    if (error) {
-      alert("Error guardando: " + error.message);
+    const response = await staffFetch('/api/admin/menu', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      alert("Error guardando: " + (result.error || 'Error desconocido'));
     } else {
       setShowForm(false);
       setFormData({ name: '', description: '', price: '', category_id: categories[0]?.id || '', image_url: '', modifiable_ingredients: '' });
@@ -53,7 +56,7 @@ export default function MenuPanel() {
 
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar este platillo?")) {
-      await supabase.from('menu_items').delete().eq('id', id);
+      await staffFetch(`/api/admin/menu?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
       loadData();
     }
   };

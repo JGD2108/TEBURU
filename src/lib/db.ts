@@ -1,4 +1,5 @@
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
+import { logger } from '@/lib/logger';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -17,7 +18,7 @@ const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle PostgreSQL client', err);
+  logger.error('database.pool.idle_error', err);
 });
 
 export async function query<T extends QueryResultRow = QueryResultRow>(
@@ -28,15 +29,14 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
   try {
     const result = await pool.query<T>(text, params);
     if (process.env.NODE_ENV === 'development') {
-      console.log('Executed query', {
-        text: text.trim().substring(0, 80),
+      logger.info('database.query.completed', {
         duration: Date.now() - start,
         rows: result.rowCount,
       });
     }
     return result;
   } catch (error) {
-    console.error('Database query error:', error);
+    logger.error('database.query.failed', error, { duration: Date.now() - start });
     throw error;
   }
 }

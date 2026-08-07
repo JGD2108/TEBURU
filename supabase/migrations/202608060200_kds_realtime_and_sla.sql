@@ -24,27 +24,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- The payload deliberately contains no customer data. Clients refetch the
--- authorized KDS projection after receiving a change notification.
-CREATE OR REPLACE FUNCTION notify_kds_change()
-RETURNS TRIGGER AS $$
+-- Supabase Realtime replaces the per-screen PostgreSQL LISTEN connection.
+-- Plain PostgreSQL integration databases do not have this publication, so the
+-- block is intentionally conditional.
+DO $$
+DECLARE
+  target_table TEXT;
 BEGIN
-  PERFORM pg_notify(
-    'teburu_kds',
-    json_build_object('entity', TG_TABLE_NAME, 'operation', TG_OP)::text
-  );
-  RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER order_items_notify_kds
-AFTER INSERT OR UPDATE OR DELETE ON order_items
-FOR EACH STATEMENT EXECUTE FUNCTION notify_kds_change();
-
-CREATE TRIGGER kitchen_stations_notify_kds
-AFTER INSERT OR UPDATE OR DELETE ON kitchen_stations
-FOR EACH STATEMENT EXECUTE FUNCTION notify_kds_change();
-
-CREATE TRIGGER menu_item_stations_notify_kds
-AFTER INSERT OR UPDATE OR DELETE ON menu_item_stations
-FOR EACH STATEMENT EXECUTE FUNCTION notify_kds_change();
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    FOREACH target_table IN ARRAY ARRAY['order_items', 'kitchen_stations', 'menu_item_stations']
+    LOOP
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables
+        WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = target_table
+      ) THEN
+        EXECUTE format('ALTER PUBLICATION supabase_realtime ADD TABLE public.%I', target_table);
+      END IF;
+    END LOOP;
+  END IF;
+END $$;

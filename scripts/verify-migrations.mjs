@@ -10,11 +10,9 @@ if (!process.env.DATABASE_URL) {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const migrationsDir = path.join(root, 'supabase', 'migrations');
 const client = new Client({ connectionString: process.env.DATABASE_URL });
-const listener = new Client({ connectionString: process.env.DATABASE_URL });
 
 try {
   await client.connect();
-  await listener.connect();
   const migrations = (await readdir(migrationsDir)).filter((file) => file.endsWith('.sql')).sort();
   for (const migration of migrations) {
     await client.query(await readFile(path.join(migrationsDir, migration), 'utf8'));
@@ -67,31 +65,27 @@ try {
     'SELECT station_id, station_name, warning_minutes, critical_minutes FROM order_item_stations WHERE order_item_id = $1', [orderItem.id]
   );
 
-  await listener.query('LISTEN teburu_kds');
-  const notification = new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('KDS notification timeout')), 3000);
-    listener.once('notification', (message) => {
-      clearTimeout(timeout);
-      resolve(JSON.parse(message.payload || '{}'));
-    });
-  });
   await client.query("UPDATE order_items SET priority = 'urgent' WHERE id = $1", [orderItem.id]);
-  const realtimeEvent = await notification;
 
   await client.query("UPDATE orders SET status = 'delivered' WHERE id = $1 AND status = 'ready'", [order.id]);
   await client.query("UPDATE order_items SET delivered_at = now() WHERE order_id = $1", [order.id]);
   const { rows: [delivered] } = await client.query(
     'SELECT o.status, oi.delivered_at FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.id = $1', [order.id]
   );
+  const { rows: rlsTables } = await client.query(`
+    SELECT relname FROM pg_class
+    WHERE relnamespace = 'public'::regnamespace AND relrowsecurity = true
+  `);
+  const protectedTables = new Set(rlsTables.map(({ relname }) => relname));
 
   if (preparing.rowCount !== 1 || ready.rowCount !== 1 || aggregate.status !== 'ready' ||
       routing.station_id !== station.id || routing.station_name !== 'Integration station' ||
       routing.warning_minutes !== 10 || routing.critical_minutes !== 20 ||
-      realtimeEvent.entity !== 'order_items' || delivered.status !== 'delivered' || !delivered.delivered_at) {
+      delivered.status !== 'delivered' || !delivered.delivered_at ||
+      !['staff', 'tables', 'orders', 'order_items', 'guest_access_tokens'].every((name) => protectedTables.has(name))) {
     throw new Error('Phase 2/3 routing, transitions, realtime or delivery verification failed against PostgreSQL.');
   }
   console.log(`Verified ${migrations.length} migrations, routing, SLA snapshots, realtime and delivery against PostgreSQL.`);
 } finally {
-  await listener.end().catch(() => undefined);
   await client.end();
 }

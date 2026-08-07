@@ -9,7 +9,11 @@ export default function TablesManagerPanel() {
   const [tables, setTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTableNumber, setNewTableNumber] = useState('');
+  const [newTableCapacity, setNewTableCapacity] = useState('2');
+  const [waiters, setWaiters] = useState<{ user_id: string; name: string | null; email: string | null }[]>([]);
   const [showQrFor, setShowQrFor] = useState<string | null>(null);
+  const [selectedToActivate, setSelectedToActivate] = useState<string[]>([]);
+  const [lastActivation, setLastActivation] = useState<{ pin: string; tableNumbers: number[] } | null>(null);
   const [settings, setSettings] = useState<{logo_url: string, primary_color: string}>({ logo_url: '', primary_color: '#ff4757' });
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -20,6 +24,7 @@ export default function TablesManagerPanel() {
     if (response.ok) {
       setTables(payload.tables);
       if (payload.settings) setSettings(payload.settings);
+      if (payload.waiters) setWaiters(payload.waiters);
     }
     setLoading(false);
   };
@@ -40,12 +45,24 @@ export default function TablesManagerPanel() {
 
     const response = await staffFetch('/api/admin/tables', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ table_number: parseInt(newTableNumber) }),
+      body: JSON.stringify({ table_number: parseInt(newTableNumber), capacity: parseInt(newTableCapacity) }),
     });
     const result = await response.json();
     
     if (!response.ok) alert("Error agregando mesa: " + (result.error || 'Error desconocido'));
-    else { setNewTableNumber(''); loadTablesAndSettings(); }
+    else { setNewTableNumber(''); setNewTableCapacity('2'); loadTablesAndSettings(); }
+  };
+
+  const assignWaiter = async (tableId: string, waiterId: string) => {
+    const response = await staffFetch('/api/admin/tables', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: tableId, assigned_waiter_id: waiterId || null }),
+    });
+    if (!response.ok) {
+      const result = await response.json();
+      alert(result.error || 'No se pudo asignar el mesero');
+    }
+    await loadTablesAndSettings();
   };
 
   const handleDelete = async (id: string) => {
@@ -57,6 +74,24 @@ export default function TablesManagerPanel() {
       }
       loadTablesAndSettings();
     }
+  };
+
+  const activate = async (ids: string[]) => {
+    const response = await staffFetch('/api/table/activate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ table_ids: ids }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      alert(result.error || 'No se pudo activar la mesa');
+      return;
+    }
+    setLastActivation({ pin: result.pin, tableNumbers: result.tables.map((table: { table_number: number }) => table.table_number) });
+    setSelectedToActivate([]);
+    await loadTablesAndSettings();
+  };
+
+  const toggleActivation = (id: string) => {
+    setSelectedToActivate((selected) => selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id]);
   };
 
   const downloadPDF = async (tableNumber: number, tableId: string) => {
@@ -109,10 +144,23 @@ export default function TablesManagerPanel() {
           <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Número de Mesa</label>
           <input required type="number" min="1" value={newTableNumber} onChange={e => setNewTableNumber(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} placeholder="Ej: 5" />
         </div>
+        <div style={{ flex: 1, maxWidth: '160px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Capacidad</label>
+          <input required type="number" min="1" max="100" value={newTableCapacity} onChange={e => setNewTableCapacity(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+        </div>
         <button type="submit" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Plus size={18} /> Agregar Mesa
         </button>
       </form>
+
+      {lastActivation && <div style={{ marginBottom: '20px', padding: '14px', background: 'rgba(46,213,115,.12)', border: '1px solid #2ed573', borderRadius: '8px' }}>
+        Mesas {lastActivation.tableNumbers.join(', ')} activadas. PIN temporal: <strong style={{ fontSize: '1.25rem', letterSpacing: '3px' }}>{lastActivation.pin}</strong>
+      </div>}
+      {selectedToActivate.length > 0 && <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <span>{selectedToActivate.length} mesa(s) para activar</span>
+        <button className="btn-primary" onClick={() => void activate(selectedToActivate)}>Activar como grupo</button>
+        <button className="btn-secondary" onClick={() => setSelectedToActivate([])}>Cancelar</button>
+      </div>}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
         {tables.map(table => {
@@ -124,6 +172,7 @@ export default function TablesManagerPanel() {
                 <div>
                   <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--primary)' }}>Mesa {table.table_number}</h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ID: {table.id.split('-')[0]}...</p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Capacidad: {table.capacity}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={() => setShowQrFor(showQrFor === table.id ? null : table.id)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px' }}>
@@ -144,6 +193,26 @@ export default function TablesManagerPanel() {
                   <button onClick={() => downloadPDF(table.table_number, table.id)} className="btn-primary" style={{ marginTop: '16px', width: '100%', display: 'flex', justifyContent: 'center', gap: '8px' }}>
                     <Download size={18} /> Descargar PDF (A6)
                   </button>
+                </div>
+              )}
+
+              <div style={{ marginTop: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mesero asignado</label>
+                <select
+                  value={table.assigned_waiter_id || ''}
+                  disabled={table.status !== 'available'}
+                  onChange={(event) => void assignWaiter(table.id, event.target.value)}
+                  style={{ width: '100%', padding: '9px', borderRadius: '5px', background: 'var(--bg-base)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}
+                >
+                  <option value="">Sin asignar</option>
+                  {waiters.map((waiter) => <option key={waiter.user_id} value={waiter.user_id}>{waiter.name || waiter.email || 'Mesero'}</option>)}
+                </select>
+              </div>
+
+              {table.status === 'available' && (
+                <div style={{ display: 'flex', gap: '10px', marginTop: '14px', alignItems: 'center' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}><input type="checkbox" checked={selectedToActivate.includes(table.id)} onChange={() => toggleActivation(table.id)} /> Combinar</label>
+                  <button className="btn-secondary" onClick={() => void activate([table.id])} style={{ flex: 1 }}>Activar</button>
                 </div>
               )}
 

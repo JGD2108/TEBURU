@@ -33,11 +33,15 @@ try {
     [item.id, station.id]
   );
   const { rows: [table] } = await client.query(
-    'INSERT INTO tables (table_number) VALUES (1) RETURNING id'
+    'INSERT INTO tables (table_number) VALUES (1) RETURNING id, capacity'
   );
   const { rows: [session] } = await client.query(
     "INSERT INTO sessions (table_id, code) VALUES ($1, '0000') RETURNING id",
     [table.id]
+  );
+  await client.query(
+    'INSERT INTO session_tables (session_id, table_id, is_primary) VALUES ($1, $2, true)',
+    [session.id, table.id]
   );
   const { rows: [guest] } = await client.query(
     "INSERT INTO session_users (session_id, name) VALUES ($1, 'Integration guest') RETURNING id",
@@ -82,7 +86,8 @@ try {
       routing.station_id !== station.id || routing.station_name !== 'Integration station' ||
       routing.warning_minutes !== 10 || routing.critical_minutes !== 20 ||
       delivered.status !== 'delivered' || !delivered.delivered_at ||
-      !['staff', 'tables', 'orders', 'order_items', 'guest_access_tokens'].every((name) => protectedTables.has(name))) {
+      table.capacity !== 2 ||
+      !['staff', 'tables', 'orders', 'order_items', 'guest_access_tokens', 'session_tables'].every((name) => protectedTables.has(name))) {
     throw new Error('Phase 2/3 routing, transitions, realtime or delivery verification failed against PostgreSQL.');
   }
   console.log(`Verified ${migrations.length} migrations, routing, SLA snapshots, realtime and delivery against PostgreSQL.`);

@@ -20,7 +20,6 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [staffData, setStaffData] = useState<{ name: string, role: string } | null>(null);
   
   // Navigation State
@@ -46,7 +45,6 @@ export default function AdminDashboard() {
       }
 
       setUserEmail(session.user.email ?? null);
-      setUserId(session.user.id);
       setLoading(false);
     }
     verifyProtection();
@@ -131,7 +129,7 @@ export default function AdminDashboard() {
         {staffData?.role === 'admin' && activeTab === 'stations' && <StationsPanel />}
 
         {/* Waiter View */}
-        {staffData?.role === 'waiter' && activeTab === 'tables' && <WaiterPanel waiterId={userId} />}
+        {staffData?.role === 'waiter' && activeTab === 'tables' && <WaiterPanel />}
 
         {/* Kitchen View */}
         {staffData?.role === 'kitchen' && activeTab === 'kds' && <KitchenPanel />}

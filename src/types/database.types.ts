@@ -15,6 +15,10 @@ export interface Database {
           table_number: number
           status: 'available' | 'occupied' | 'cleaning'
           current_session_id: string | null
+          capacity: number
+          access_code: string | null
+          assigned_waiter_id: string | null
+          needs_attention: boolean
           created_at: string
         }
         Insert: {
@@ -22,6 +26,10 @@ export interface Database {
           table_number: number
           status?: 'available' | 'occupied' | 'cleaning'
           current_session_id?: string | null
+          capacity?: number
+          access_code?: string | null
+          assigned_waiter_id?: string | null
+          needs_attention?: boolean
           created_at?: string
         }
         Update: {
@@ -29,6 +37,10 @@ export interface Database {
           table_number?: number
           status?: 'available' | 'occupied' | 'cleaning'
           current_session_id?: string | null
+          capacity?: number
+          access_code?: string | null
+          assigned_waiter_id?: string | null
+          needs_attention?: boolean
           created_at?: string
         }
       }

@@ -15,9 +15,12 @@ export async function POST(request: Request) {
     client = await getPoolClient();
     await client.query('BEGIN');
     const delivered = await client.query(
-      `UPDATE orders SET status = 'delivered'
-       WHERE id = $1 AND status = 'ready' RETURNING id`,
-      [order_id]
+      `UPDATE orders o SET status = 'delivered'
+       FROM sessions s
+       WHERE o.id = $1 AND o.status = 'ready' AND s.id = o.session_id
+         AND ($2::text = 'admin' OR s.waiter_id = $3)
+       RETURNING o.id`,
+      [order_id, staff.role, staff.userId]
     );
     if (!delivered.rowCount) {
       await client.query('ROLLBACK');

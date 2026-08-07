@@ -21,17 +21,17 @@ describe('POST /api/table/checkout', () => {
   });
 
   it('revokes every guest token while closing the table', async () => {
-    client.query.mockImplementation(async (sql: string) => sql.includes('SELECT id FROM tables')
-      ? { rows: [{ id: 'table-1' }], rowCount: 1 }
+    client.query.mockImplementation(async (sql: string) => sql.includes('FROM tables t JOIN sessions s')
+      ? { rows: [{ id: 'session-1' }], rowCount: 1 }
       : { rows: [], rowCount: 1 });
     const response = await POST(requestFor());
     expect(response.status).toBe(200);
-    expect(client.query).toHaveBeenCalledWith(expect.stringContaining('UPDATE guest_access_tokens'), ['table-1']);
+    expect(client.query).toHaveBeenCalledWith(expect.stringContaining('UPDATE guest_access_tokens'), ['session-1']);
     expect(client.query).toHaveBeenCalledWith('COMMIT');
   });
 
   it('rejects a waiter who does not own the table', async () => {
-    client.query.mockImplementation(async (sql: string) => sql.includes('SELECT id FROM tables')
+    client.query.mockImplementation(async (sql: string) => sql.includes('FROM tables t JOIN sessions s')
       ? { rows: [], rowCount: 0 }
       : { rows: [], rowCount: 1 });
     const response = await POST(requestFor());

@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { staffFetch } from '@/lib/api-client';
 import { RefreshCw, QrCode, Key, AlertCircle, CheckCircle2, PackageCheck } from 'lucide-react';
 
-export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) {
+export default function WaiterPanel() {
   const [tables, setTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTableIds, setSelectedTableIds] = useState<string[]>([]);
+  const [lastActivation, setLastActivation] = useState<{ pin: string; tables: number[] } | null>(null);
 
   const loadTables = async () => {
     setLoading(true);
@@ -24,17 +26,25 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
     return () => clearInterval(interval);
   }, []);
 
-  const generatePin = async (tableId: string) => {
+  const activateTables = async (tableIds: string[]) => {
     try {
-      const res = await staffFetch('/api/table/generate-pin', {
+      const res = await staffFetch('/api/table/activate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ table_id: tableId, waiter_id: waiterId })
+        body: JSON.stringify({ table_ids: tableIds })
       });
-      if (res.ok) loadTables();
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error || 'No se pudo activar la mesa');
+      setLastActivation({ pin: payload.pin, tables: payload.tables.map((table: { table_number: number }) => table.table_number) });
+      setSelectedTableIds([]);
+      await loadTables();
     } catch (err) {
-      console.error(err);
+      window.alert(err instanceof Error ? err.message : 'No se pudo activar la mesa');
     }
+  };
+
+  const toggleTable = (tableId: string) => {
+    setSelectedTableIds((current) => current.includes(tableId) ? current.filter((id) => id !== tableId) : [...current, tableId]);
   };
 
   const clearNeedsAttention = async (tableId: string) => {
@@ -93,6 +103,23 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
         </button>
       </div>
 
+      {lastActivation && (
+        <div style={{ marginBottom: '24px', padding: '16px', borderRadius: '10px', background: 'rgba(46, 213, 115, 0.12)', border: '1px solid #2ed573' }}>
+          <strong>Mesas {lastActivation.tables.join(', ')} activadas.</strong> PIN temporal: <span style={{ fontSize: '1.35rem', letterSpacing: '3px' }}>{lastActivation.pin}</span>
+          <div style={{ fontSize: '0.85rem', marginTop: '4px', color: 'var(--text-muted)' }}>El QR impreso de cualquiera de estas mesas abre la misma cuenta.</div>
+        </div>
+      )}
+
+      {selectedTableIds.length > 0 && (
+        <div style={{ marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center', padding: '14px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)' }}>
+          <span>{selectedTableIds.length} mesa(s) seleccionada(s)</span>
+          <button className="btn-primary" onClick={() => void activateTables(selectedTableIds)}>
+            Activar {selectedTableIds.length > 1 ? 'como grupo' : 'mesa'}
+          </button>
+          <button className="btn-secondary" onClick={() => setSelectedTableIds([])}>Cancelar</button>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
         {tables.map(table => (
           <div key={table.id} style={{ background: 'var(--bg-surface)', padding: '24px', borderRadius: '12px', border: table.needs_attention ? '2px solid #ffa502' : '1px solid var(--border-color)', position: 'relative' }}>
@@ -107,6 +134,9 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
                   <span style={{ fontSize: '0.8rem', color: table.status === 'occupied' ? 'var(--primary)' : 'var(--text-muted)' }}>
                     {table.status === 'occupied' ? 'Ocupada' : 'Libre'}
                   </span>
+                  {table.status === 'occupied' && table.group_table_numbers?.length > 1 && (
+                    <span style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '3px' }}>Grupo: mesas {table.group_table_numbers.join(', ')}</span>
+                  )}
                 </div>
               </div>
 
@@ -148,21 +178,20 @@ export default function WaiterPanel({ waiterId }: { waiterId?: string | null }) 
             {/* Acciones del Mesero */}
             <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
               {table.status === 'available' ? (
-                table.access_code ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Key size={18} color="var(--primary)" />
-                      <span style={{ color: 'var(--text-muted)' }}>PIN:</span>
-                    </div>
-                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '2px' }}>{table.access_code}</span>
-                  </div>
-                ) : (
-                  <button className="btn-primary" onClick={() => generatePin(table.id)} style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                    <QrCode size={18} /> Habilitar Mesa
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', gap: '7px', alignItems: 'center', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                    <input type="checkbox" checked={selectedTableIds.includes(table.id)} onChange={() => toggleTable(table.id)} /> Combinar
+                  </label>
+                  <button className="btn-primary" onClick={() => void activateTables([table.id])} style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                    <QrCode size={18} /> Activar
                   </button>
-                )
+                </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Key size={18} color="var(--primary)" /><span style={{ color: 'var(--text-muted)' }}>PIN:</span></div>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '2px' }}>{table.access_code}</span>
+                  </div>
                   {table.needs_attention && (
                     <button className="btn-secondary" onClick={() => clearNeedsAttention(table.id)} style={{ width: '100%', borderColor: '#ffa502', color: '#ffa502' }}>
                       Apagar Alerta de Llamado

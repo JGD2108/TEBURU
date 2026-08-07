@@ -22,7 +22,7 @@ describe('POST /api/orders/deliver', () => {
   });
 
   it('records pickup only from ready state', async () => {
-    client.query.mockImplementation(async (sql: string) => sql.includes("UPDATE orders SET status = 'delivered'")
+    client.query.mockImplementation(async (sql: string) => sql.includes("UPDATE orders o SET status = 'delivered'")
       ? { rows: [{ id: 'order-1' }], rowCount: 1 }
       : { rows: [], rowCount: 1 });
     const response = await POST(requestFor({ order_id: 'order-1' }));
@@ -32,7 +32,7 @@ describe('POST /api/orders/deliver', () => {
   });
 
   it('rejects delivery when the order is not ready', async () => {
-    client.query.mockImplementation(async (sql: string) => sql.includes("UPDATE orders SET status = 'delivered'")
+    client.query.mockImplementation(async (sql: string) => sql.includes("UPDATE orders o SET status = 'delivered'")
       ? { rows: [], rowCount: 0 }
       : { rows: [], rowCount: 1 });
     const response = await POST(requestFor({ order_id: 'order-1' }));

@@ -48,6 +48,10 @@ export async function requireGuestSession(request: Request, expectedTableId?: st
   const parameters = expectedTableId
     ? [token, expectedTableId, guestTokenLifetimeSeconds()]
     : [token, guestTokenLifetimeSeconds()];
+  const expectedTableCheck = expectedTableId
+    ? 'AND EXISTS (SELECT 1 FROM tables requested_table WHERE requested_table.id = $2 AND requested_table.current_session_id = gat.session_id)'
+    : '';
+  const tableIdField = expectedTableId ? '$2::uuid' : 's.table_id';
   const { rows } = await query<Omit<GuestSession, 'rawToken'>>(`
     UPDATE guest_access_tokens gat
     SET last_used_at = now(), expires_at = now() + ($${lifetimeParameter}::integer * interval '1 second')
@@ -55,9 +59,9 @@ export async function requireGuestSession(request: Request, expectedTableId?: st
     WHERE gat.token_hash = encode(digest($1, 'sha256'), 'hex')
       AND gat.revoked_at IS NULL AND gat.expires_at > now()
       AND s.id = gat.session_id AND su.id = gat.session_user_id AND s.status = 'active'
-      ${expectedTableId ? 'AND s.table_id = $2' : ''}
+      ${expectedTableCheck}
     RETURNING gat.id AS "tokenId", gat.session_id AS "sessionId", gat.session_user_id AS "guestId",
-      s.table_id AS "tableId", su.name AS "guestName"`, parameters);
+      ${tableIdField} AS "tableId", su.name AS "guestName"`, parameters);
   if (!rows[0]) return NextResponse.json({ error: 'La sesión de mesa expiró o fue cerrada' }, { status: 401 });
   return { ...rows[0], rawToken: token };
 }

@@ -116,10 +116,11 @@ export default function TableLogin() {
                 <input 
                   type="text" 
                   id="code"
-                  placeholder="Ej. 1234" 
+                  placeholder="Ej. 123456"
                   value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  maxLength={4}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                  inputMode="numeric"
+                  maxLength={6}
                   className={styles.input}
                   autoComplete="off"
                 />

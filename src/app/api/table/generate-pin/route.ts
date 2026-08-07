@@ -1,31 +1,29 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { getPoolClient } from '@/lib/db';
 import { isAuthorizationFailure, requireRole } from '@/lib/auth';
+import { activateTables, normalizeTableIds, TableActivationError } from '@/lib/table-activation';
 
+// Backwards-compatible single-table activation endpoint.
 export async function POST(request: Request) {
   const staff = await requireRole(request, 'admin', 'waiter');
   if (isAuthorizationFailure(staff)) return staff;
+  let client;
   try {
-    const { table_id, waiter_id } = await request.json();
-    if (!table_id) {
-      return NextResponse.json({ error: 'Falta el ID de la mesa' }, { status: 400 });
+    const { table_id: tableId } = await request.json();
+    client = await getPoolClient();
+    await client.query('BEGIN');
+    const result = await activateTables(client, staff, normalizeTableIds([tableId]));
+    await client.query('COMMIT');
+    return NextResponse.json({ success: true, pin: result.pin, session_id: result.sessionId });
+  } catch (error) {
+    if (client) await client.query('ROLLBACK').catch(() => undefined);
+    if (error instanceof TableActivationError) {
+      const status = error.code === 'FORBIDDEN_TABLE' ? 403 : error.code === 'TABLE_UNAVAILABLE' ? 409 : 400;
+      return NextResponse.json({ error: error.code === 'FORBIDDEN_TABLE' ? 'Mesa no asignada' : 'La mesa no está disponible' }, { status });
     }
-
-    const newPin = Math.floor(1000 + Math.random() * 9000).toString(); // 4 digits
-
-    const result = await query(`
-      UPDATE tables 
-      SET access_code = $1,
-          assigned_waiter_id = CASE WHEN $4::text = 'waiter' THEN $5 ELSE COALESCE($2, assigned_waiter_id) END
-      WHERE id = $3 AND ($4::text = 'admin' OR assigned_waiter_id = $5)
-    `, [newPin, waiter_id || null, table_id, staff.role, staff.userId]);
-
-    if (!result.rowCount) return NextResponse.json({ error: 'Mesa no asignada' }, { status: 403 });
-
-    return NextResponse.json({ success: true, pin: newPin });
-
-  } catch (error: any) {
-    console.error("Generate PIN Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Generate PIN error:', error);
+    return NextResponse.json({ error: 'No se pudo activar la mesa' }, { status: 500 });
+  } finally {
+    client?.release();
   }
 }

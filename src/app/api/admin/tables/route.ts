@@ -46,14 +46,21 @@ export async function PATCH(request: Request) {
     if (!waiter.rowCount) return NextResponse.json({ error: 'Mesero no encontrado' }, { status: 404 });
   }
   const updated = await query(
-    `UPDATE tables SET assigned_waiter_id = $1
-     WHERE id = $2 AND status = 'available' AND current_session_id IS NULL
+    `WITH target AS (
+       SELECT current_session_id FROM tables WHERE id = $2
+     ), transferred_session AS (
+       UPDATE sessions SET waiter_id = $1
+       WHERE id = (SELECT current_session_id FROM target)
+       RETURNING id
+     )
+     UPDATE tables SET assigned_waiter_id = $1
+     WHERE id = $2 OR current_session_id = (SELECT id FROM transferred_session)
      RETURNING *`,
     [waiterId, id]
   );
   return updated.rowCount
     ? NextResponse.json({ data: updated.rows[0] })
-    : NextResponse.json({ error: 'Solo se pueden asignar mesas disponibles' }, { status: 409 });
+    : NextResponse.json({ error: 'Mesa no encontrada' }, { status: 404 });
 }
 
 export async function DELETE(request: Request) {

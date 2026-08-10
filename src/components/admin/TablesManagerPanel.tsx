@@ -13,7 +13,6 @@ export default function TablesManagerPanel() {
   const [waiters, setWaiters] = useState<{ user_id: string; name: string | null; email: string | null }[]>([]);
   const [showQrFor, setShowQrFor] = useState<string | null>(null);
   const [selectedToActivate, setSelectedToActivate] = useState<string[]>([]);
-  const [lastActivation, setLastActivation] = useState<{ pin: string; tableNumbers: number[] } | null>(null);
   const [settings, setSettings] = useState<{logo_url: string, primary_color: string}>({ logo_url: '', primary_color: '#ff4757' });
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -85,7 +84,6 @@ export default function TablesManagerPanel() {
       alert(result.error || 'No se pudo activar la mesa');
       return;
     }
-    setLastActivation({ pin: result.pin, tableNumbers: result.tables.map((table: { table_number: number }) => table.table_number) });
     setSelectedToActivate([]);
     await loadTablesAndSettings();
   };
@@ -153,9 +151,6 @@ export default function TablesManagerPanel() {
         </button>
       </form>
 
-      {lastActivation && <div style={{ marginBottom: '20px', padding: '14px', background: 'rgba(46,213,115,.12)', border: '1px solid #2ed573', borderRadius: '8px' }}>
-        Mesas {lastActivation.tableNumbers.join(', ')} activadas. PIN temporal: <strong style={{ fontSize: '1.25rem', letterSpacing: '3px' }}>{lastActivation.pin}</strong>
-      </div>}
       {selectedToActivate.length > 0 && <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
         <span>{selectedToActivate.length} mesa(s) para activar</span>
         <button className="btn-primary" onClick={() => void activate(selectedToActivate)}>Activar como grupo</button>
@@ -173,6 +168,9 @@ export default function TablesManagerPanel() {
                   <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--primary)' }}>Mesa {table.table_number}</h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ID: {table.id.split('-')[0]}...</p>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Capacidad: {table.capacity}</p>
+                  <p style={{ fontSize: '0.85rem', color: table.status === 'occupied' ? 'var(--primary)' : 'var(--text-muted)' }}>
+                    {table.status === 'occupied' ? 'Ocupada' : 'Disponible'}
+                  </p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={() => setShowQrFor(showQrFor === table.id ? null : table.id)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px' }}>
@@ -200,7 +198,6 @@ export default function TablesManagerPanel() {
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mesero asignado</label>
                 <select
                   value={table.assigned_waiter_id || ''}
-                  disabled={table.status !== 'available'}
                   onChange={(event) => void assignWaiter(table.id, event.target.value)}
                   style={{ width: '100%', padding: '9px', borderRadius: '5px', background: 'var(--bg-base)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}
                 >
@@ -208,6 +205,13 @@ export default function TablesManagerPanel() {
                   {waiters.map((waiter) => <option key={waiter.user_id} value={waiter.user_id}>{waiter.name || waiter.email || 'Mesero'}</option>)}
                 </select>
               </div>
+
+              {table.status === 'occupied' && table.access_code && (
+                <div style={{ marginTop: '16px', padding: '12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Código de activación</span>
+                  <strong style={{ fontSize: '1.2rem', letterSpacing: '3px', color: 'var(--primary)' }}>{table.access_code}</strong>
+                </div>
+              )}
 
               {table.status === 'available' && (
                 <div style={{ display: 'flex', gap: '10px', marginTop: '14px', alignItems: 'center' }}>

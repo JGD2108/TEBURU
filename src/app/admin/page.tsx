@@ -94,6 +94,7 @@ export default function AdminDashboard() {
               <NavButton id="menu" icon={BookOpen} label="Menú y Platillos" />
               <NavButton id="staff" icon={Users} label="Gestión de Staff" />
               <NavButton id="admin_tables" icon={Armchair} label="Estructura de Mesas" />
+              <NavButton id="tables" icon={Grid} label="Salón y Mesas" />
               <NavButton id="history" icon={BookOpen} label="Historial de Cajas" />
               <NavButton id="kds" icon={ChefHat} label="Monitor Cocina (KDS)" />
               <NavButton id="stations" icon={Workflow} label="Estaciones de Cocina" />
@@ -124,6 +125,7 @@ export default function AdminDashboard() {
         {staffData?.role === 'admin' && activeTab === 'staff' && <StaffPanel />}
         {staffData?.role === 'admin' && activeTab === 'settings' && <SettingsPanel />}
         {staffData?.role === 'admin' && activeTab === 'admin_tables' && <TablesManagerPanel />}
+        {staffData?.role === 'admin' && activeTab === 'tables' && <WaiterPanel />}
         {staffData?.role === 'admin' && activeTab === 'history' && <HistoryPanel />}
         {staffData?.role === 'admin' && activeTab === 'kds' && <KitchenPanel />}
         {staffData?.role === 'admin' && activeTab === 'stations' && <StationsPanel />}

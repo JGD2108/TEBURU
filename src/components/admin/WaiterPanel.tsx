@@ -6,7 +6,6 @@ export default function WaiterPanel() {
   const [tables, setTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTableIds, setSelectedTableIds] = useState<string[]>([]);
-  const [lastActivation, setLastActivation] = useState<{ pin: string; tables: number[] } | null>(null);
 
   const loadTables = async () => {
     setLoading(true);
@@ -35,7 +34,6 @@ export default function WaiterPanel() {
       });
       const payload = await res.json();
       if (!res.ok) throw new Error(payload.error || 'No se pudo activar la mesa');
-      setLastActivation({ pin: payload.pin, tables: payload.tables.map((table: { table_number: number }) => table.table_number) });
       setSelectedTableIds([]);
       await loadTables();
     } catch (err) {
@@ -102,13 +100,6 @@ export default function WaiterPanel() {
           <RefreshCw size={18} /> Actualizar
         </button>
       </div>
-
-      {lastActivation && (
-        <div style={{ marginBottom: '24px', padding: '16px', borderRadius: '10px', background: 'rgba(46, 213, 115, 0.12)', border: '1px solid #2ed573' }}>
-          <strong>Mesas {lastActivation.tables.join(', ')} activadas.</strong> PIN temporal: <span style={{ fontSize: '1.35rem', letterSpacing: '3px' }}>{lastActivation.pin}</span>
-          <div style={{ fontSize: '0.85rem', marginTop: '4px', color: 'var(--text-muted)' }}>El QR impreso de cualquiera de estas mesas abre la misma cuenta.</div>
-        </div>
-      )}
 
       {selectedTableIds.length > 0 && (
         <div style={{ marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center', padding: '14px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)' }}>

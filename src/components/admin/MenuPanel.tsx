@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { staffFetch } from '@/lib/api-client';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
 
 export default function MenuPanel() {
   const [items, setItems] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [savingCategory, setSavingCategory] = useState(false);
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -61,6 +63,30 @@ export default function MenuPanel() {
     }
   };
 
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = newCategoryName.trim();
+    if (!name) return;
+
+    setSavingCategory(true);
+    const response = await staffFetch('/api/admin/menu/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      alert(result.error || 'No se pudo crear la categoría');
+      setSavingCategory(false);
+      return;
+    }
+
+    setNewCategoryName('');
+    setFormData((current) => ({ ...current, category_id: current.category_id || result.data.id }));
+    await loadData();
+    setSavingCategory(false);
+  };
+
   if (loading) return <div>Cargando menú...</div>;
 
   return (
@@ -71,6 +97,33 @@ export default function MenuPanel() {
           <Plus size={18} /> {showForm ? 'Cancelar' : 'Añadir Platillo'}
         </button>
       </div>
+
+      <section style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--border-color)' }}>
+        <h3 style={{ fontSize: '1.05rem', marginBottom: '14px' }}>Categorías del menú</h3>
+        <form onSubmit={handleCreateCategory} style={{ display: 'flex', gap: '10px', marginBottom: categories.length ? '16px' : 0 }}>
+          <input
+            required
+            maxLength={80}
+            type="text"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            placeholder="Ej: Bebidas, Entradas o Postres"
+            style={{ flex: 1, padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }}
+          />
+          <button type="submit" className="btn-secondary" disabled={savingCategory} style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <Plus size={17} /> {savingCategory ? 'Creando...' : 'Crear categoría'}
+          </button>
+        </form>
+        {categories.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {categories.map((category) => (
+              <span key={category.id} style={{ background: 'var(--bg-base)', border: '1px solid var(--border-color)', padding: '6px 10px', borderRadius: '999px', fontSize: '0.85rem' }}>
+                {category.name}
+              </span>
+            ))}
+          </div>
+        )}
+      </section>
 
       {showForm && (
         <form onSubmit={handleSave} style={{ background: 'var(--bg-surface)', padding: '24px', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--border-color)', display: 'grid', gap: '16px', gridTemplateColumns: '1fr 1fr' }}>

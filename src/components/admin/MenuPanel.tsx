@@ -8,6 +8,9 @@ export default function MenuPanel() {
   const [loading, setLoading] = useState(true);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [savingCategory, setSavingCategory] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [savingItem, setSavingItem] = useState(false);
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -37,8 +40,25 @@ export default function MenuPanel() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSavingItem(true);
+    let imageUrl = formData.image_url.trim() || null;
+
+    if (imageFile) {
+      const uploadBody = new FormData();
+      uploadBody.append('file', imageFile);
+      const uploadResponse = await staffFetch('/api/admin/menu/images', { method: 'POST', body: uploadBody });
+      const uploadResult = await uploadResponse.json();
+      if (!uploadResponse.ok) {
+        alert(uploadResult.error || 'No se pudo subir la imagen');
+        setSavingItem(false);
+        return;
+      }
+      imageUrl = uploadResult.url;
+    }
+
     const payload = {
       ...formData,
+      image_url: imageUrl,
       price: parseFloat(formData.price),
       modifiable_ingredients: formData.modifiable_ingredients || null
     };
@@ -49,11 +69,31 @@ export default function MenuPanel() {
     const result = await response.json();
     if (!response.ok) {
       alert("Error guardando: " + (result.error || 'Error desconocido'));
+      setSavingItem(false);
     } else {
       setShowForm(false);
       setFormData({ name: '', description: '', price: '', category_id: categories[0]?.id || '', image_url: '', modifiable_ingredients: '' });
+      setImageFile(null);
+      setImagePreview('');
+      setSavingItem(false);
       loadData();
     }
+  };
+
+  const handleImageFile = (file: File | null) => {
+    if (!file) {
+      setImageFile(null);
+      setImagePreview('');
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 4 * 1024 * 1024) {
+      alert('Selecciona una imagen JPG, PNG o WEBP de máximo 4 MB');
+      return;
+    }
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(typeof reader.result === 'string' ? reader.result : '');
+    reader.readAsDataURL(file);
   };
 
   const handleDelete = async (id: string) => {
@@ -143,8 +183,14 @@ export default function MenuPanel() {
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>URL de la Imagen</label>
-            <input required type="url" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>URL de la imagen (opcional)</label>
+            <input type="url" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} placeholder="https://..." style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+          </div>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>O subir una foto (opcional)</label>
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => handleImageFile(e.target.files?.[0] || null)} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '6px' }}>JPG, PNG o WEBP. Máximo 4 MB. Si eliges una foto, tendrá prioridad sobre la URL.</p>
+            {(imagePreview || formData.image_url) && <img src={imagePreview || formData.image_url} alt="Vista previa del platillo" style={{ marginTop: '10px', width: '120px', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }} />}
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Descripción</label>
@@ -155,7 +201,7 @@ export default function MenuPanel() {
             <input type="text" placeholder="ej: sin huevo,sin cebolla" value={formData.modifiable_ingredients} onChange={e => setFormData({...formData, modifiable_ingredients: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
           </div>
           <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="submit" className="btn-primary">Guardar Platillo</button>
+            <button type="submit" className="btn-primary" disabled={savingItem}>{savingItem ? 'Guardando...' : 'Guardar Platillo'}</button>
           </div>
         </form>
       )}
@@ -174,7 +220,11 @@ export default function MenuPanel() {
             {items.map(item => (
               <tr key={item.id} style={{ borderTop: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <img src={item.image_url} alt={item.name} style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover' }} />
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.name} style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: 'var(--bg-base)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', textAlign: 'center' }}>Sin imagen</div>
+                  )}
                   <div>
                     <p style={{ fontWeight: 600 }}>{item.name}</p>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.description?.slice(0,40)}...</p>

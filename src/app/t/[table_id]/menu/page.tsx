@@ -202,7 +202,7 @@ export default function TableMenu() {
           {filteredItems.map(item => {
             if (item.isFeatured) {
               return (
-                <div key={item.id} className={styles.featuredCard} style={{ backgroundImage: `url(${item.image})` }}>
+                <div key={item.id} className={styles.featuredCard} style={{ backgroundImage: item.image ? `url(${item.image})` : 'linear-gradient(135deg, #28222b, #151216)' }}>
                   <div className={styles.featuredOverlay}>
                     <div className={styles.featuredTag}><Star size={14} fill="currentColor" /> Recomendado del Chef</div>
                     <div className={styles.featuredContent}>
@@ -221,7 +221,11 @@ export default function TableMenu() {
             return (
               <div key={item.id} className={styles.itemCard}>
                 <div className={styles.itemImageContainer}>
-                  <img src={item.image} alt={item.name} className={styles.itemImage} />
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} className={styles.itemImage} />
+                  ) : (
+                    <div className={styles.itemImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Sin imagen</div>
+                  )}
                 </div>
                 <div className={styles.itemInfo}>
                   <h3 className={styles.itemName}>{item.name}</h3>

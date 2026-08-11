@@ -25,13 +25,9 @@ export async function POST(request: Request) {
     const safeSlug = typeof body.slug === 'string' && slugify(body.slug) || slugify(name);
     const adminName = typeof body.admin_name === 'string' ? body.admin_name.trim() : '';
     const adminEmail = typeof body.admin_email === 'string' ? body.admin_email.trim().toLowerCase() : '';
-    const tableCount = Number(body.table_count);
-    const tableCapacity = Number(body.table_capacity);
     if (name.length < 2 || !safeSlug || adminName.length < 2 || !/^\S+@\S+\.\S+$/.test(adminEmail) ||
-        typeof body.admin_password !== 'string' || body.admin_password.length < 12 ||
-        !Number.isInteger(tableCount) || tableCount < 1 || tableCount > 100 ||
-        !Number.isInteger(tableCapacity) || tableCapacity < 1 || tableCapacity > 30) {
-      return NextResponse.json({ error: 'Completa el restaurante, administrador, contraseña y mesas con datos válidos.' }, { status: 400 });
+        typeof body.admin_password !== 'string' || body.admin_password.length < 12) {
+      return NextResponse.json({ error: 'Completa el restaurante, administrador y contraseña con datos válidos.' }, { status: 400 });
     }
 
     const supabase = authAdmin();
@@ -68,11 +64,6 @@ export async function POST(request: Request) {
     await client.query(
       "INSERT INTO staff (user_id, restaurant_id, name, email, role) VALUES ($1, $2, $3, $4, 'admin')",
       [createdAuthUserId, restaurantId, adminName, adminEmail]
-    );
-    await client.query(
-      `INSERT INTO tables (restaurant_id, table_number, capacity, status)
-       SELECT $1, number, $3, 'available' FROM generate_series(1, $2) AS number`,
-      [restaurantId, tableCount, tableCapacity]
     );
     await client.query('COMMIT');
     return NextResponse.json({ data: restaurant.rows[0] }, { status: 201 });

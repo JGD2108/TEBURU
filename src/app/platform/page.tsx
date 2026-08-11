@@ -13,7 +13,6 @@ type Restaurant = {
 const emptyForm = {
   name: '', slug: '', contact_email: '', phone: '', address: '', primary_color: '#ff4757',
   currency: 'USD', timezone: 'America/Bogota', admin_name: '', admin_email: '', admin_password: '',
-  table_count: 10, table_capacity: 4,
 };
 
 export default function PlatformPage() {
@@ -61,14 +60,12 @@ export default function PlatformPage() {
       {message && <p style={{ marginTop: '20px', padding: '12px 16px', borderRadius: '10px', background: 'rgba(255,71,87,.1)', color: 'var(--primary)' }}>{message}</p>}
 
       {showForm && <form onSubmit={createRestaurant} className="glass-panel" style={{ marginTop: '28px', padding: 'clamp(20px, 4vw, 36px)' }}>
-        <h2 style={{ marginTop: 0 }}>Alta de restaurante</h2><p style={{ color: 'var(--text-muted)' }}>Se creará el restaurante, su administrador y las mesas iniciales en una sola operación.</p>
+        <h2 style={{ marginTop: 0 }}>Alta de restaurante</h2><p style={{ color: 'var(--text-muted)' }}>Se creará el restaurante y su administrador. Podrás configurar las mesas después desde el panel del restaurante.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
           {[
             ['name','Nombre del restaurante','text'],['slug','Identificador web (opcional)','text'],['contact_email','Correo del restaurante','email'],['phone','Teléfono','tel'],['address','Dirección','text'],
             ['admin_name','Nombre del administrador','text'],['admin_email','Correo de acceso del administrador','email'],['admin_password','Contraseña inicial (12+ caracteres)','password'],
           ].map(([key,label,type]) => <label key={key} style={{ display: 'grid', gap: '7px', fontSize: '.9rem' }}>{label}<input required={!['slug','contact_email','phone','address'].includes(key)} type={type} style={inputStyle} value={String(form[key as keyof typeof form])} onChange={(e) => setForm({ ...form, [key]: e.target.value })}/></label>)}
-          <label style={{ display: 'grid', gap: '7px', fontSize: '.9rem' }}>Número de mesas<input type="number" min="1" max="100" style={inputStyle} value={form.table_count} onChange={(e) => setForm({ ...form, table_count: Number(e.target.value) })}/></label>
-          <label style={{ display: 'grid', gap: '7px', fontSize: '.9rem' }}>Capacidad por mesa<input type="number" min="1" max="30" style={inputStyle} value={form.table_capacity} onChange={(e) => setForm({ ...form, table_capacity: Number(e.target.value) })}/></label>
           <label style={{ display: 'grid', gap: '7px', fontSize: '.9rem' }}>Moneda<select style={inputStyle} value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}><option>USD</option><option>COP</option><option>EUR</option><option>MXN</option></select></label>
           <label style={{ display: 'grid', gap: '7px', fontSize: '.9rem' }}>Color de marca<input type="color" style={{ ...inputStyle, height: '45px' }} value={form.primary_color} onChange={(e) => setForm({ ...form, primary_color: e.target.value })}/></label>
         </div>

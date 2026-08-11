@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { staffFetch } from '@/lib/api-client';
+import { kitchenWorkflowEnabled } from '@/lib/features';
 import { LogOut, LayoutDashboard, Settings, UtensilsCrossed, Users, Grid, ChefHat, BookOpen, Armchair, Workflow, Globe2 } from 'lucide-react';
 
 import MenuPanel from '@/components/admin/MenuPanel';
@@ -37,7 +38,7 @@ export default function AdminDashboard() {
         setStaffData(staff as { name: string, role: string, isPlatformAdmin: boolean });
         // Set default tab based on role
         if (staff.role === 'waiter') setActiveTab('tables');
-        if (staff.role === 'kitchen') setActiveTab('kds');
+        if (staff.role === 'kitchen' && kitchenWorkflowEnabled) setActiveTab('kds');
       } else {
         await supabase.auth.signOut();
         router.replace('/admin/login?error=unauthorized');
@@ -98,13 +99,13 @@ export default function AdminDashboard() {
               <NavButton id="admin_tables" icon={Armchair} label="Estructura de Mesas" />
               <NavButton id="tables" icon={Grid} label="Salón y Mesas" />
               <NavButton id="history" icon={BookOpen} label="Historial de Cajas" />
-              <NavButton id="kds" icon={ChefHat} label="Monitor Cocina (KDS)" />
-              <NavButton id="stations" icon={Workflow} label="Estaciones de Cocina" />
+              {kitchenWorkflowEnabled && <NavButton id="kds" icon={ChefHat} label="Monitor Cocina (KDS)" />}
+              {kitchenWorkflowEnabled && <NavButton id="stations" icon={Workflow} label="Estaciones de Cocina" />}
               <NavButton id="settings" icon={Settings} label="Ajustes Globales" />
             </>
           )}
           {staffData?.role === 'waiter' && <NavButton id="tables" icon={Grid} label="Salón y Mesas" />}
-          {staffData?.role === 'kitchen' && <NavButton id="kds" icon={ChefHat} label="Comandas KDS" />}
+          {kitchenWorkflowEnabled && staffData?.role === 'kitchen' && <NavButton id="kds" icon={ChefHat} label="Comandas KDS" />}
         </nav>
 
         <div style={{ marginTop: 'auto' }}>
@@ -130,14 +131,15 @@ export default function AdminDashboard() {
         {staffData?.role === 'admin' && activeTab === 'admin_tables' && <TablesManagerPanel />}
         {staffData?.role === 'admin' && activeTab === 'tables' && <WaiterPanel />}
         {staffData?.role === 'admin' && activeTab === 'history' && <HistoryPanel />}
-        {staffData?.role === 'admin' && activeTab === 'kds' && <KitchenPanel />}
-        {staffData?.role === 'admin' && activeTab === 'stations' && <StationsPanel />}
+        {kitchenWorkflowEnabled && staffData?.role === 'admin' && activeTab === 'kds' && <KitchenPanel />}
+        {kitchenWorkflowEnabled && staffData?.role === 'admin' && activeTab === 'stations' && <StationsPanel />}
 
         {/* Waiter View */}
         {staffData?.role === 'waiter' && activeTab === 'tables' && <WaiterPanel />}
 
         {/* Kitchen View */}
-        {staffData?.role === 'kitchen' && activeTab === 'kds' && <KitchenPanel />}
+        {kitchenWorkflowEnabled && staffData?.role === 'kitchen' && activeTab === 'kds' && <KitchenPanel />}
+        {!kitchenWorkflowEnabled && staffData?.role === 'kitchen' && <section className="glass-panel" style={{ maxWidth: '620px', padding: '32px' }}><h1 style={{ marginTop: 0 }}>Cocina temporalmente desactivada</h1><p style={{ color: 'var(--text-muted)' }}>El monitor de cocina y las estaciones están guardados para una próxima etapa de Teburu.</p></section>}
 
       </main>
     </div>

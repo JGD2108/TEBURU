@@ -43,6 +43,10 @@ export default function TableMenu() {
   // Estado para el minijuego de pago
   const [showMinigame, setShowMinigame] = useState(false);
   const [minigameWinner, setMinigameWinner] = useState('');
+  const [bill, setBill] = useState<{ guests: { id: string; name: string; own_total: number }[]; total: number } | null>(null);
+  const [splitMode, setSplitMode] = useState<'own_items' | 'equal' | 'custom'>('own_items');
+  const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
+  const [splitMessage, setSplitMessage] = useState('');
 
   const loadTableOrders = useCallback(async () => {
     const response = await fetch('/api/table/orders');
@@ -55,9 +59,23 @@ export default function TableMenu() {
     setTableOrders(payload.data);
   }, [router, table_id]);
 
+  const loadBill = useCallback(async () => {
+    const response = await fetch('/api/table/bill');
+    if (response.ok) setBill((await response.json()).data);
+  }, []);
+
+  const requestSplit = async () => {
+    const participants = bill?.guests.map((guest) => ({ guestId: guest.id, amount: Number(customAmounts[guest.id] ?? 0) })) ?? [];
+    const response = await fetch('/api/table/bill-splits', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: splitMode, participants }),
+    });
+    const payload = await response.json();
+    setSplitMessage(response.ok ? 'Solicitud enviada al mesero. El desglose ya está listo.' : payload.error || 'No se pudo solicitar la cuenta.');
+  };
+
   useEffect(() => {
     async function loadMenu() {
-      const catalogResponse = await fetch('/api/public/catalog');
+      const catalogResponse = await fetch(`/api/public/catalog?table_id=${encodeURIComponent(table_id)}`);
       const catalog = await catalogResponse.json();
       const catsData = catalogResponse.ok ? catalog.categories : [];
       if (catsData) setDbCategories(catsData.map((c: { name: string }) => c.name));
@@ -88,9 +106,16 @@ export default function TableMenu() {
       setCustomerName(session.name);
       setSessionReady(true);
       await loadTableOrders();
+      await loadBill();
     }
     void loadMenu();
-  }, [loadTableOrders, router, table_id]);
+  }, [loadBill, loadTableOrders, router, table_id]);
+
+  useEffect(() => {
+    if (!sessionReady) return;
+    const interval = window.setInterval(() => { void loadTableOrders(); }, 8000);
+    return () => window.clearInterval(interval);
+  }, [loadTableOrders, sessionReady]);
 
   const handleAddClick = (item: any) => {
     if (item.ingredients && item.ingredients.length > 0) {
@@ -356,32 +381,35 @@ export default function TableMenu() {
           Total Pendiente Mesa: <span>${tableTotal.toFixed(2)}</span>
         </div>
 
-        <h2 className={styles.sectionTitle} style={{marginTop: '24px'}}>¿Cómo desean pagar?</h2>
+        <h2 className={styles.sectionTitle} style={{marginTop: '24px'}}>Dividir la cuenta</h2>
+        <p className={styles.sectionSubtitle}>Elige el desglose y se lo enviaremos a tu mesero.</p>
         
         <div className={styles.paymentOptions}>
-          <button className={styles.payBtnNormal} disabled={myTotal === 0}>
+          <button className={styles.payBtnNormal} onClick={() => setSplitMode('own_items')} style={{ outline: splitMode === 'own_items' ? '2px solid var(--primary)' : undefined }}>
             <div>
-              <span className={styles.payBtnTitle}>🙋‍♂️ Pagar lo mío</span>
-              <span className={styles.payBtnSub}>Paga solo tus consumos</span>
+              <span className={styles.payBtnTitle}>Mis consumos</span>
+              <span className={styles.payBtnSub}>Cada persona asume sus platos</span>
             </div>
             <strong>${myTotal.toFixed(2)}</strong>
           </button>
           
-          <button className={styles.payBtnNormal}>
+          <button className={styles.payBtnNormal} onClick={() => setSplitMode('equal')} style={{ outline: splitMode === 'equal' ? '2px solid var(--primary)' : undefined }}>
             <div>
-              <span className={styles.payBtnTitle}>👑 Pagar por todos</span>
-              <span className={styles.payBtnSub}>Invita a toda la mesa</span>
+              <span className={styles.payBtnTitle}>Partes iguales</span>
+              <span className={styles.payBtnSub}>Repartir el total entre todos</span>
             </div>
             <strong>${tableTotal.toFixed(2)}</strong>
           </button>
           
-          <button className={styles.payBtnGame} onClick={playRoulette}>
-            <div style={{display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center'}}>
-              <Dices size={24} />
-              <span style={{fontSize: '1.1rem', fontWeight: 700}}>Minijuego: ¿Quién Paga?</span>
-            </div>
-          </button>
+          <button className={styles.payBtnGame} onClick={() => setSplitMode('custom')}>Monto personalizado</button>
         </div>
+        {splitMode === 'custom' && bill && <div className={styles.cartList} style={{ marginTop: '16px' }}>{bill.guests.map((guest) => (
+          <label key={guest.id} className={styles.cartItemRowStatic}>{guest.name}<input aria-label={`Monto de ${guest.name}`} inputMode="decimal" value={customAmounts[guest.id] ?? ''} onChange={(event) => setCustomAmounts({ ...customAmounts, [guest.id]: event.target.value })} style={{ width: '90px' }} /></label>
+        ))}</div>}
+        <button className="btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={!bill || bill.total === 0} onClick={() => void requestSplit()}>
+          Solicitar cuenta al mesero
+        </button>
+        {splitMessage && <p className={styles.sectionSubtitle} style={{ marginTop: '12px' }}>{splitMessage}</p>}
       </div>
     );
   };

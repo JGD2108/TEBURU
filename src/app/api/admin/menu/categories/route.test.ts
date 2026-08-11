@@ -19,7 +19,7 @@ const requestFor = (name: unknown) => new Request('http://localhost/api/admin/me
 describe('POST /api/admin/menu/categories', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    requireRole.mockResolvedValue({ userId: 'admin-1', name: 'Admin', role: 'admin' });
+    requireRole.mockResolvedValue({ userId: 'admin-1', name: 'Admin', role: 'admin', restaurantId: 'restaurant-1', isPlatformAdmin: false });
   });
 
   it('creates a trimmed category at the end of the menu', async () => {
@@ -28,7 +28,7 @@ describe('POST /api/admin/menu/categories', () => {
     const response = await POST(requestFor('  Bebidas  '));
 
     expect(response.status).toBe(201);
-    expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO menu_categories'), ['Bebidas']);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO menu_categories'), ['restaurant-1', 'Bebidas']);
     expect(await response.json()).toMatchObject({ data: { name: 'Bebidas' } });
   });
 

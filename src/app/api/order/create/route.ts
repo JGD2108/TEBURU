@@ -14,9 +14,11 @@ export async function POST(request: Request) {
 
     client = await getPoolClient();
     await client.query('BEGIN');
+    const session = await client.query<{ restaurant_id: string }>('SELECT restaurant_id FROM sessions WHERE id = $1 AND status = $2 FOR SHARE', [guest.sessionId, 'active']);
+    if (!session.rows[0]) throw new Error('SESSION_CLOSED');
     const orderRes = await client.query(
-      `INSERT INTO orders (session_id, user_id, status) VALUES ($1, $2, 'pending') RETURNING id`,
-      [guest.sessionId, guest.guestId]
+      `INSERT INTO orders (restaurant_id, session_id, user_id, status) VALUES ($1, $2, $3, 'pending') RETURNING id`,
+      [session.rows[0].restaurant_id, guest.sessionId, guest.guestId]
     );
 
     for (const item of items) {
@@ -24,13 +26,13 @@ export async function POST(request: Request) {
         throw new Error('INVALID_ITEM');
       }
       const menuItem = await client.query<{ price: string }>(
-        'SELECT price FROM menu_items WHERE id = $1 AND is_available = true', [item.menu_item_id]
+        'SELECT price FROM menu_items WHERE id = $1 AND restaurant_id = $2 AND is_available = true', [item.menu_item_id, session.rows[0].restaurant_id]
       );
       if (!menuItem.rows[0]) throw new Error('Un artículo ya no está disponible');
       await client.query(
-        `INSERT INTO order_items (order_id, menu_item_id, quantity, notes, unit_price)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [orderRes.rows[0].id, item.menu_item_id, item.qty, typeof item.notes === 'string' ? item.notes.slice(0, 500) : '', menuItem.rows[0].price]
+        `INSERT INTO order_items (restaurant_id, order_id, menu_item_id, quantity, notes, unit_price)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [session.rows[0].restaurant_id, orderRes.rows[0].id, item.menu_item_id, item.qty, typeof item.notes === 'string' ? item.notes.slice(0, 500) : '', menuItem.rows[0].price]
       );
     }
     await client.query('COMMIT');

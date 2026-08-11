@@ -7,10 +7,10 @@ export async function GET(request: Request) {
   if (isAuthorizationFailure(staff)) return staff;
 
   const [categories, items] = await Promise.all([
-    query('SELECT * FROM menu_categories ORDER BY sort_order, name'),
+    query('SELECT * FROM menu_categories WHERE restaurant_id = $1 ORDER BY sort_order, name', [staff.restaurantId]),
     query(`SELECT mi.*, json_build_object('name', mc.name) AS category
       FROM menu_items mi JOIN menu_categories mc ON mc.id = mi.category_id
-      ORDER BY mi.name`),
+      WHERE mi.restaurant_id = $1 AND mc.restaurant_id = $1 ORDER BY mi.name`, [staff.restaurantId]),
   ]);
   return NextResponse.json({ categories: categories.rows, items: items.rows });
 }
@@ -25,9 +25,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Datos de platillo inválidos' }, { status: 400 });
   }
   const { rows } = await query(
-    `INSERT INTO menu_items (name, description, price, category_id, image_url, modifiable_ingredients)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [body.name.trim(), body.description || null, price, body.category_id, body.image_url || null, body.modifiable_ingredients || null]
+    `INSERT INTO menu_items (restaurant_id, name, description, price, category_id, image_url, modifiable_ingredients)
+     SELECT $1, $2, $3, $4, mc.id, $5, $6 FROM menu_categories mc WHERE mc.id = $7 AND mc.restaurant_id = $1 RETURNING *`,
+    [staff.restaurantId, body.name.trim(), body.description || null, price, body.image_url || null, body.modifiable_ingredients || null, body.category_id]
   );
   return NextResponse.json({ data: rows[0] }, { status: 201 });
 }
@@ -37,7 +37,7 @@ export async function DELETE(request: Request) {
   if (isAuthorizationFailure(staff)) return staff;
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Falta el platillo' }, { status: 400 });
-  const result = await query('DELETE FROM menu_items WHERE id = $1', [id]);
+  const result = await query('DELETE FROM menu_items WHERE id = $1 AND restaurant_id = $2', [id, staff.restaurantId]);
   return result.rowCount
     ? NextResponse.json({ success: true })
     : NextResponse.json({ error: 'Platillo no encontrado' }, { status: 404 });

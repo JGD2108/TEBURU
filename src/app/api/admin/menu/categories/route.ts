@@ -14,10 +14,10 @@ export async function POST(request: Request) {
 
   try {
     const { rows } = await query(
-      `INSERT INTO menu_categories (name, sort_order)
-       VALUES ($1, COALESCE((SELECT MAX(sort_order) + 1 FROM menu_categories), 0))
+      `INSERT INTO menu_categories (restaurant_id, name, sort_order)
+       VALUES ($1, $2, COALESCE((SELECT MAX(sort_order) + 1 FROM menu_categories WHERE restaurant_id = $1), 0))
        RETURNING *`,
-      [name]
+      [staff.restaurantId, name]
     );
     return NextResponse.json({ data: rows[0] }, { status: 201 });
   } catch (error) {

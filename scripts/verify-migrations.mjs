@@ -10,6 +10,7 @@ if (!process.env.DATABASE_URL) {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const migrationsDir = path.join(root, 'supabase', 'migrations');
 const client = new Client({ connectionString: process.env.DATABASE_URL });
+const defaultRestaurantId = '00000000-0000-0000-0000-000000000001';
 
 try {
   await client.connect();
@@ -19,41 +20,41 @@ try {
   }
 
   const { rows: [category] } = await client.query(
-    "INSERT INTO menu_categories (name) VALUES ('Integration') RETURNING id"
+    "INSERT INTO menu_categories (restaurant_id, name) VALUES ($1, 'Integration') RETURNING id", [defaultRestaurantId]
   );
   const { rows: [item] } = await client.query(
-    "INSERT INTO menu_items (category_id, name, price) VALUES ($1, 'Integration dish', 10) RETURNING id",
-    [category.id]
+    "INSERT INTO menu_items (restaurant_id, category_id, name, price) VALUES ($1, $2, 'Integration dish', 10) RETURNING id",
+    [defaultRestaurantId, category.id]
   );
   const { rows: [station] } = await client.query(
-    "INSERT INTO kitchen_stations (name, color) VALUES ('Integration station', '#ff6b35') RETURNING id"
+    "INSERT INTO kitchen_stations (restaurant_id, name, color) VALUES ($1, 'Integration station', '#ff6b35') RETURNING id", [defaultRestaurantId]
   );
   await client.query(
     'INSERT INTO menu_item_stations (menu_item_id, station_id) VALUES ($1, $2)',
     [item.id, station.id]
   );
   const { rows: [table] } = await client.query(
-    'INSERT INTO tables (table_number) VALUES (1) RETURNING id, capacity'
+    'INSERT INTO tables (restaurant_id, table_number) VALUES ($1, 1) RETURNING id, capacity', [defaultRestaurantId]
   );
   const { rows: [session] } = await client.query(
-    "INSERT INTO sessions (table_id, code) VALUES ($1, '0000') RETURNING id",
-    [table.id]
+    "INSERT INTO sessions (restaurant_id, table_id, code) VALUES ($1, $2, '0000') RETURNING id",
+    [defaultRestaurantId, table.id]
   );
   await client.query(
     'INSERT INTO session_tables (session_id, table_id, is_primary) VALUES ($1, $2, true)',
     [session.id, table.id]
   );
   const { rows: [guest] } = await client.query(
-    "INSERT INTO session_users (session_id, name) VALUES ($1, 'Integration guest') RETURNING id",
-    [session.id]
+    "INSERT INTO session_users (restaurant_id, session_id, name) VALUES ($1, $2, 'Integration guest') RETURNING id",
+    [defaultRestaurantId, session.id]
   );
   const { rows: [order] } = await client.query(
-    'INSERT INTO orders (session_id, user_id) VALUES ($1, $2) RETURNING id, status',
-    [session.id, guest.id]
+    'INSERT INTO orders (restaurant_id, session_id, user_id) VALUES ($1, $2, $3) RETURNING id, status',
+    [defaultRestaurantId, session.id, guest.id]
   );
   const { rows: [orderItem] } = await client.query(
-    'INSERT INTO order_items (order_id, menu_item_id, unit_price) VALUES ($1, $2, 10) RETURNING id, version',
-    [order.id, item.id]
+    'INSERT INTO order_items (restaurant_id, order_id, menu_item_id, unit_price) VALUES ($1, $2, $3, 10) RETURNING id, version',
+    [defaultRestaurantId, order.id, item.id]
   );
 
   const preparing = await client.query(

@@ -24,7 +24,7 @@ export default function TableLogin() {
   useEffect(() => {
     async function initialize() {
       const [settingsResponse, sessionResponse] = await Promise.all([
-        fetch('/api/public/settings'),
+        fetch(`/api/public/settings?table_id=${encodeURIComponent(table_id)}`),
         fetch(`/api/table/session?table_id=${encodeURIComponent(table_id)}`),
       ]);
       const settingsResult = await settingsResponse.json();

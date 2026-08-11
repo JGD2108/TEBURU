@@ -32,8 +32,8 @@ function newAccessCode() {
 export async function activateTables(client: PoolClient, staff: StaffSession, tableIds: string[]) {
   const { rows: tables } = await client.query<TableForActivation>(
     `SELECT id, table_number, status, current_session_id, assigned_waiter_id
-     FROM tables WHERE id = ANY($1::uuid[]) ORDER BY table_number FOR UPDATE`,
-    [tableIds]
+     FROM tables WHERE id = ANY($1::uuid[]) AND restaurant_id = $2 ORDER BY table_number FOR UPDATE`,
+    [tableIds, staff.restaurantId]
   );
 
   if (tables.length !== tableIds.length) throw new TableActivationError('INVALID_TABLES');
@@ -53,9 +53,9 @@ export async function activateTables(client: PoolClient, staff: StaffSession, ta
     const pin = newAccessCode();
     try {
       const created = await client.query<{ id: string }>(
-        `INSERT INTO sessions (table_id, status, code, waiter_id)
-         VALUES ($1, 'active', $2, $3) RETURNING id`,
-        [primary.id, pin, waiterId]
+        `INSERT INTO sessions (restaurant_id, table_id, status, code, waiter_id)
+         VALUES ($1, $2, 'active', $3, $4) RETURNING id`,
+        [staff.restaurantId, primary.id, pin, waiterId]
       );
       const sessionId = created.rows[0].id;
       await client.query(

@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const path = `menu/${randomUUID()}.${extensions[file.type]}`;
+  const path = `menu/${staff.restaurantId}/${randomUUID()}.${extensions[file.type]}`;
   const uploaded = await supabase.storage.from(bucketName).upload(path, new Uint8Array(await file.arrayBuffer()), {
     contentType: file.type,
     cacheControl: '31536000',

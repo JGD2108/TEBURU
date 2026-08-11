@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   const staff = await requireRole(request, 'admin');
   if (isAuthorizationFailure(staff)) return staff;
   const { rows } = await query(
-    `SELECT id, user_id, name, role, email, created_at FROM staff ORDER BY created_at ASC`
+    `SELECT id, user_id, name, role, email, created_at FROM staff WHERE restaurant_id = $1 ORDER BY created_at ASC`, [staff.restaurantId]
   );
   return NextResponse.json({ data: rows });
 }
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const existing = await query('SELECT id FROM staff WHERE lower(email) = $1', [normalizedEmail]);
+    const existing = await query('SELECT id FROM staff WHERE restaurant_id = $1 AND lower(email) = $2', [currentStaff.restaurantId, normalizedEmail]);
     if (existing.rowCount) return NextResponse.json({ error: 'El usuario ya existe' }, { status: 409 });
 
     const supabaseAdmin = adminClient();
@@ -64,10 +64,10 @@ export async function POST(request: Request) {
     createdAuthUserId = data.user.id;
 
     const inserted = await query(
-      `INSERT INTO staff (user_id, name, role, email)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO staff (restaurant_id, user_id, name, role, email)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id, user_id, name, role, email, created_at`,
-      [data.user.id, normalizedName, role, normalizedEmail]
+      [currentStaff.restaurantId, data.user.id, normalizedName, role, normalizedEmail]
     );
     return NextResponse.json({ success: true, data: inserted.rows[0] }, { status: 201 });
   } catch (error) {
@@ -90,7 +90,7 @@ export async function DELETE(request: Request) {
   const client = await getPoolClient();
   try {
     await client.query('BEGIN');
-    const removed = await client.query('DELETE FROM staff WHERE user_id = $1 RETURNING user_id', [userId]);
+    const removed = await client.query('DELETE FROM staff WHERE user_id = $1 AND restaurant_id = $2 RETURNING user_id', [userId, currentStaff.restaurantId]);
     if (!removed.rowCount) {
       await client.query('ROLLBACK');
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });

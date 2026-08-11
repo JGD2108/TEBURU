@@ -25,7 +25,7 @@ describe('POST /api/staff', () => {
     vi.clearAllMocks();
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-test-key';
-    requireRole.mockResolvedValue({ userId: 'admin-1', name: 'Admin', role: 'admin' });
+    requireRole.mockResolvedValue({ userId: 'admin-1', name: 'Admin', role: 'admin', restaurantId: 'restaurant-1', isPlatformAdmin: false });
   });
 
   it('rejects callers without the admin role before provisioning', async () => {
@@ -40,7 +40,7 @@ describe('POST /api/staff', () => {
     createUser.mockResolvedValue({ data: { user: { id: 'auth-user-1' } }, error: null });
     const response = await POST(requestFor({ email: 'COOK@example.com', password: 'LongPassword_1', name: 'Cook', role: 'kitchen' }));
     expect(response.status).toBe(201);
-    expect(query).toHaveBeenLastCalledWith(expect.stringContaining('INSERT INTO staff'), ['auth-user-1', 'Cook', 'kitchen', 'cook@example.com']);
+    expect(query).toHaveBeenLastCalledWith(expect.stringContaining('INSERT INTO staff'), ['restaurant-1', 'auth-user-1', 'Cook', 'kitchen', 'cook@example.com']);
   });
 
   it('removes the Auth user if the staff insert fails', async () => {

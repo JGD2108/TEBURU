@@ -12,8 +12,8 @@ export async function POST(request: Request) {
     if (!uuid.test(tableId) || typeof code !== 'string' || !/^\d{6}$/.test(code) || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json({ error: 'Datos de acceso inválidos' }, { status: 400 });
     }
-    const tableResult = await query<{ id: string; access_code: string | null; current_session_id: string | null; status: string }>(
-      'SELECT id, access_code, current_session_id, status FROM tables WHERE id = $1', [tableId]
+    const tableResult = await query<{ id: string; restaurant_id: string; access_code: string | null; current_session_id: string | null; status: string }>(
+      'SELECT id, restaurant_id, access_code, current_session_id, status FROM tables WHERE id = $1', [tableId]
     );
     const table = tableResult.rows[0];
     if (!table) return NextResponse.json({ error: 'Mesa no encontrada' }, { status: 404 });
@@ -47,8 +47,8 @@ export async function POST(request: Request) {
     );
     if (!activeSession.rowCount) throw new Error('SESSION_CLOSED');
     const guest = await client.query(
-      `INSERT INTO session_users (session_id, name) VALUES ($1, $2) RETURNING id`,
-      [table.current_session_id, name.trim().slice(0, 100)]
+      `INSERT INTO session_users (restaurant_id, session_id, name) VALUES ($1, $2, $3) RETURNING id`,
+      [table.restaurant_id, table.current_session_id, name.trim().slice(0, 100)]
     );
     const accessToken = newGuestToken();
     await client.query(

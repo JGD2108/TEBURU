@@ -6,9 +6,9 @@ export async function GET(request: Request) {
   const staff = await requireRole(request, 'admin');
   if (isAuthorizationFailure(staff)) return staff;
   const [tables, settings, waiters] = await Promise.all([
-    query('SELECT * FROM tables ORDER BY table_number'),
-    query('SELECT logo_url, primary_color FROM restaurant_settings ORDER BY updated_at DESC LIMIT 1'),
-    query(`SELECT user_id, name, email FROM staff WHERE role = 'waiter' ORDER BY name NULLS LAST, email`),
+    query('SELECT * FROM tables WHERE restaurant_id = $1 ORDER BY table_number', [staff.restaurantId]),
+    query('SELECT logo_url, primary_color FROM restaurant_settings WHERE restaurant_id = $1', [staff.restaurantId]),
+    query(`SELECT user_id, name, email FROM staff WHERE restaurant_id = $1 AND role = 'waiter' ORDER BY name NULLS LAST, email`, [staff.restaurantId]),
   ]);
   return NextResponse.json({ tables: tables.rows, settings: settings.rows[0] ?? null, waiters: waiters.rows });
 }
@@ -24,8 +24,8 @@ export async function POST(request: Request) {
   }
   try {
     const { rows } = await query(
-      `INSERT INTO tables (table_number, capacity, status) VALUES ($1, $2, 'available') RETURNING *`,
-      [tableNumber, capacity]
+      `INSERT INTO tables (restaurant_id, table_number, capacity, status) VALUES ($1, $2, $3, 'available') RETURNING *`,
+      [staff.restaurantId, tableNumber, capacity]
     );
     return NextResponse.json({ data: rows[0] }, { status: 201 });
   } catch (error) {
@@ -42,21 +42,21 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Datos de asignación inválidos' }, { status: 400 });
   }
   if (waiterId) {
-    const waiter = await query(`SELECT 1 FROM staff WHERE user_id = $1 AND role = 'waiter'`, [waiterId]);
+    const waiter = await query(`SELECT 1 FROM staff WHERE user_id = $1 AND restaurant_id = $2 AND role = 'waiter'`, [waiterId, staff.restaurantId]);
     if (!waiter.rowCount) return NextResponse.json({ error: 'Mesero no encontrado' }, { status: 404 });
   }
   const updated = await query(
     `WITH target AS (
-       SELECT current_session_id FROM tables WHERE id = $2
+       SELECT current_session_id FROM tables WHERE id = $2 AND restaurant_id = $3
      ), transferred_session AS (
        UPDATE sessions SET waiter_id = $1
        WHERE id = (SELECT current_session_id FROM target)
        RETURNING id
      )
      UPDATE tables SET assigned_waiter_id = $1
-     WHERE id = $2 OR current_session_id = (SELECT id FROM transferred_session)
+     WHERE restaurant_id = $3 AND (id = $2 OR current_session_id = (SELECT id FROM transferred_session))
      RETURNING *`,
-    [waiterId, id]
+    [waiterId, id, staff.restaurantId]
   );
   return updated.rowCount
     ? NextResponse.json({ data: updated.rows[0] })
@@ -68,7 +68,7 @@ export async function DELETE(request: Request) {
   if (isAuthorizationFailure(staff)) return staff;
   const id = new URL(request.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Falta la mesa' }, { status: 400 });
-  const result = await query(`DELETE FROM tables WHERE id = $1 AND status = 'available' AND current_session_id IS NULL`, [id]);
+  const result = await query(`DELETE FROM tables WHERE id = $1 AND restaurant_id = $2 AND status = 'available' AND current_session_id IS NULL`, [id, staff.restaurantId]);
   return result.rowCount
     ? NextResponse.json({ success: true })
     : NextResponse.json({ error: 'Solo se puede eliminar una mesa disponible' }, { status: 409 });

@@ -6,7 +6,8 @@ export async function GET(request: Request) {
   if (!tableId) return NextResponse.json({ error: 'Falta la mesa' }, { status: 400 });
   const { rows } = await query(
     `SELECT rs.name, rs.logo_url, rs.primary_color FROM restaurant_settings rs
-     JOIN tables t ON t.restaurant_id = rs.restaurant_id WHERE t.id = $1`, [tableId]
+     JOIN tables t ON t.restaurant_id = rs.restaurant_id
+     JOIN restaurants r ON r.id = rs.restaurant_id WHERE t.id = $1 AND r.status = 'active'`, [tableId]
   );
   return NextResponse.json({ data: rows[0] ?? null });
 }

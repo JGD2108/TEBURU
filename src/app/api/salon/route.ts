@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const { rows } = await query(`
       SELECT t.id, t.table_number, t.capacity, t.status, t.access_code, t.needs_attention,
         t.current_session_id, t.assigned_waiter_id,
-        ARRAY(SELECT grouped.table_number FROM tables grouped WHERE grouped.current_session_id = t.current_session_id ORDER BY grouped.table_number) AS group_table_numbers,
+        ARRAY(SELECT grouped.table_number FROM tables grouped WHERE grouped.current_session_id = t.current_session_id AND grouped.restaurant_id = t.restaurant_id ORDER BY grouped.table_number) AS group_table_numbers,
         (
           SELECT json_agg(json_build_object(
             'order_id', o.id, 'status', o.status, 'customer_name', su.name,
@@ -22,9 +22,9 @@ export async function GET(request: Request) {
           WHERE o.session_id = t.current_session_id AND o.status NOT IN ('delivered', 'cancelled')
         ) AS active_orders
       FROM tables t
-      WHERE ($1::text = 'admin' OR t.assigned_waiter_id = $2)
+      WHERE t.restaurant_id = $3 AND ($1::text = 'admin' OR t.assigned_waiter_id = $2)
       ORDER BY t.table_number ASC;
-    `, [staff.role, staff.userId]);
+    `, [staff.role, staff.userId, staff.restaurantId]);
     return NextResponse.json({ success: true, data: rows });
   } catch (error: unknown) {
     console.error('Salon API error:', error);

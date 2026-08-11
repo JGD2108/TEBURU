@@ -27,8 +27,8 @@ export async function POST(request: Request) {
              started_at = CASE WHEN $1 = 'preparing' THEN COALESCE(started_at, now()) ELSE started_at END,
              ready_at = CASE WHEN $1 = 'ready' THEN now() ELSE ready_at END,
              version = version + 1
-         WHERE id = $2 AND version = $3 AND kitchen_status = $4 RETURNING order_id`,
-        [status, item.item_id, item.version, transitions[status]]
+         WHERE id = $2 AND version = $3 AND kitchen_status = $4 AND restaurant_id = $5 RETURNING order_id`,
+        [status, item.item_id, item.version, transitions[status], staff.restaurantId]
       );
       if (!updated.rowCount) {
         await client.query('ROLLBACK');

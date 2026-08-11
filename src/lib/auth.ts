@@ -29,6 +29,28 @@ export async function requireStaff(request: Request): Promise<StaffSession | Nex
   const user = await requireAuthenticatedUser(request);
   if (user instanceof NextResponse) return user;
   try {
+    const requestedRestaurantId = request.headers.get('x-restaurant-id');
+    const platformAdmin = await query<{ is_platform_admin: boolean }>(
+      'SELECT EXISTS (SELECT 1 FROM platform_admins WHERE user_id = $1) AS is_platform_admin',
+      [user.id]
+    );
+    const isPlatformAdmin = platformAdmin.rows[0]?.is_platform_admin ?? false;
+
+    if (isPlatformAdmin && requestedRestaurantId) {
+      const restaurant = await query<{ id: string }>(
+        "SELECT id FROM restaurants WHERE id = $1 AND status = 'active'",
+        [requestedRestaurantId]
+      );
+      if (!restaurant.rows[0]) return NextResponse.json({ error: 'Restaurante no disponible' }, { status: 404 });
+      return {
+        userId: user.id,
+        name: 'Soporte Teburu',
+        role: 'admin',
+        restaurantId: restaurant.rows[0].id,
+        isPlatformAdmin: true,
+      };
+    }
+
     const { rows } = await query<{ user_id: string; name: string; role: StaffRole; restaurant_id: string; is_platform_admin: boolean }>(
       `SELECT s.user_id, s.name, s.role, s.restaurant_id,
         EXISTS (SELECT 1 FROM platform_admins pa WHERE pa.user_id = s.user_id) AS is_platform_admin
@@ -44,9 +66,11 @@ export async function requireStaff(request: Request): Promise<StaffSession | Nex
 }
 
 export async function requirePlatformAdmin(request: Request): Promise<StaffSession | NextResponse> {
-  const staff = await requireStaff(request);
-  if (staff instanceof NextResponse) return staff;
-  return staff.isPlatformAdmin ? staff : NextResponse.json({ error: 'Acceso de plataforma requerido' }, { status: 403 });
+  const user = await requireAuthenticatedUser(request);
+  if (user instanceof NextResponse) return user;
+  const admin = await query<{ user_id: string }>('SELECT user_id FROM platform_admins WHERE user_id = $1', [user.id]);
+  if (!admin.rows[0]) return NextResponse.json({ error: 'Acceso de plataforma requerido' }, { status: 403 });
+  return { userId: user.id, name: user.email ?? 'Administrador de plataforma', role: 'admin', restaurantId: '', isPlatformAdmin: true };
 }
 
 export async function requireRole(request: Request, ...roles: StaffRole[]): Promise<StaffSession | NextResponse> {

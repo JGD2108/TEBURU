@@ -55,10 +55,11 @@ export async function requireGuestSession(request: Request, expectedTableId?: st
   const { rows } = await query<Omit<GuestSession, 'rawToken'>>(`
     UPDATE guest_access_tokens gat
     SET last_used_at = now(), expires_at = now() + ($${lifetimeParameter}::integer * interval '1 second')
-    FROM sessions s, session_users su
+    FROM sessions s, session_users su, restaurants r
     WHERE gat.token_hash = encode(digest($1, 'sha256'), 'hex')
       AND gat.revoked_at IS NULL AND gat.expires_at > now()
       AND s.id = gat.session_id AND su.id = gat.session_user_id AND s.status = 'active'
+      AND r.id = s.restaurant_id AND r.status = 'active'
       ${expectedTableCheck}
     RETURNING gat.id AS "tokenId", gat.session_id AS "sessionId", gat.session_user_id AS "guestId",
       ${tableIdField} AS "tableId", su.name AS "guestName"`, parameters);

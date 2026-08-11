@@ -14,10 +14,10 @@ export async function POST(request: Request) {
     const session = await client.query<{ id: string }>(
       `SELECT s.id
        FROM tables t JOIN sessions s ON s.id = t.current_session_id
-       WHERE t.id = $1 AND s.status = 'active'
+       WHERE t.id = $1 AND s.status = 'active' AND t.restaurant_id = $4 AND s.restaurant_id = $4
          AND ($2::text = 'admin' OR s.waiter_id = $3)
        FOR UPDATE`,
-      [tableId, staff.role, staff.userId]
+      [tableId, staff.role, staff.userId, staff.restaurantId]
     );
     const sessionId = session.rows[0]?.id;
     if (!sessionId) throw new Error('FORBIDDEN_TABLE');
@@ -25,8 +25,8 @@ export async function POST(request: Request) {
     await client.query(`UPDATE guest_access_tokens SET revoked_at = now() WHERE session_id = $1 AND revoked_at IS NULL`, [sessionId]);
     await client.query(
       `UPDATE tables SET status = 'available', current_session_id = NULL, access_code = NULL, needs_attention = false
-       WHERE current_session_id = $1`,
-      [sessionId]
+       WHERE current_session_id = $1 AND restaurant_id = $2`,
+      [sessionId, staff.restaurantId]
     );
     await client.query('COMMIT');
     return NextResponse.json({ success: true });

@@ -4,15 +4,17 @@ import { RefreshCw, QrCode, Key, AlertCircle, CheckCircle2, PackageCheck } from 
 
 export default function WaiterPanel() {
   const [tables, setTables] = useState<any[]>([]);
+  const [billSplits, setBillSplits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTableIds, setSelectedTableIds] = useState<string[]>([]);
 
   const loadTables = async () => {
     setLoading(true);
     try {
-      const res = await staffFetch('/api/salon');
+      const [res, billsRes] = await Promise.all([staffFetch('/api/salon'), staffFetch('/api/bill-splits')]);
       const { data } = await res.json();
       if (data) setTables(data);
+      if (billsRes.ok) setBillSplits((await billsRes.json()).data ?? []);
     } catch (err) {
       console.error(err);
     }
@@ -87,6 +89,13 @@ export default function WaiterPanel() {
     }
   };
 
+  const updateBillSplit = async (id: string, status: 'acknowledged' | 'completed' | 'cancelled') => {
+    const response = await staffFetch('/api/bill-splits', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) });
+    const payload = await response.json();
+    if (!response.ok) return window.alert(payload.error ?? 'No se pudo actualizar la solicitud');
+    await loadTables();
+  };
+
   if (loading && tables.length === 0) return <div>Cargando salón...</div>;
 
   return (
@@ -110,6 +119,15 @@ export default function WaiterPanel() {
           <button className="btn-secondary" onClick={() => setSelectedTableIds([])}>Cancelar</button>
         </div>
       )}
+
+      {billSplits.length > 0 && <section style={{ marginBottom: '28px' }}>
+        <h3 style={{ marginBottom: '12px' }}>Solicitudes de cobro</h3>
+        <div style={{ display: 'grid', gap: '12px' }}>{billSplits.map((bill) => <article key={bill.id} style={{ padding: '16px', borderRadius: '12px', border: '1px solid #ffa502', background: 'rgba(255,165,2,.08)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}><strong>Mesa {bill.table_number} Â· ${Number(bill.total).toFixed(2)}</strong><span style={{ color: '#ffa502' }}>{bill.status === 'requested' ? 'Nueva solicitud' : 'En atenciÃ³n'}</span></div>
+          <div style={{ display: 'grid', gap: '5px', margin: '12px 0', color: 'var(--text-muted)' }}>{bill.participants.map((participant: any) => <span key={participant.name}>{participant.name}: ${Number(participant.amount).toFixed(2)}</span>)}</div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>{bill.status === 'requested' && <button className="btn-primary" onClick={() => void updateBillSplit(bill.id, 'acknowledged')}>Estoy atendiendo</button>}<button className="btn-secondary" onClick={() => void updateBillSplit(bill.id, 'completed')}>Cobro completado</button><button className="btn-secondary" onClick={() => void updateBillSplit(bill.id, 'cancelled')}>Cancelar</button></div>
+        </article>)}</div>
+      </section>}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
         {tables.map(table => (

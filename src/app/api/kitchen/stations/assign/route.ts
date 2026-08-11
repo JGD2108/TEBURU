@@ -16,6 +16,18 @@ export async function POST(request: Request) {
 
     client = await getPoolClient();
     await client.query('BEGIN');
+    const menuItem = await client.query('SELECT 1 FROM menu_items WHERE id = $1 AND restaurant_id = $2', [menu_item_id, staff.restaurantId]);
+    if (!menuItem.rowCount) {
+      await client.query('ROLLBACK');
+      return NextResponse.json({ error: 'Platillo no encontrado' }, { status: 404 });
+    }
+    if (station_ids.length) {
+      const stations = await client.query('SELECT id FROM kitchen_stations WHERE id = ANY($1::uuid[]) AND restaurant_id = $2', [station_ids, staff.restaurantId]);
+      if (stations.rowCount !== station_ids.length) {
+        await client.query('ROLLBACK');
+        return NextResponse.json({ error: 'Una estaciÃ³n no pertenece al restaurante' }, { status: 400 });
+      }
+    }
     await client.query('DELETE FROM menu_item_stations WHERE menu_item_id = $1', [menu_item_id]);
     if (station_ids.length) {
       await client.query(

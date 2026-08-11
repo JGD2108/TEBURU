@@ -15,10 +15,10 @@ export async function GET(request: Request) {
               COUNT(mis.menu_item_id)::int AS item_count
        FROM kitchen_stations ks
        LEFT JOIN menu_item_stations mis ON mis.station_id = ks.id
-       WHERE ($1::boolean OR ks.is_active)
+       WHERE ks.restaurant_id = $1 AND ($2::boolean OR ks.is_active)
        GROUP BY ks.id
        ORDER BY ks.sort_order, ks.name`,
-      [staff.role === 'admin']
+      [staff.restaurantId, staff.role === 'admin']
     );
 
     if (staff.role !== 'admin') {
@@ -30,8 +30,9 @@ export async function GET(request: Request) {
               COALESCE(array_agg(mis.station_id) FILTER (WHERE mis.station_id IS NOT NULL), '{}') AS station_ids
        FROM menu_items mi
        LEFT JOIN menu_item_stations mis ON mis.menu_item_id = mi.id
+       WHERE mi.restaurant_id = $1
        GROUP BY mi.id
-       ORDER BY mi.name`
+       ORDER BY mi.name`, [staff.restaurantId]
     );
     return NextResponse.json({ success: true, data: { stations, menu_items: menuItems } });
   } catch (error) {
@@ -53,10 +54,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Datos de estación inválidos' }, { status: 400 });
     }
     const { rows } = await query(
-      `INSERT INTO kitchen_stations (name, color, sort_order, warning_minutes, critical_minutes)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO kitchen_stations (restaurant_id, name, color, sort_order, warning_minutes, critical_minutes)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, name, color, sort_order, is_active, warning_minutes, critical_minutes`,
-      [name.trim(), color, sort_order, warning_minutes, critical_minutes]
+      [staff.restaurantId, name.trim(), color, sort_order, warning_minutes, critical_minutes]
     );
     return NextResponse.json({ success: true, data: rows[0] }, { status: 201 });
   } catch (error: unknown) {
@@ -81,8 +82,8 @@ export async function PATCH(request: Request) {
       `UPDATE kitchen_stations
        SET name = $1, color = $2, sort_order = $3, is_active = $4,
            warning_minutes = $5, critical_minutes = $6, updated_at = now()
-       WHERE id = $7 RETURNING id`,
-      [name.trim(), color, sort_order, is_active, warning_minutes, critical_minutes, id]
+       WHERE id = $7 AND restaurant_id = $8 RETURNING id`,
+      [name.trim(), color, sort_order, is_active, warning_minutes, critical_minutes, id, staff.restaurantId]
     );
     if (!result.rowCount) return NextResponse.json({ error: 'Estación no encontrada' }, { status: 404 });
     return NextResponse.json({ success: true });
@@ -103,13 +104,13 @@ export async function DELETE(request: Request) {
       `SELECT 1 FROM order_item_stations ois
        JOIN order_items oi ON oi.id = ois.order_item_id
        JOIN orders o ON o.id = oi.order_id
-       WHERE ois.station_id = $1 AND o.status NOT IN ('delivered', 'cancelled') LIMIT 1`,
-      [id]
+       WHERE ois.station_id = $1 AND o.status NOT IN ('delivered', 'cancelled') AND oi.restaurant_id = $2 LIMIT 1`,
+      [id, staff.restaurantId]
     );
     if (openItems.rowCount) {
       return NextResponse.json({ error: 'Pausa la estación: todavía tiene platillos abiertos' }, { status: 409 });
     }
-    const result = await query('DELETE FROM kitchen_stations WHERE id = $1 RETURNING id', [id]);
+    const result = await query('DELETE FROM kitchen_stations WHERE id = $1 AND restaurant_id = $2 RETURNING id', [id, staff.restaurantId]);
     if (!result.rowCount) return NextResponse.json({ error: 'Estación no encontrada' }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (error) {

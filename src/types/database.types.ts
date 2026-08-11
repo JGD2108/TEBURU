@@ -6,6 +6,17 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type RestaurantStatus = 'active' | 'suspended'
+export type Restaurant = {
+  id: string; name: string; slug: string; status: RestaurantStatus; primary_color: string | null;
+  contact_email: string | null; phone: string | null; address: string | null;
+  currency: string; timezone: string; created_at: string; updated_at: string;
+}
+export type RestaurantMembership = { user_id: string; restaurant_id: string; role: 'admin' | 'waiter' | 'kitchen' }
+export type BillSplitStatus = 'requested' | 'acknowledged' | 'completed' | 'cancelled'
+export type BillSplit = { id: string; restaurant_id: string; session_id: string; requested_by: string; mode: 'own_items' | 'equal' | 'custom'; status: BillSplitStatus; total: number; created_at: string; updated_at: string }
+export type BillSplitParticipant = { id: string; bill_split_id: string; session_user_id: string; amount: number }
+
 export interface Database {
   public: {
     Tables: {

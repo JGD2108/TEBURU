@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   if (isAuthorizationFailure(staff)) return staff;
 
   const station = new URL(request.url).searchParams.get('station');
-  const params: unknown[] = [];
+  const params: unknown[] = [staff.restaurantId];
   let stationFilter = '';
   if (station === 'unassigned') {
     stationFilter = `AND NOT EXISTS (
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     params.push(station);
     stationFilter = `AND EXISTS (
       SELECT 1 FROM order_item_stations assignment
-      WHERE assignment.order_item_id = oi.id AND assignment.station_id = $1
+      WHERE assignment.order_item_id = oi.id AND assignment.station_id = $2
     )`;
   }
 
@@ -50,6 +50,7 @@ export async function GET(request: Request) {
        LEFT JOIN order_item_stations ois ON ois.order_item_id = oi.id
        WHERE oi.kitchen_status IN ('pending', 'preparing', 'ready')
          AND o.status NOT IN ('delivered', 'cancelled')
+         AND oi.restaurant_id = $1 AND o.restaurant_id = $1
          ${stationFilter}
        GROUP BY oi.id, o.id, t.table_number, su.name, mi.name
        ORDER BY CASE oi.priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 ELSE 2 END,

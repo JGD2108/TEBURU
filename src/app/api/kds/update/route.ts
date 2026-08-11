@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     await client.query('BEGIN');
     const current = await client.query<{
       order_id: string; kitchen_status: string; priority: string; version: number;
-    }>('SELECT order_id, kitchen_status, priority, version FROM order_items WHERE id = $1 FOR UPDATE', [item_id]);
+    }>('SELECT order_id, kitchen_status, priority, version FROM order_items WHERE id = $1 AND restaurant_id = $2 FOR UPDATE', [item_id, staff.restaurantId]);
     const item = current.rows[0];
     if (!item || item.version !== version || (isStatusChange && !nextStatuses[status].includes(item.kitchen_status))) {
       await client.query('ROLLBACK');

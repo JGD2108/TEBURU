@@ -40,10 +40,10 @@ export async function GET(request: Request) {
       FROM sessions s
       JOIN tables t ON s.table_id = t.id
       LEFT JOIN staff st ON s.waiter_id = st.user_id
-      WHERE s.status = 'closed'
+      WHERE s.status = 'closed' AND s.restaurant_id = $1
       ORDER BY s.ended_at DESC
       LIMIT 100;
-    `);
+    `, [staff.restaurantId]);
 
     return NextResponse.json({ success: true, data: rows });
   } catch (error: any) {

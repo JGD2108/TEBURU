@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { staffFetch } from '@/lib/api-client';
-import { LogOut, LayoutDashboard, Settings, UtensilsCrossed, Users, Grid, ChefHat, BookOpen, Armchair, Workflow } from 'lucide-react';
+import { LogOut, LayoutDashboard, Settings, UtensilsCrossed, Users, Grid, ChefHat, BookOpen, Armchair, Workflow, Globe2 } from 'lucide-react';
 
 import MenuPanel from '@/components/admin/MenuPanel';
 import StaffPanel from '@/components/admin/StaffPanel';
@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [staffData, setStaffData] = useState<{ name: string, role: string } | null>(null);
+  const [staffData, setStaffData] = useState<{ name: string, role: string, isPlatformAdmin: boolean } | null>(null);
   
   // Navigation State
   const [activeTab, setActiveTab] = useState('overview');
@@ -34,7 +34,7 @@ export default function AdminDashboard() {
 
       if (response.ok) {
         const { data: staff } = await response.json();
-        setStaffData(staff as { name: string, role: string });
+        setStaffData(staff as { name: string, role: string, isPlatformAdmin: boolean });
         // Set default tab based on role
         if (staff.role === 'waiter') setActiveTab('tables');
         if (staff.role === 'kitchen') setActiveTab('kds');
@@ -51,6 +51,7 @@ export default function AdminDashboard() {
   }, [router]);
 
   const handleLogout = async () => {
+    window.localStorage.removeItem('teburu_restaurant_id');
     await supabase.auth.signOut();
     router.push('/admin/login');
   };
@@ -88,6 +89,7 @@ export default function AdminDashboard() {
         </div>
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {staffData?.isPlatformAdmin && <button className="btn-secondary" onClick={() => { window.localStorage.removeItem('teburu_restaurant_id'); router.push('/platform'); }} style={{ textAlign: 'left', display: 'flex', gap: '12px', alignItems: 'center', color: 'var(--primary)' }}><Globe2 size={18}/> Volver a plataforma</button>}
           {staffData?.role === 'admin' && (
             <>
               <NavButton id="overview" icon={LayoutDashboard} label="Resumen General" />
@@ -118,6 +120,7 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+        {staffData?.isPlatformAdmin && <div style={{ padding: '12px 16px', marginBottom: '24px', borderRadius: '10px', background: 'rgba(255,71,87,.1)', color: 'var(--primary)' }}>Modo soporte de plataforma: estÃ¡s administrando el restaurante seleccionado.</div>}
         
         {/* Admin Views */}
         {staffData?.role === 'admin' && activeTab === 'overview' && <OverviewPanel />}

@@ -47,6 +47,8 @@ export default function TableMenu() {
   const [splitMode, setSplitMode] = useState<'own_items' | 'equal' | 'custom'>('own_items');
   const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
   const [splitMessage, setSplitMessage] = useState('');
+  const [splitRequest, setSplitRequest] = useState<{ status: string; total: number } | null>(null);
+  const [attentionMessage, setAttentionMessage] = useState('');
 
   const loadTableOrders = useCallback(async () => {
     const response = await fetch('/api/table/orders');
@@ -60,8 +62,9 @@ export default function TableMenu() {
   }, [router, table_id]);
 
   const loadBill = useCallback(async () => {
-    const response = await fetch('/api/table/bill');
+    const [response, splitResponse] = await Promise.all([fetch('/api/table/bill'), fetch('/api/table/bill-splits')]);
     if (response.ok) setBill((await response.json()).data);
+    if (splitResponse.ok) setSplitRequest((await splitResponse.json()).data);
   }, []);
 
   const requestSplit = async () => {
@@ -71,6 +74,14 @@ export default function TableMenu() {
     });
     const payload = await response.json();
     setSplitMessage(response.ok ? 'Solicitud enviada al mesero. El desglose ya está listo.' : payload.error || 'No se pudo solicitar la cuenta.');
+  };
+
+  const callWaiter = async () => {
+    const response = await fetch('/api/table/attention', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table_id, needs_attention: true }),
+    });
+    setAttentionMessage(response.ok ? 'Tu mesero recibio el llamado.' : 'No se pudo llamar al mesero.');
   };
 
   useEffect(() => {
@@ -113,9 +124,9 @@ export default function TableMenu() {
 
   useEffect(() => {
     if (!sessionReady) return;
-    const interval = window.setInterval(() => { void loadTableOrders(); }, 8000);
+    const interval = window.setInterval(() => { void loadTableOrders(); void loadBill(); }, 5000);
     return () => window.clearInterval(interval);
-  }, [loadTableOrders, sessionReady]);
+  }, [loadBill, loadTableOrders, sessionReady]);
 
   const handleAddClick = (item: any) => {
     if (item.ingredients && item.ingredients.length > 0) {
@@ -323,7 +334,7 @@ export default function TableMenu() {
               <div className={styles.tableOrderHeader}>
                 <UserCircle2 size={18} color="var(--primary)"/>
                 <span className={styles.tableOrderUser}>{order.user}</span>
-                <span className={styles.statusBadge}>{order.status}</span>
+                <span className={styles.statusBadge}>{{ pending: 'Recibido', preparing: 'En preparaciÃ³n', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado' }[order.item_status as string] ?? order.status}</span>
               </div>
               <div className={styles.cartItemRowStatic}>
                 <div className={styles.cartItemText}>
@@ -410,6 +421,7 @@ export default function TableMenu() {
           Solicitar cuenta al mesero
         </button>
         {splitMessage && <p className={styles.sectionSubtitle} style={{ marginTop: '12px' }}>{splitMessage}</p>}
+        {splitRequest && <div className={styles.tableTotalBadge} style={{ marginTop: '16px' }}>Solicitud: <span>{{ requested: 'enviada al mesero', acknowledged: 'el mesero va en camino', completed: 'cobro completado', cancelled: 'cancelada' }[splitRequest.status] ?? splitRequest.status}</span></div>}
       </div>
     );
   };
@@ -517,8 +529,12 @@ export default function TableMenu() {
         {activeTab === 'cart' && renderCartTab()}
         {activeTab === 'bill' && renderBillTab()}
         {activeTab === 'table' && (
-          <div className="screen-centered">
-            <h2 style={{color: 'var(--text-muted)'}}>Próximamente...</h2>
+          <div className={`${styles.cartContainer} animate-fade-up`}>
+            <h2 className={styles.sectionTitle}>Tu mesa</h2>
+            <p className={styles.sectionSubtitle}>Revisa lo pedido por el grupo o solicita ayuda.</p>
+            <div className={styles.tableOrdersList}>{tableOrders.map((order, index) => <div key={index} className={styles.tableOrderCard}><div className={styles.tableOrderHeader}><UserCircle2 size={18}/><strong>{order.user}</strong><span className={styles.statusBadge}>{{ pending: 'Recibido', preparing: 'En preparaciÃ³n', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado' }[order.item_status as string] ?? order.status}</span></div><div>{order.qty}x {order.item}</div></div>)}</div>
+            <button className="btn-primary" style={{ width: '100%', marginTop: '24px' }} onClick={() => void callWaiter()}><Bell size={18}/> Llamar al mesero</button>
+            {attentionMessage && <p className={styles.sectionSubtitle} style={{ marginTop: '12px' }}>{attentionMessage}</p>}
           </div>
         )}
       </main>

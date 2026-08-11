@@ -29,4 +29,16 @@ describe('admin business APIs', () => {
     expect(response.status).toBe(401);
     expect(query).not.toHaveBeenCalled();
   });
+
+  it('scopes every overview query to the active restaurant', async () => {
+    requireRole.mockResolvedValue({ userId: 'admin-1', name: 'Admin', role: 'admin', restaurantId: 'restaurant-1', isPlatformAdmin: false });
+    query.mockResolvedValue({ rows: [] });
+    const response = await getOverview(new Request('http://localhost/api/admin/overview'));
+    expect(response.status).toBe(200);
+    expect(query).toHaveBeenCalledTimes(3);
+    for (const call of query.mock.calls) {
+      expect(call[0]).toContain('restaurant_id');
+      expect(call[1]).toEqual(['restaurant-1']);
+    }
+  });
 });

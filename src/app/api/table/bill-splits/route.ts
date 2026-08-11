@@ -3,6 +3,23 @@ import { getPoolClient } from '@/lib/db';
 import { isGuestFailure, requireGuestSession } from '@/lib/guest-session';
 import { splitTotal, type BillSplitMode } from '@/lib/bill-split';
 
+export async function GET(request: Request) {
+  const guest = await requireGuestSession(request);
+  if (isGuestFailure(guest)) return guest;
+  const client = await getPoolClient();
+  try {
+    const { rows } = await client.query(
+      `SELECT bs.id, bs.status, bs.mode, bs.total, bs.created_at,
+         json_agg(json_build_object('name', su.name, 'amount', bsp.amount) ORDER BY su.joined_at) AS participants
+       FROM bill_splits bs
+       JOIN bill_split_participants bsp ON bsp.bill_split_id = bs.id
+       JOIN session_users su ON su.id = bsp.session_user_id
+       WHERE bs.session_id = $1 GROUP BY bs.id ORDER BY bs.created_at DESC LIMIT 1`, [guest.sessionId]
+    );
+    return NextResponse.json({ data: rows[0] ?? null });
+  } finally { client.release(); }
+}
+
 export async function POST(request: Request) {
   const guest = await requireGuestSession(request);
   if (isGuestFailure(guest)) return guest;
@@ -19,6 +36,11 @@ export async function POST(request: Request) {
     );
     const restaurant = await client.query<{ restaurant_id: string }>('SELECT restaurant_id FROM sessions WHERE id = $1 FOR SHARE', [guest.sessionId]);
     const total = guests.rows.reduce((sum, row) => sum + Number(row.ownTotal), 0);
+    const existing = await client.query("SELECT id FROM bill_splits WHERE session_id = $1 AND status IN ('requested', 'acknowledged')", [guest.sessionId]);
+    if (existing.rowCount) {
+      await client.query('ROLLBACK');
+      return NextResponse.json({ error: 'Ya existe una solicitud de cobro activa para esta mesa.' }, { status: 409 });
+    }
     const participants = splitTotal(body.mode as BillSplitMode, guests.rows, total, guest.guestId, body.participants);
     const split = await client.query<{ id: string }>(
       `INSERT INTO bill_splits (restaurant_id, session_id, requested_by, mode, total) VALUES ($1, $2, $3, $4, $5) RETURNING id`,

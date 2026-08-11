@@ -18,9 +18,10 @@ export async function POST(request: Request) {
       `UPDATE orders o SET status = 'delivered'
        FROM sessions s
        WHERE o.id = $1 AND o.status = 'ready' AND s.id = o.session_id
+         AND o.restaurant_id = $4 AND s.restaurant_id = $4
          AND ($2::text = 'admin' OR s.waiter_id = $3)
        RETURNING o.id`,
-      [order_id, staff.role, staff.userId]
+      [order_id, staff.role, staff.userId, staff.restaurantId]
     );
     if (!delivered.rowCount) {
       await client.query('ROLLBACK');
@@ -28,8 +29,8 @@ export async function POST(request: Request) {
     }
     await client.query(
       `UPDATE order_items SET delivered_at = now()
-       WHERE order_id = $1 AND kitchen_status = 'ready'`,
-      [order_id]
+       WHERE order_id = $1 AND kitchen_status = 'ready' AND restaurant_id = $2`,
+      [order_id, staff.restaurantId]
     );
     await client.query(
       `INSERT INTO order_events (order_id, actor_staff_id, event_type, from_status, to_status)

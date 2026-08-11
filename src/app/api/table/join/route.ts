@@ -13,7 +13,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Datos de acceso inválidos' }, { status: 400 });
     }
     const tableResult = await query<{ id: string; restaurant_id: string; access_code: string | null; current_session_id: string | null; status: string }>(
-      'SELECT id, restaurant_id, access_code, current_session_id, status FROM tables WHERE id = $1', [tableId]
+      `SELECT t.id, t.restaurant_id, t.access_code, t.current_session_id, t.status
+       FROM tables t JOIN restaurants r ON r.id = t.restaurant_id WHERE t.id = $1 AND r.status = 'active'`, [tableId]
     );
     const table = tableResult.rows[0];
     if (!table) return NextResponse.json({ error: 'Mesa no encontrada' }, { status: 404 });

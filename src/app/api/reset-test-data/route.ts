@@ -13,15 +13,17 @@ export async function POST(request: Request) {
   try {
     client = await getPoolClient();
     await client.query('BEGIN');
-    await client.query('DELETE FROM order_items;');
-    await client.query('DELETE FROM orders;');
-    await client.query('DELETE FROM session_users;');
-    await client.query('DELETE FROM sessions;');
+    await client.query('DELETE FROM bill_splits WHERE restaurant_id = $1', [staff.restaurantId]);
+    await client.query('DELETE FROM order_items WHERE restaurant_id = $1', [staff.restaurantId]);
+    await client.query('DELETE FROM orders WHERE restaurant_id = $1', [staff.restaurantId]);
+    await client.query('DELETE FROM session_users WHERE restaurant_id = $1', [staff.restaurantId]);
+    await client.query('DELETE FROM sessions WHERE restaurant_id = $1', [staff.restaurantId]);
     await client.query(`
       UPDATE tables
       SET status = 'available', current_session_id = NULL,
-          assigned_waiter_id = NULL, needs_attention = false;
-    `);
+          assigned_waiter_id = NULL, needs_attention = false
+      WHERE restaurant_id = $1;
+    `, [staff.restaurantId]);
     await client.query('COMMIT');
     return NextResponse.json({ success: true, message: 'Datos de prueba eliminados.' });
   } catch (error: unknown) {

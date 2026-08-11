@@ -66,8 +66,8 @@ export async function activateTables(client: PoolClient, staff: StaffSession, ta
       await client.query(
         `UPDATE tables
          SET status = 'occupied', current_session_id = $1, access_code = $2, needs_attention = false
-         WHERE id = ANY($3::uuid[])`,
-        [sessionId, pin, tables.map((table) => table.id)]
+         WHERE id = ANY($3::uuid[]) AND restaurant_id = $4`,
+        [sessionId, pin, tables.map((table) => table.id), staff.restaurantId]
       );
       return { sessionId, pin, tables };
     } catch (error) {

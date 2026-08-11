@@ -117,6 +117,30 @@
   gap: 14px;
 }
 
+.singleAccess {
+  width: min(100%, 470px);
+  min-height: 500px;
+  justify-self: end;
+  opacity: 1;
+  animation: reveal .65s .16s cubic-bezier(.2,.8,.2,1) both;
+  background: rgba(25, 28, 32, .9);
+}
+
+.singleAccess .cardIcon {
+  width: 62px;
+  height: 62px;
+  color: #ff5a69;
+}
+
+.singleAccess h2 {
+  font-size: clamp(3rem, 5vw, 5.5rem);
+}
+
+.singleAccess .cardNumber {
+  color: #8e9391;
+  font-weight: 700;
+}
+
 .accessCard {
   min-height: 450px;
   padding: 25px;
@@ -214,6 +238,7 @@
   .hero { grid-template-columns: 1fr; align-items: start; gap: 42px; }
   .intro h1 { font-size: clamp(3.7rem, 11vw, 6.4rem); }
   .accessCard { min-height: 360px; }
+  .singleAccess { justify-self: start; width: min(100%, 620px); }
 }
 
 @media (max-width: 720px) {
@@ -221,6 +246,7 @@
   .hero { padding: 42px 0; }
   .accessGrid { grid-template-columns: 1fr; }
   .accessCard { min-height: 285px; }
+  .singleAccess { min-height: 340px; }
   .intro h1 { font-size: clamp(3.25rem, 17vw, 5.4rem); }
   .footer { align-items: flex-start; flex-direction: column; gap: 8px; }
   .footerDot { display: none; }

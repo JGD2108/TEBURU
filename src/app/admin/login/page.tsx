@@ -9,14 +9,16 @@ import styles from './login.module.css';
 
 type AuthStep = 'login' | 'setup_2fa' | 'verify_2fa' | 'forgot_password';
 
-function loginDestination() {
-  const next = new URLSearchParams(window.location.search).get('next');
-  return next?.startsWith('/') && !next.startsWith('//') ? next : '/admin';
+async function accessDestination(accessToken: string) {
+  window.localStorage.removeItem('teburu_restaurant_id');
+  const response = await fetch('/api/auth/destination', { headers: { Authorization: `Bearer ${accessToken}` } });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error ?? 'No se pudo determinar el acceso de esta cuenta.');
+  return payload.data.destination as '/platform' | '/admin';
 }
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [loginRole, setLoginRole] = useState<'platform' | 'admin' | 'waiter'>('admin');
   
   const [step, setStep] = useState<AuthStep>('login');
   const [email, setEmail] = useState('');
@@ -33,11 +35,14 @@ export default function AdminLogin() {
   useEffect(() => {
     // Redirigir si ya tiene sesión activa (2FA desactivado para desarrollo)
     async function checkAuth() {
-      const requestedRole = new URLSearchParams(window.location.search).get('role');
-      if (requestedRole === 'platform' || requestedRole === 'waiter') setLoginRole(requestedRole);
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        router.push(loginDestination());
+        try {
+          router.replace(await accessDestination(session.access_token));
+        } catch (accessError) {
+          await supabase.auth.signOut();
+          setError(accessError instanceof Error ? accessError.message : 'Cuenta no autorizada.');
+        }
       }
     }
     checkAuth();
@@ -59,9 +64,13 @@ export default function AdminLogin() {
       return;
     }
 
-    // 2FA desactivado temporalmente para desarrollo: ingresar directamente
-    router.push(loginDestination());
-    setLoading(false);
+    try {
+      router.replace(await accessDestination(data.session.access_token));
+    } catch (accessError) {
+      await supabase.auth.signOut();
+      setError(accessError instanceof Error ? accessError.message : 'Cuenta no autorizada.');
+      setLoading(false);
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -115,8 +124,8 @@ export default function AdminLogin() {
           <div className={styles.iconWrapper}>
             <Lock size={32} color="var(--primary)" />
           </div>
-          <h1 className={styles.title}>{loginRole === 'platform' ? 'Control de Plataforma' : loginRole === 'waiter' ? 'Acceso de Mesero' : 'Administración del Restaurante'}</h1>
-          <p className={styles.subtitle}>{loginRole === 'platform' ? 'Teburu Central' : loginRole === 'waiter' ? 'Operación de salón' : 'Teburu Restaurant OS'}</p>
+          <h1 className={styles.title}>Acceso Teburu</h1>
+          <p className={styles.subtitle}>Tu cuenta define el espacio de trabajo</p>
         </div>
 
         {error && <div className={styles.errorAlert}>{error}</div>}

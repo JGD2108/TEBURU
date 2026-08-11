@@ -53,11 +53,9 @@ ALTER TABLE order_items ALTER COLUMN restaurant_id SET NOT NULL;
 ALTER TABLE restaurant_settings ALTER COLUMN restaurant_id SET NOT NULL;
 ALTER TABLE kitchen_stations ALTER COLUMN restaurant_id SET NOT NULL;
 
-ALTER TABLE staff DROP CONSTRAINT IF EXISTS staff_user_id_key;
 ALTER TABLE staff DROP CONSTRAINT IF EXISTS staff_email_key;
 ALTER TABLE tables DROP CONSTRAINT IF EXISTS tables_table_number_key;
 ALTER TABLE menu_categories DROP CONSTRAINT IF EXISTS menu_categories_name_key;
-CREATE UNIQUE INDEX staff_restaurant_user_unique ON staff (restaurant_id, user_id);
 CREATE UNIQUE INDEX staff_restaurant_email_unique ON staff (restaurant_id, email) WHERE email IS NOT NULL;
 CREATE UNIQUE INDEX tables_restaurant_number_unique ON tables (restaurant_id, table_number);
 CREATE UNIQUE INDEX categories_restaurant_name_unique ON menu_categories (restaurant_id, lower(name));

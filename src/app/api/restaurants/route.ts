@@ -31,11 +31,11 @@ export async function POST(request: Request) {
         typeof body.admin_password !== 'string' || body.admin_password.length < 12 ||
         !Number.isInteger(tableCount) || tableCount < 1 || tableCount > 100 ||
         !Number.isInteger(tableCapacity) || tableCapacity < 1 || tableCapacity > 30) {
-      return NextResponse.json({ error: 'Completa el restaurante, administrador, contraseÃ±a y mesas con datos vÃ¡lidos.' }, { status: 400 });
+      return NextResponse.json({ error: 'Completa el restaurante, administrador, contraseña y mesas con datos válidos.' }, { status: 400 });
     }
 
     const supabase = authAdmin();
-    if (!supabase) return NextResponse.json({ error: 'Supabase Auth Admin no estÃ¡ configurado' }, { status: 503 });
+    if (!supabase) return NextResponse.json({ error: 'Supabase Auth Admin no está configurado' }, { status: 503 });
     const created = await supabase.auth.admin.createUser({
       email: adminEmail,
       password: body.admin_password,
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     if (client) await client.query('ROLLBACK').catch(() => undefined);
     if (createdAuthUserId) await authAdmin()?.auth.admin.deleteUser(createdAuthUserId).catch(() => undefined);
     console.error('Restaurant provisioning error:', error);
-    return NextResponse.json({ error: 'No se pudo crear el restaurante. Revisa que el identificador no estÃ© en uso.' }, { status: 409 });
+    return NextResponse.json({ error: 'No se pudo crear el restaurante. Revisa que el identificador no esté en uso.' }, { status: 409 });
   } finally {
     client?.release();
   }

@@ -4,11 +4,11 @@ import { isAuthorizationFailure, requireRole } from '@/lib/auth';
 import { activateTables, normalizeTableIds, TableActivationError } from '@/lib/table-activation';
 
 const messages = {
-  INVALID_TABLES: 'Selecciona entre una y veinte mesas vÃ¡lidas.',
+  INVALID_TABLES: 'Selecciona entre una y veinte mesas válidas.',
   FORBIDDEN_TABLE: 'Solo puedes activar mesas asignadas a ti.',
   TABLE_UNAVAILABLE: 'Todas las mesas deben estar disponibles antes de activarlas.',
   MIXED_WAITERS: 'Para combinar mesas, todas deben estar asignadas al mismo mesero.',
-  CODE_GENERATION_FAILED: 'No se pudo generar un PIN Ãºnico. Intenta nuevamente.',
+  CODE_GENERATION_FAILED: 'No se pudo generar un PIN único. Intenta nuevamente.',
 };
 
 export async function POST(request: Request) {

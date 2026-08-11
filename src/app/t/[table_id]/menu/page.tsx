@@ -334,7 +334,7 @@ export default function TableMenu() {
               <div className={styles.tableOrderHeader}>
                 <UserCircle2 size={18} color="var(--primary)"/>
                 <span className={styles.tableOrderUser}>{order.user}</span>
-                <span className={styles.statusBadge}>{{ pending: 'Recibido', preparing: 'En preparaciÃ³n', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado' }[order.item_status as string] ?? order.status}</span>
+                <span className={styles.statusBadge}>{{ pending: 'Recibido', preparing: 'En preparación', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado' }[order.item_status as string] ?? order.status}</span>
               </div>
               <div className={styles.cartItemRowStatic}>
                 <div className={styles.cartItemText}>
@@ -532,7 +532,7 @@ export default function TableMenu() {
           <div className={`${styles.cartContainer} animate-fade-up`}>
             <h2 className={styles.sectionTitle}>Tu mesa</h2>
             <p className={styles.sectionSubtitle}>Revisa lo pedido por el grupo o solicita ayuda.</p>
-            <div className={styles.tableOrdersList}>{tableOrders.map((order, index) => <div key={index} className={styles.tableOrderCard}><div className={styles.tableOrderHeader}><UserCircle2 size={18}/><strong>{order.user}</strong><span className={styles.statusBadge}>{{ pending: 'Recibido', preparing: 'En preparaciÃ³n', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado' }[order.item_status as string] ?? order.status}</span></div><div>{order.qty}x {order.item}</div></div>)}</div>
+            <div className={styles.tableOrdersList}>{tableOrders.map((order, index) => <div key={index} className={styles.tableOrderCard}><div className={styles.tableOrderHeader}><UserCircle2 size={18}/><strong>{order.user}</strong><span className={styles.statusBadge}>{{ pending: 'Recibido', preparing: 'En preparación', ready: 'Listo', delivered: 'Entregado', cancelled: 'Cancelado' }[order.item_status as string] ?? order.status}</span></div><div>{order.qty}x {order.item}</div></div>)}</div>
             <button className="btn-primary" style={{ width: '100%', marginTop: '24px' }} onClick={() => void callWaiter()}><Bell size={18}/> Llamar al mesero</button>
             {attentionMessage && <p className={styles.sectionSubtitle} style={{ marginTop: '12px' }}>{attentionMessage}</p>}
           </div>

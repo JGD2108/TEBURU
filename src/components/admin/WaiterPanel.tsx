@@ -123,7 +123,7 @@ export default function WaiterPanel() {
       {billSplits.length > 0 && <section style={{ marginBottom: '28px' }}>
         <h3 style={{ marginBottom: '12px' }}>Solicitudes de cobro</h3>
         <div style={{ display: 'grid', gap: '12px' }}>{billSplits.map((bill) => <article key={bill.id} style={{ padding: '16px', borderRadius: '12px', border: '1px solid #ffa502', background: 'rgba(255,165,2,.08)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}><strong>Mesa {bill.table_number} Â· ${Number(bill.total).toFixed(2)}</strong><span style={{ color: '#ffa502' }}>{bill.status === 'requested' ? 'Nueva solicitud' : 'En atenciÃ³n'}</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}><strong>Mesa {bill.table_number} · ${Number(bill.total).toFixed(2)}</strong><span style={{ color: '#ffa502' }}>{bill.status === 'requested' ? 'Nueva solicitud' : 'En atención'}</span></div>
           <div style={{ display: 'grid', gap: '5px', margin: '12px 0', color: 'var(--text-muted)' }}>{bill.participants.map((participant: any) => <span key={participant.name}>{participant.name}: ${Number(participant.amount).toFixed(2)}</span>)}</div>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>{bill.status === 'requested' && <button className="btn-primary" onClick={() => void updateBillSplit(bill.id, 'acknowledged')}>Estoy atendiendo</button>}<button className="btn-secondary" onClick={() => void updateBillSplit(bill.id, 'completed')}>Cobro completado</button><button className="btn-secondary" onClick={() => void updateBillSplit(bill.id, 'cancelled')}>Cancelar</button></div>
         </article>)}</div>

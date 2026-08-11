@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       const stations = await client.query('SELECT id FROM kitchen_stations WHERE id = ANY($1::uuid[]) AND restaurant_id = $2', [station_ids, staff.restaurantId]);
       if (stations.rowCount !== station_ids.length) {
         await client.query('ROLLBACK');
-        return NextResponse.json({ error: 'Una estaciÃ³n no pertenece al restaurante' }, { status: 400 });
+        return NextResponse.json({ error: 'Una estación no pertenece al restaurante' }, { status: 400 });
       }
     }
     await client.query('DELETE FROM menu_item_stations WHERE menu_item_id = $1', [menu_item_id]);

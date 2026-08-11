@@ -120,7 +120,7 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
-        {staffData?.isPlatformAdmin && <div style={{ padding: '12px 16px', marginBottom: '24px', borderRadius: '10px', background: 'rgba(255,71,87,.1)', color: 'var(--primary)' }}>Modo soporte de plataforma: estÃ¡s administrando el restaurante seleccionado.</div>}
+        {staffData?.isPlatformAdmin && <div style={{ padding: '12px 16px', marginBottom: '24px', borderRadius: '10px', background: 'rgba(255,71,87,.1)', color: 'var(--primary)' }}>Modo soporte de plataforma: estás administrando el restaurante seleccionado.</div>}
         
         {/* Admin Views */}
         {staffData?.role === 'admin' && activeTab === 'overview' && <OverviewPanel />}

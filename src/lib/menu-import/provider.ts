@@ -73,7 +73,7 @@ export function createPdfAnalysisProvider(overrides: Partial<PdfAnalysisProvider
         const objectIds = operatorList.argsArray.filter((_, position) => operatorList.fnArray[position] === imageOperator).map((args) => args[0]);
         for (const objectId of objectIds) {
           const image = await new Promise<{ data?: Uint8ClampedArray; width?: number; height?: number } | undefined>((resolve) => {
-            page.objs.get(objectId, (value) => resolve(value as { data?: Uint8ClampedArray; width?: number; height?: number }));
+            page.objs.get(objectId, (value: unknown) => resolve(value as { data?: Uint8ClampedArray; width?: number; height?: number }));
           });
           if (image?.data && image.width && image.height) images.push({ page: index, data: ppmFromRgba(image.data, image.width, image.height), mimeType: 'image/x-portable-pixmap', width: image.width, height: image.height });
         }

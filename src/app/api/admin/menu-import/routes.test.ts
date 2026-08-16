@@ -92,7 +92,10 @@ describe('PDF menu import APIs', () => {
     expect(response.status).toBe(422);
     expect(client.query).toHaveBeenCalledWith('ROLLBACK');
     expect(client.query.mock.calls[1][1]).toEqual(['import-a', 'restaurant-a']);
-    expect(client.query.mock.calls.some(([sql]: [string]) => sql.includes('INSERT INTO menu_items'))).toBe(false);
+    expect(client.query.mock.calls.some((call: unknown[]) => {
+      const [sql] = call as [string, ...unknown[]];
+      return sql.includes('INSERT INTO menu_items');
+    })).toBe(false);
     expect(client.release).toHaveBeenCalledOnce();
   });
 
@@ -114,7 +117,10 @@ describe('PDF menu import APIs', () => {
     const response = await publish(new Request('http://localhost', { method: 'POST', body: JSON.stringify({ mode: 'append' }) }), context());
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ published: 1 });
-    expect(client.query.mock.calls.some(([sql, params]: [string, unknown[]]) => sql.includes('INSERT INTO menu_items') && params[0] === 'restaurant-a')).toBe(true);
+    expect(client.query.mock.calls.some((call: unknown[]) => {
+      const [sql, params] = call as [string, unknown[]];
+      return sql.includes('INSERT INTO menu_items') && params[0] === 'restaurant-a';
+    })).toBe(true);
     expect(client.query).toHaveBeenCalledWith('COMMIT');
   });
 

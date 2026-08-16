@@ -1,16 +1,16 @@
 # Graph Report - teburuapp  (2026-08-16)
 
 ## Corpus Check
-- 169 files · ~72,780 words
+- 169 files · ~73,240 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 777 nodes · 1418 edges · 96 communities (65 shown, 31 thin omitted)
+- 778 nodes · 1420 edges · 95 communities (64 shown, 31 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a9a4fb8b`
+- Built from commit: `473390de`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,7 +21,7 @@
 - compilerOptions
 - devDependencies
 - What You Must Do When Invoked
-- activate/route.ts
+- db.ts
 - schema.sql
 - orders
 - eslint.config.mjs
@@ -50,7 +50,7 @@
 - graphify reference: transcribe video and audio
 - Subagents for OpenSpec changes
 - extraction-spec.md
-- db.ts
+- guest-session.ts
 - 202608050000_initial_schema.sql
 - order_items
 - worker.ts
@@ -93,11 +93,10 @@
 - restaurants/route.ts
 - bulk/route.ts
 - update/route.ts
+- categories/route.ts
 - deliver/route.ts
 - checkout/route.ts
-- bill-split.ts
 - error-context.md
-- health/route.ts
 - lucide-react
 - @types/react-dom
 
@@ -120,23 +119,23 @@
   src/app/admin/page.tsx → src/lib/demo.ts
 - `GET()` --calls--> `query()`  [EXTRACTED]
   src/app/api/health/route.ts → src/lib/db.ts
+- `GET()` --calls--> `query()`  [EXTRACTED]
+  src/app/api/public/catalog/route.ts → src/lib/db.ts
 - `PATCH()` --calls--> `isAuthorizationFailure()`  [EXTRACTED]
-  src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
-- `PATCH()` --calls--> `requireRole()`  [EXTRACTED]
   src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (96 total, 31 thin omitted)
+## Communities (95 total, 31 thin omitted)
 
 ### Community 0 - "isLocalDemo"
 Cohesion: 0.17
 Nodes (16): accessDestination(), AdminLogin(), AuthStep, emptyForm, PlatformPage(), Restaurant, CartItem, TableMenu() (+8 more)
 
 ### Community 1 - "isAuthorizationFailure"
-Cohesion: 0.17
-Nodes (26): DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query }, GET(), PATCH() (+18 more)
+Cohesion: 0.19
+Nodes (25): DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query }, GET(), PATCH() (+17 more)
 
 ### Community 2 - "dependencies"
 Cohesion: 0.12
@@ -154,9 +153,9 @@ Nodes (17): eslint, eslint-config-next, devDependencies, eslint, eslint-config-n
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 6 - "activate/route.ts"
-Cohesion: 0.23
-Nodes (10): messages, POST(), { requireRole, getPoolClient, activateTables, client }, POST(), StaffSession, activateTables(), newAccessCode(), normalizeTableIds() (+2 more)
+### Community 6 - "db.ts"
+Cohesion: 0.13
+Nodes (17): POST(), GET(), POST(), ImportedItem, POST(), messages, POST(), { requireRole, getPoolClient, activateTables, client } (+9 more)
 
 ### Community 7 - "schema.sql"
 Cohesion: 0.50
@@ -210,9 +209,9 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 Cohesion: 0.29
 Nodes (6): Available subagents, graphify, Subagents for OpenSpec changes, This is NOT the Next.js you know, Using subagents with `openspec apply`, When to spawn each subagent
 
-### Community 37 - "db.ts"
-Cohesion: 0.14
-Nodes (25): POST(), POST(), POST(), ImportedItem, POST(), POST(), GET(), GET() (+17 more)
+### Community 37 - "guest-session.ts"
+Cohesion: 0.15
+Nodes (21): POST(), POST(), GET(), GET(), POST(), POST(), GET(), GET() (+13 more)
 
 ### Community 39 - "202608050000_initial_schema.sql"
 Cohesion: 0.13
@@ -231,8 +230,8 @@ Cohesion: 0.10
 Nodes (19): ADDED Requirements, Purpose, Requirement: Controlled publication to the restaurant menu, Requirement: Menu structure extraction, Requirement: Restaurant-scoped PDF import submission, Requirement: Review before live-menu publication, Requirement: Source visual preservation and image suggestions, Scenario: Administrator appends an approved draft (+11 more)
 
 ### Community 49 - "finalize/route.ts"
-Cohesion: 0.13
-Nodes (38): Authorization, POST(), StorageObject, verifyAuthorizedUpload(), DELETE(), PATCH(), POST(), GET() (+30 more)
+Cohesion: 0.11
+Nodes (41): Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE(), PATCH(), POST() (+33 more)
 
 ### Community 52 - "openspec-explore/SKILL.md"
 Cohesion: 0.18
@@ -315,8 +314,8 @@ Cohesion: 0.50
 Nodes (3): 1. Finalize contract, 2. UI recovery, 3. Verification
 
 ### Community 83 - "auth.ts"
-Cohesion: 0.18
-Nodes (10): POST(), { requireRole, query }, AccessRow, GET(), { requireAuthenticatedUser, query }, GET(), authClient(), requireAuthenticatedUser() (+2 more)
+Cohesion: 0.26
+Nodes (9): AccessRow, GET(), { requireAuthenticatedUser, query }, GET(), authClient(), requireAuthenticatedUser(), requireStaff(), StaffRole (+1 more)
 
 ### Community 84 - "staff/route.ts"
 Cohesion: 0.31
@@ -337,10 +336,6 @@ Nodes (4): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions
 ### Community 88 - "update/route.ts"
 Cohesion: 0.33
 Nodes (4): nextStatuses, POST(), priorities, { getPoolClient, requireRole, client }
-
-### Community 91 - "bill-split.ts"
-Cohesion: 0.40
-Nodes (3): BillParticipantInput, BillSplitMode, guests
 
 ### Community 92 - "error-context.md"
 Cohesion: 0.40

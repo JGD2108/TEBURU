@@ -8,9 +8,8 @@ import { menuImportDatabaseFailure } from '@/lib/menu-import-errors';
 import { PDF_MENU_MAX_BYTES } from '@/lib/menu-import';
 import { menuImportBucket, menuImportStorage } from '@/lib/menu-import-storage';
 
-type Authorization = { id: string; storage_path: string; source_filename: string; expected_size_bytes: number; expires_at: string; token_hash: string; import_job_id: string | null };
+type Authorization = { id: string; storage_path: string; source_filename: string; expected_size_bytes: number | string; expires_at: string; token_hash: string; import_job_id: string | null };
 
-type StorageObject = { name: string; metadata?: { size?: number | string; mimetype?: string; contentType?: string; content_type?: string } | null };
 type StorageObjectInfo = {
   size?: number | string;
   contentType?: string;
@@ -21,6 +20,7 @@ type StorageObjectInfo = {
 function validateStoredPdf(object: StorageObjectInfo, record: Authorization) {
   const rawSize = object.size ?? object.metadata?.size;
   const type = object.contentType ?? object.content_type ?? object.metadata?.mimetype ?? object.metadata?.contentType ?? object.metadata?.content_type;
+  const expectedSize = Number(record.expected_size_bytes);
   const hasSize = rawSize !== undefined && rawSize !== null;
   const hasType = type !== undefined && type !== null;
   const size = hasSize ? Number(rawSize) : undefined;
@@ -30,12 +30,15 @@ function validateStoredPdf(object: StorageObjectInfo, record: Authorization) {
   // authorization-bound path is sufficient in that case; reject only metadata
   // values Storage actually returned and which contradict the authorization.
   if (
-    (hasSize && (size === undefined || !Number.isSafeInteger(size) || size < 1 || size > PDF_MENU_MAX_BYTES || size !== record.expected_size_bytes))
+    !Number.isSafeInteger(expectedSize)
+    || expectedSize < 1
+    || expectedSize > PDF_MENU_MAX_BYTES
+    || (hasSize && (size === undefined || !Number.isSafeInteger(size) || size < 1 || size > PDF_MENU_MAX_BYTES || size !== expectedSize))
     || (hasType && type !== 'application/pdf')
   ) {
     return { kind: 'metadata_mismatch' as const, size, type };
   }
-  return { kind: 'verified' as const, size: size ?? record.expected_size_bytes };
+  return { kind: 'verified' as const, size: size ?? expectedSize };
 }
 
 async function verifyAuthorizedUpload(storage: NonNullable<ReturnType<typeof menuImportStorage>>, record: Authorization) {
@@ -43,17 +46,24 @@ async function verifyAuthorizedUpload(storage: NonNullable<ReturnType<typeof men
   const info = await bucket.info(record.storage_path);
   if (!info.error && info.data) return validateStoredPdf(info.data as StorageObjectInfo, record);
 
-  const slashIndex = record.storage_path.lastIndexOf('/');
-  const folder = record.storage_path.slice(0, slashIndex);
-  const filename = record.storage_path.slice(slashIndex + 1);
-  const listed = await bucket.list(folder, { search: filename });
+  // `list()` is a fuzzy, paginated folder query, so it can miss an object that
+  // has already been committed by a signed upload. `exists()` performs a HEAD
+  // request for this exact authorization-bound path instead.
+  let exists: { data: boolean; error: unknown };
+  try {
+    exists = await bucket.exists(record.storage_path);
+  } catch (error) {
+    return { kind: 'storage_error' as const, error };
+  }
+  if (!exists.data) return { kind: 'missing' as const };
 
-  if (listed.error) return { kind: 'storage_error' as const, error: listed.error };
-
-  const object = (listed.data as StorageObject[] | null)?.find((entry) => entry.name === filename);
-  if (!object) return { kind: 'missing' as const };
-
-  return validateStoredPdf({ metadata: object.metadata }, record);
+  // The exact object exists, but `info()` did not expose metadata. The signed
+  // URL and unguessable authorization path bind it to this upload already.
+  const expectedSize = Number(record.expected_size_bytes);
+  if (!Number.isSafeInteger(expectedSize) || expectedSize < 1 || expectedSize > PDF_MENU_MAX_BYTES) {
+    return { kind: 'metadata_mismatch' as const, size: undefined, type: undefined };
+  }
+  return { kind: 'verified' as const, size: expectedSize };
 }
 
 export async function POST(request: Request) {

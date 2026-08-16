@@ -1370,23 +1370,35 @@
       "norm_label": "authorization"
     },
     {
-      "label": "StorageObject",
+      "label": "StorageObjectInfo",
       "file_type": "code",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
       "source_location": "L13",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_app_api_admin_menu_import_finalize_route_storageobject",
+      "id": "src_app_api_admin_menu_import_finalize_route_storageobjectinfo",
       "community": 49,
       "community_name": "finalize/route.ts",
-      "norm_label": "storageobject"
+      "norm_label": "storageobjectinfo"
+    },
+    {
+      "label": "validateStoredPdf()",
+      "file_type": "code",
+      "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
+      "source_location": "L20",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_app_api_admin_menu_import_finalize_route_validatestoredpdf",
+      "community": 49,
+      "community_name": "finalize/route.ts",
+      "norm_label": "validatestoredpdf()"
     },
     {
       "label": "verifyAuthorizedUpload()",
       "file_type": "code",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L15",
+      "source_location": "L40",
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_verifyauthorizedupload",
@@ -1398,7 +1410,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L35",
+      "source_location": "L61",
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_post",
@@ -1540,8 +1552,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 89,
+      "community_name": "categories/route.ts",
       "norm_label": "categories/route.test.ts"
     },
     {
@@ -1551,8 +1563,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test_requirerole_query",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 89,
+      "community_name": "categories/route.ts",
       "norm_label": "{ requirerole, query }"
     },
     {
@@ -1563,8 +1575,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test_requestfor",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 89,
+      "community_name": "categories/route.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -1574,8 +1586,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 89,
+      "community_name": "categories/route.ts",
       "norm_label": "categories/route.ts"
     },
     {
@@ -1586,8 +1598,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_post",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 89,
+      "community_name": "categories/route.ts",
       "norm_label": "post()"
     },
     {
@@ -1968,8 +1980,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_health_route",
-      "community": 93,
-      "community_name": "health/route.ts",
+      "community": 49,
+      "community_name": "finalize/route.ts",
       "norm_label": "health/route.ts"
     },
     {
@@ -1979,8 +1991,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_health_route_dynamic",
-      "community": 93,
-      "community_name": "health/route.ts",
+      "community": 49,
+      "community_name": "finalize/route.ts",
       "norm_label": "dynamic"
     },
     {
@@ -1991,8 +2003,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_health_route_get",
-      "community": 93,
-      "community_name": "health/route.ts",
+      "community": 49,
+      "community_name": "finalize/route.ts",
       "norm_label": "get()"
     },
     {
@@ -2254,7 +2266,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_assign_route",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "assign/route.ts"
     },
@@ -2266,7 +2278,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_assign_route_post",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "post()"
     },
@@ -2359,7 +2371,7 @@
       "_origin": "ast",
       "id": "src_app_api_order_create_route",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "create/route.ts"
     },
     {
@@ -2371,7 +2383,7 @@
       "_origin": "ast",
       "id": "src_app_api_order_create_route_post",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "post()"
     },
     {
@@ -2381,7 +2393,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test",
-      "community": 89,
+      "community": 90,
       "community_name": "deliver/route.ts",
       "norm_label": "deliver/route.test.ts"
     },
@@ -2392,7 +2404,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test_getpoolclient_requirerole_client",
-      "community": 89,
+      "community": 90,
       "community_name": "deliver/route.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
@@ -2404,7 +2416,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test_requestfor",
-      "community": 89,
+      "community": 90,
       "community_name": "deliver/route.ts",
       "norm_label": "requestfor()"
     },
@@ -2415,7 +2427,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route",
-      "community": 89,
+      "community": 90,
       "community_name": "deliver/route.ts",
       "norm_label": "deliver/route.ts"
     },
@@ -2427,7 +2439,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_post",
-      "community": 89,
+      "community": 90,
       "community_name": "deliver/route.ts",
       "norm_label": "post()"
     },
@@ -2438,8 +2450,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_public_catalog_route",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 6,
+      "community_name": "db.ts",
       "norm_label": "catalog/route.ts"
     },
     {
@@ -2450,8 +2462,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_public_catalog_route_get",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 6,
+      "community_name": "db.ts",
       "norm_label": "get()"
     },
     {
@@ -2484,7 +2496,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_reset_test_data_route",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "reset-test-data/route.ts"
     },
@@ -2496,7 +2508,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_reset_test_data_route_post",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "post()"
     },
@@ -2530,7 +2542,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_restaurants_current_menu_import_route",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "current/menu-import/route.ts"
     },
@@ -2543,7 +2555,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_current_menu_import_route_importeditem",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "importeditem"
     },
@@ -2555,7 +2567,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_current_menu_import_route_post",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "post()"
     },
@@ -2765,7 +2777,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "activate/route.test.ts"
     },
     {
@@ -2776,7 +2788,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test_requirerole_getpoolclient_activatetables_client",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "{ requirerole, getpoolclient, activatetables, client }"
     },
     {
@@ -2788,7 +2800,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test_requestfor",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2799,7 +2811,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "activate/route.ts"
     },
     {
@@ -2810,7 +2822,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_messages",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "messages"
     },
     {
@@ -2822,7 +2834,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_post",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "post()"
     },
     {
@@ -2833,7 +2845,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_attention_route",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "attention/route.ts"
     },
     {
@@ -2845,7 +2857,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_attention_route_post",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "post()"
     },
     {
@@ -2856,7 +2868,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_bill_splits_route",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "table/bill-splits/route.ts"
     },
     {
@@ -2868,7 +2880,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_bill_splits_route_get",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "get()"
     },
     {
@@ -2880,7 +2892,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_bill_splits_route_post",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "post()"
     },
     {
@@ -2891,7 +2903,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_bill_route",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "bill/route.ts"
     },
     {
@@ -2903,7 +2915,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_bill_route_get",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "get()"
     },
     {
@@ -2913,7 +2925,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test",
-      "community": 90,
+      "community": 91,
       "community_name": "checkout/route.ts",
       "norm_label": "checkout/route.test.ts"
     },
@@ -2924,7 +2936,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test_getpoolclient_requirerole_client",
-      "community": 90,
+      "community": 91,
       "community_name": "checkout/route.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
@@ -2936,7 +2948,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test_requestfor",
-      "community": 90,
+      "community": 91,
       "community_name": "checkout/route.ts",
       "norm_label": "requestfor()"
     },
@@ -2947,7 +2959,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route",
-      "community": 90,
+      "community": 91,
       "community_name": "checkout/route.ts",
       "norm_label": "checkout/route.ts"
     },
@@ -2959,7 +2971,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_post",
-      "community": 90,
+      "community": 91,
       "community_name": "checkout/route.ts",
       "norm_label": "post()"
     },
@@ -2971,7 +2983,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_generate_pin_route",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "generate-pin/route.ts"
     },
     {
@@ -2983,7 +2995,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_generate_pin_route_post",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "post()"
     },
     {
@@ -2994,7 +3006,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_join_route",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "join/route.ts"
     },
     {
@@ -3006,7 +3018,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_join_route_post",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "post()"
     },
     {
@@ -3017,7 +3029,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_orders_route",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "orders/route.ts"
     },
     {
@@ -3029,7 +3041,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_orders_route_get",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "get()"
     },
     {
@@ -3040,7 +3052,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_session_route_test",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "session/route.test.ts"
     },
     {
@@ -3051,7 +3063,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_session_route_test_requireguestsession_setguestcookie_clearguestcookie",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "{ requireguestsession, setguestcookie, clearguestcookie }"
     },
     {
@@ -3062,7 +3074,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_session_route",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "session/route.ts"
     },
     {
@@ -3074,7 +3086,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_session_route_get",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "get()"
     },
     {
@@ -4203,8 +4215,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_auth_staffsession",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "staffsession"
     },
     {
@@ -4286,8 +4298,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_bill_split_test",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "guest-session.ts",
       "norm_label": "bill-split.test.ts"
     },
     {
@@ -4297,8 +4309,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_bill_split_test_guests",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "guest-session.ts",
       "norm_label": "guests"
     },
     {
@@ -4308,8 +4320,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_bill_split",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "guest-session.ts",
       "norm_label": "bill-split.ts"
     },
     {
@@ -4321,8 +4333,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_bill_split_billsplitmode",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "guest-session.ts",
       "norm_label": "billsplitmode"
     },
     {
@@ -4334,8 +4346,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_bill_split_billparticipantinput",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "guest-session.ts",
       "norm_label": "billparticipantinput"
     },
     {
@@ -4347,7 +4359,7 @@
       "_origin": "ast",
       "id": "src_lib_bill_split_splittotal",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "splittotal()"
     },
     {
@@ -4357,7 +4369,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_db",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "db.ts"
     },
@@ -4368,7 +4380,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_lib_db_issupabase",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "issupabase"
     },
@@ -4379,7 +4391,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_lib_db_pool",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "pool"
     },
@@ -4403,7 +4415,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_db_getpoolclient",
-      "community": 37,
+      "community": 6,
       "community_name": "db.ts",
       "norm_label": "getpoolclient()"
     },
@@ -4495,7 +4507,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "guest-session.ts"
     },
     {
@@ -4506,7 +4518,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session_guestcookiename",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "guestcookiename"
     },
     {
@@ -4519,7 +4531,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session_guestsession",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "guestsession"
     },
     {
@@ -4531,7 +4543,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session_guesttokenlifetimeseconds",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "guesttokenlifetimeseconds()"
     },
     {
@@ -4543,7 +4555,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session_newguesttoken",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "newguesttoken()"
     },
     {
@@ -4555,7 +4567,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session_setguestcookie",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "setguestcookie()"
     },
     {
@@ -4567,7 +4579,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session_clearguestcookie",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "clearguestcookie()"
     },
     {
@@ -4579,7 +4591,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session_requireguestsession",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "requireguestsession()"
     },
     {
@@ -4591,7 +4603,7 @@
       "_origin": "ast",
       "id": "src_lib_guest_session_isguestfailure",
       "community": 37,
-      "community_name": "db.ts",
+      "community_name": "guest-session.ts",
       "norm_label": "isguestfailure()"
     },
     {
@@ -5348,7 +5360,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "table-activation.ts"
     },
     {
@@ -5361,7 +5373,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_tableforactivation",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "tableforactivation"
     },
     {
@@ -5374,7 +5386,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_tableactivationerror",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "tableactivationerror"
     },
     {
@@ -5386,7 +5398,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_tableactivationerror_constructor",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": ".constructor()"
     },
     {
@@ -5398,7 +5410,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_normalizetableids",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "normalizetableids()"
     },
     {
@@ -5410,7 +5422,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_newaccesscode",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "newaccesscode()"
     },
     {
@@ -5422,7 +5434,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_activatetables",
       "community": 6,
-      "community_name": "activate/route.ts",
+      "community_name": "db.ts",
       "norm_label": "activatetables()"
     },
     {
@@ -11530,7 +11542,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L35",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route",
@@ -11545,14 +11557,25 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route",
-      "target": "src_app_api_admin_menu_import_finalize_route_storageobject",
+      "target": "src_app_api_admin_menu_import_finalize_route_storageobjectinfo",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L15",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_admin_menu_import_finalize_route",
+      "target": "src_app_api_admin_menu_import_finalize_route_validatestoredpdf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route",
@@ -11804,7 +11827,19 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L68",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_admin_menu_import_finalize_route_verifyauthorizedupload",
+      "target": "src_app_api_admin_menu_import_finalize_route_validatestoredpdf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11817,7 +11852,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L38",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11829,7 +11864,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L57",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11841,7 +11876,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L39",
+      "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11853,7 +11888,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L36",
+      "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11865,7 +11900,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L38",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11877,7 +11912,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L37",
+      "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11889,7 +11924,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L45",
+      "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11901,7 +11936,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L94",
+      "source_location": "L120",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11913,7 +11948,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L63",
+      "source_location": "L89",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -25243,5 +25278,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a9a4fb8bd05ab2a66e65b04d45b768da726ef6c9"
+  "built_at_commit": "473390de29c0a7422404da0f77b628de1a088174"
 }

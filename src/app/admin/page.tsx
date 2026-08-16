@@ -16,6 +16,8 @@ import WaiterPanel from '@/components/admin/WaiterPanel';
 import HistoryPanel from '@/components/admin/HistoryPanel';
 import KitchenPanel from '@/components/admin/KitchenPanel';
 import StationsPanel from '@/components/admin/StationsPanel';
+import DemoWorkspace from '@/components/DemoWorkspace';
+import { isLocalDemo, type DemoRole } from '@/lib/demo';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -28,6 +30,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     async function verifyProtection() {
+      if (isLocalDemo()) return;
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { router.push('/admin/login'); return; }
 
@@ -50,6 +53,9 @@ export default function AdminDashboard() {
     }
     verifyProtection();
   }, [router]);
+
+  const demoRole = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('demo') as DemoRole | null : null;
+  if (isLocalDemo() && (demoRole === 'admin' || demoRole === 'waiter' || demoRole === 'kitchen')) return <DemoWorkspace role={demoRole} />;
 
   const handleLogout = async () => {
     window.localStorage.removeItem('teburu_restaurant_id');

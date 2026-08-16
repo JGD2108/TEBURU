@@ -7,4 +7,10 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_A
   console.warn('[Teburu Warning] Credenciales de Supabase incompletas en .env.local. Verifica NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY');
 }
 
-export const supabase = createClient(supabaseUrl || 'https://invalid.local', supabaseAnonKey || 'placeholder-anon-key');
+export const supabase = createClient(supabaseUrl || 'https://invalid.local', supabaseAnonKey || 'placeholder-anon-key', {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
+});

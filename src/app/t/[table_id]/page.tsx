@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowRight, ChevronLeft, Building2 } from 'lucide-react';
 import styles from './table.module.css';
+import DemoBar from '@/components/DemoBar';
+import { isLocalDemo } from '@/lib/demo';
 
 export default function TableLogin() {
   const params = useParams();
@@ -23,6 +25,11 @@ export default function TableLogin() {
   // Load branding and restore a valid HttpOnly guest session on this device.
   useEffect(() => {
     async function initialize() {
+      if (isLocalDemo()) {
+        setRestaurantName('Casa Teburu');
+        setCheckingSession(false);
+        return;
+      }
       const [settingsResponse, sessionResponse] = await Promise.all([
         fetch(`/api/public/settings?table_id=${encodeURIComponent(table_id)}`),
         fetch(`/api/table/session?table_id=${encodeURIComponent(table_id)}`),
@@ -52,6 +59,10 @@ export default function TableLogin() {
     }
 
     setIsLoading(true);
+    if (isLocalDemo()) {
+      router.push(`/t/${table_id}/menu`);
+      return;
+    }
     
     try {
       const res = await fetch('/api/table/join', {
@@ -77,7 +88,7 @@ export default function TableLogin() {
   if (checkingSession) return <main className="screen-centered"><p>Recuperando tu mesa…</p></main>;
 
   return (
-    <main className="screen-centered">
+    <main className="screen-centered"><DemoBar active="guest" />
       <div className={`glass-panel animate-fade-up ${styles.loginCard}`}>
         
         {step === 'landing' ? (

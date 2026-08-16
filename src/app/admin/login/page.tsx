@@ -6,6 +6,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '@/lib/supabase';
 import { Lock, Mail, Key, ShieldCheck } from 'lucide-react';
 import styles from './login.module.css';
+import DemoBar from '@/components/DemoBar';
+import { isLocalDemo } from '@/lib/demo';
 
 type AuthStep = 'login' | 'setup_2fa' | 'verify_2fa' | 'forgot_password';
 
@@ -35,6 +37,7 @@ export default function AdminLogin() {
   useEffect(() => {
     // Redirigir si ya tiene sesión activa (2FA desactivado para desarrollo)
     async function checkAuth() {
+      if (isLocalDemo()) return;
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         try {
@@ -47,6 +50,8 @@ export default function AdminLogin() {
     }
     checkAuth();
   }, [router]);
+
+  if (isLocalDemo()) return <div className="app-shell"><DemoBar /><main className="screen-centered"><section className="surface-card" style={{ width: 'min(580px, 100%)', padding: 'clamp(26px, 6vw, 52px)' }}><p className="eyebrow">Demo local</p><h1 className="display" style={{ margin: 0 }}>Elige un punto de vista.</h1><p style={{ margin: '18px 0 28px' }}>Este acceso no usa Vercel, Supabase ni credenciales. Solo existe mientras el modo demo local esté activo.</p><div style={{ display: 'grid', gap: 10 }}><button className="btn-primary" onClick={() => router.push('/platform?demo=platform')}>Ver plataforma</button><button className="btn-secondary" onClick={() => router.push('/admin?demo=admin')}>Entrar como administrador</button><button className="btn-secondary" onClick={() => router.push('/admin?demo=waiter')}>Entrar como mesero</button><button className="btn-secondary" onClick={() => router.push('/admin?demo=kitchen')}>Entrar a cocina</button><button className="btn-secondary" onClick={() => router.push('/t/demo-table?demo=guest')}>Vivir experiencia de mesa</button></div></section></main></div>;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

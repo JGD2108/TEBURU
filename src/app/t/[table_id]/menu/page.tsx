@@ -4,6 +4,8 @@ import { useCallback, useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Bell, Users, ShoppingBag, Receipt, Search, ArrowRight, UserCircle2, Star, Minus, Plus, X, Dices } from 'lucide-react';
 import styles from './menu.module.css';
+import DemoBar from '@/components/DemoBar';
+import { demoMenu, demoOrders, isLocalDemo } from '@/lib/demo';
 
 type CartItem = {
   cart_id: string; 
@@ -68,6 +70,11 @@ export default function TableMenu() {
   }, []);
 
   const requestSplit = async () => {
+    if (isLocalDemo()) {
+      setSplitRequest({ status: 'acknowledged', total: bill?.total ?? 0 });
+      setSplitMessage('Solicitud demo enviada al mesero.');
+      return;
+    }
     const participants = bill?.guests.map((guest) => ({ guestId: guest.id, amount: Number(customAmounts[guest.id] ?? 0) })) ?? [];
     const response = await fetch('/api/table/bill-splits', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: splitMode, participants }),
@@ -77,6 +84,7 @@ export default function TableMenu() {
   };
 
   const callWaiter = async () => {
+    if (isLocalDemo()) { setAttentionMessage('Tu mesero demo recibió el llamado.'); return; }
     const response = await fetch('/api/table/attention', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ table_id, needs_attention: true }),
@@ -86,6 +94,14 @@ export default function TableMenu() {
 
   useEffect(() => {
     async function loadMenu() {
+      if (isLocalDemo()) {
+        setDbItems(demoMenu.map((item) => ({ ...item, ingredients: item.id === 'arepa' ? ['cebolla', 'queso'] : [], isFeatured: item.id === 'arepa' })));
+        setDbCategories(['Recomendados', 'Principales', 'Postres']);
+        setCustomerName('Valentina');
+        setTableOrders(demoOrders);
+        setBill({ guests: [{ id: 'me', name: 'Valentina', own_total: 0 }, { id: 'lucia', name: 'Lucía', own_total: 8.5 }, { id: 'mateo', name: 'Mateo', own_total: 18 }], total: 26.5 });
+        setLoadingDb(false); setSessionReady(true); return;
+      }
       const catalogResponse = await fetch(`/api/public/catalog?table_id=${encodeURIComponent(table_id)}`);
       const catalog = await catalogResponse.json();
       const catsData = catalogResponse.ok ? catalog.categories : [];
@@ -175,6 +191,10 @@ export default function TableMenu() {
       return;
     }
 
+    if (isLocalDemo()) {
+      setTableOrders((orders) => [...orders, ...myCart.map((item) => ({ user: customerName, item: item.name, qty: item.qty, price: item.price, item_status: 'pending', notes: item.notes }))]);
+      setMyCart([]); setIsConfirmModalOpen(false); setToastMessage('¡Pedido demo enviado a cocina!'); setTimeout(() => setToastMessage(''), 2500); return;
+    }
     try {
       const res = await fetch('/api/order/create', {
         method: 'POST',
@@ -427,7 +447,7 @@ export default function TableMenu() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container}><DemoBar active="guest" />
       {toastMessage && <div className={styles.toast}>{toastMessage}</div>}
 
       {/* Modal Customización */}

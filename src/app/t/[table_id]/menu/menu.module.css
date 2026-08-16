@@ -279,11 +279,12 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 4px;
+  color: #fffaf1;
 }
 
 .featuredDesc {
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: rgba(255, 250, 241, .78);
   margin-bottom: 8px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -294,7 +295,7 @@
 .featuredPrice {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--accent);
+  color: #f6c75a;
 }
 
 .addButtonLarge {

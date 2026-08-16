@@ -1,45 +1,13 @@
 import Link from 'next/link';
-import { ArrowUpRight, Fingerprint, UtensilsCrossed } from 'lucide-react';
-import styles from './page.module.css';
+import { ArrowUpRight, QrCode, Sparkles, UtensilsCrossed } from 'lucide-react';
+import DemoBar from '@/components/DemoBar';
 
 export default function Home() {
-  return (
-    <main className={styles.page}>
-      <div className={styles.texture} aria-hidden="true" />
-      <header className={styles.header}>
-        <Link href="/" className={styles.brand} aria-label="Inicio de Teburu">
-          <span className={styles.brandMark}><UtensilsCrossed size={21} /></span>
-          <span>teburu</span>
-        </Link>
-        <span className={styles.privateLabel}>Acceso privado</span>
-      </header>
-
-      <section className={styles.hero}>
-        <div className={styles.intro}>
-          <p className={styles.kicker}>RESTAURANT OPERATING SYSTEM</p>
-          <h1>Una puerta.<br /><em>Tu espacio.</em></h1>
-          <p className={styles.lede}>Ingresa con tus credenciales y Teburu abrirá automáticamente las herramientas que corresponden a tu cuenta.</p>
-        </div>
-
-        <Link href="/admin/login" className={`${styles.accessCard} ${styles.singleAccess}`}>
-          <div className={styles.cardTop}>
-            <span className={styles.cardIcon}><Fingerprint size={29} /></span>
-            <span className={styles.cardNumber}>ACCESO SEGURO</span>
-          </div>
-          <div>
-            <p className={styles.cardEyebrow}>EQUIPO TEBURU</p>
-            <h2>Ingresar</h2>
-            <p className={styles.cardDescription}>El destino se asigna de forma privada según los permisos de tu cuenta.</p>
-          </div>
-          <span className={styles.cardAction}>Continuar al acceso<ArrowUpRight size={20} /></span>
-        </Link>
-      </section>
-
-      <footer className={styles.footer}>
-        <span>Los clientes acceden exclusivamente al escanear el QR de una mesa activa.</span>
-        <span className={styles.footerDot} aria-hidden="true" />
-        <span>Operación segura por restaurante</span>
-      </footer>
-    </main>
-  );
+  return <div className="app-shell"><DemoBar /><main className="container" style={{ paddingBlock: '26px 54px' }}>
+    <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 22, borderBottom: '1px solid var(--line)' }}><Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--ink)', textDecoration: 'none', fontWeight: 800 }}><span style={{ display: 'grid', placeItems: 'center', width: 38, height: 38, borderRadius: '50%', background: 'var(--brand)', color: '#fff' }}><UtensilsCrossed size={20}/></span> teburu</Link><span className="eyebrow" style={{ margin: 0 }}>restaurant operating system</span></header>
+    <section style={{ minHeight: 'calc(100vh - 150px)', display: 'grid', gridTemplateColumns: 'minmax(0, 1.1fr) minmax(300px, .9fr)', gap: 'clamp(32px, 8vw, 120px)', alignItems: 'center' }}>
+      <div className="animate-fade-up"><p className="eyebrow">Hospitalidad que fluye</p><h1 className="display" style={{ margin: 0, maxWidth: 720 }}>Menos pantallas.<br/><em style={{ color: 'var(--brand)' }}>Más servicio.</em></h1><p style={{ maxWidth: 520, fontSize: '1.15rem', color: 'var(--text-muted)', marginTop: 24 }}>Teburu conecta al salón, la cocina y a cada comensal con una experiencia pensada para la velocidad de un buen servicio.</p><Link href="/admin/login" className="btn-primary" style={{ marginTop: 26, textDecoration: 'none' }}>Entrar al equipo <ArrowUpRight size={18}/></Link></div>
+      <aside className="surface-card animate-fade-up" style={{ padding: 'clamp(24px, 4vw, 42px)', animationDelay: '.1s' }}><span style={{ display: 'grid', placeItems: 'center', width: 54, height: 54, borderRadius: '50%', background: 'var(--paper-deep)', color: 'var(--brand)' }}><QrCode /></span><p className="eyebrow" style={{ marginTop: 32 }}>Para la mesa</p><h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: '-.05em', margin: '8px 0' }}>Tu menú, cuando lo necesitas.</h2><p>Los comensales escanean el QR de su mesa activa y comienzan sin descargar nada.</p><div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 26, color: 'var(--sage)', fontWeight: 700 }}><Sparkles size={17}/> Pedido, estado y cuenta en un mismo lugar.</div></aside>
+    </section>
+  </main></div>;
 }

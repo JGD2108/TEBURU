@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Building2, ExternalLink, LogOut, Plus, Power, Search, Store, Users, UtensilsCrossed } from 'lucide-react';
 import { staffFetch } from '@/lib/api-client';
 import { supabase } from '@/lib/supabase';
+import DemoBar from '@/components/DemoBar';
+import { isLocalDemo } from '@/lib/demo';
 
 type Restaurant = {
   id: string; name: string; slug: string; status: 'active' | 'suspended'; staff_count: number;
@@ -31,13 +33,15 @@ export default function PlatformPage() {
     if (response.status === 403) return router.replace('/admin?error=platform-access');
     if (response.ok) setRestaurants((await response.json()).data);
   }, [router]);
-  useEffect(() => { window.localStorage.removeItem('teburu_restaurant_id'); void load(); }, [load]);
+  useEffect(() => { if (!isLocalDemo()) { window.localStorage.removeItem('teburu_restaurant_id'); void load(); } }, [load]);
   const visibleRestaurants = useMemo(() => {
     const term = search.trim().toLocaleLowerCase();
     if (!term) return restaurants;
     return restaurants.filter((restaurant) => [restaurant.name, restaurant.slug, restaurant.address, restaurant.contact_email]
       .filter(Boolean).some((value) => value!.toLocaleLowerCase().includes(term)));
   }, [restaurants, search]);
+
+  if (isLocalDemo()) return <div className="app-shell"><DemoBar active="platform" /><main className="container" style={{ paddingBlock: '48px' }}><header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 20, flexWrap: 'wrap', marginBottom: 34 }}><div><p className="eyebrow">Teburu platform · demo</p><h1 className="display" style={{ margin: 0 }}>Una vista clara de cada casa.</h1><p style={{ maxWidth: 580, color: 'var(--text-muted)' }}>Administra locales sin perder de vista lo importante.</p></div><button className="btn-primary"><Plus size={18}/> Nuevo restaurante</button></header><section style={{ display: 'grid', gap: 14 }}>{[{ name: 'Casa Teburu', slug: 'casa-teburu', tables: 14, staff: 9, menu: 32, status: 'Servicio activo' }, { name: 'Mesa del Jardín', slug: 'mesa-jardin', tables: 8, staff: 6, menu: 24, status: 'Preparando apertura' }].map((restaurant) => <article className="surface-card" key={restaurant.slug} style={{ padding: 24, display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) auto', gap: 20, alignItems: 'center' }}><div><p className="eyebrow">{restaurant.status}</p><h2 style={{ margin: 0 }}>{restaurant.name}</h2><p>/{restaurant.slug}</p><div style={{ display: 'flex', gap: 16, color: 'var(--text-muted)', fontSize: '.9rem' }}><span>{restaurant.staff} equipo</span><span>{restaurant.tables} mesas</span><span>{restaurant.menu} platos</span></div></div><button className="btn-secondary" onClick={() => router.push('/admin?demo=admin')}>Abrir operación</button></article>)}</section></main></div>;
 
   const createRestaurant = async (event: FormEvent) => {
     event.preventDefault(); setSaving(true); setMessage('');

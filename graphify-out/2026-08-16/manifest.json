@@ -475,8 +475,8 @@
     "semantic_hash": ""
   },
   "src/app/api/public/settings/route.ts": {
-    "mtime": 1786901066.8962824,
-    "ast_hash": "357e7e248a209bffebbefc0c2dd88091",
+    "mtime": 1786901888.1127298,
+    "ast_hash": "f19f1c85e4ad3e75187ac3edb94deafd",
     "semantic_hash": ""
   },
   "src/lib/logger.ts": {
@@ -635,8 +635,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/publish/route.ts": {
-    "mtime": 1786901721.2958953,
-    "ast_hash": "a1d0a88cd106be81e5b1f33d54410ae1",
+    "mtime": 1786901877.742617,
+    "ast_hash": "5e0df766b7140eb45df2cdbcd5b39c1c",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/route.ts": {
@@ -650,13 +650,13 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/route.ts": {
-    "mtime": 1786901516.792858,
-    "ast_hash": "ec3d0a943a60db970f7bbde8ef03079b",
+    "mtime": 1786903400.613351,
+    "ast_hash": "0faef87f1ab4161ab75d0dc832b96dd6",
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1786901039.1266775,
-    "ast_hash": "70c74901bcc9e4d51d3089f7e6efb755",
+    "mtime": 1786907495.2482884,
+    "ast_hash": "809ccf3a3ceecfb1d17df36e524cf7a2",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -760,8 +760,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/routes.test.ts": {
-    "mtime": 1786901752.9927104,
-    "ast_hash": "5c48eb85a757c1f57961b78dc8d20947",
+    "mtime": 1786907611.0073068,
+    "ast_hash": "d6bfd6f413a931173f732d31c7a5b911",
     "semantic_hash": ""
   },
   "openspec/changes/harden-menu-import-deployment/.openspec.yaml": {
@@ -785,28 +785,73 @@
     "semantic_hash": ""
   },
   "openspec/changes/harden-menu-import-deployment/tasks.md": {
-    "mtime": 1786899869.0207527,
-    "ast_hash": "99ea66082dd48d35e95121923b8b68e4",
+    "mtime": 1786901978.4576473,
+    "ast_hash": "a50a84cf8b7017838dde5d06dd96fffb",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/finalize/route.ts": {
-    "mtime": 1786901233.2344856,
-    "ast_hash": "d48091b306e8f963edb80ecd1e33e232",
+    "mtime": 1786907518.699372,
+    "ast_hash": "24b6a64bd60efab45ae019ac2ee2037f",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/upload-authorizations/route.ts": {
-    "mtime": 1786900946.372304,
-    "ast_hash": "0863e70e40b1ec7e8253d7e154833c60",
+    "mtime": 1786907440.5546796,
+    "ast_hash": "4c36290a7eaebb83cda879b116094ea3",
     "semantic_hash": ""
   },
   "src/lib/api-response.ts": {
-    "mtime": 1786901492.7649386,
-    "ast_hash": "75586ab3d30971d8318d2f462c1ae50f",
+    "mtime": 1786903330.0260825,
+    "ast_hash": "3404c56f68422e0b87835ae5ddb10b57",
     "semantic_hash": ""
   },
   "supabase/migrations/20260816130000_harden_menu_import_upload_authorizations.sql": {
     "mtime": 1786900982.5637028,
     "ast_hash": "87d85810da8379ea81907df7e91a47a2",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import-errors.ts": {
+    "mtime": 1786903615.162021,
+    "ast_hash": "785abfa340b2fee330a6413a7932e4d1",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import-upload-recovery.test.ts": {
+    "mtime": 1786907485.1147316,
+    "ast_hash": "55ba400f663a5c407d87562a1d18d054",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import-upload-recovery.ts": {
+    "mtime": 1786907472.5123413,
+    "ast_hash": "196e9264569307446803dc3f78acdda0",
+    "semantic_hash": ""
+  },
+  "supabase/.temp/linked-project.json": {
+    "mtime": 1786904467.986546,
+    "ast_hash": "421cddb04d60dd3021c7ef28b0396d50",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-upload-finalize/.openspec.yaml": {
+    "mtime": 1786907056.2845619,
+    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-upload-finalize/design.md": {
+    "mtime": 1786907169.1791515,
+    "ast_hash": "ba56bb76edc03dd33f73c01a8956ac30",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-upload-finalize/proposal.md": {
+    "mtime": 1786907142.0540822,
+    "ast_hash": "04754de9a19a166d3332d5539916d5f8",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-upload-finalize/specs/menu-import-upload-finalization/spec.md": {
+    "mtime": 1786907159.0069742,
+    "ast_hash": "4c30b0c259a02ddc0fe3f36f0981dccc",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-upload-finalize/tasks.md": {
+    "mtime": 1786907648.7067554,
+    "ast_hash": "28013b02aa7c12ac4bd0e0c8b81255dd",
     "semantic_hash": ""
   }
 }

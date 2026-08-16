@@ -3,6 +3,8 @@
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, Check, FileText, ImageIcon, Loader2, Pencil, Trash2, Upload } from 'lucide-react';
 import { readApiResponse, requireApiSuccess, staffFetch } from '@/lib/api-client';
+import { uploadRecoveryMessage } from '@/lib/menu-import-upload-recovery';
+import { supabase } from '@/lib/supabase';
 
 type DraftCategory = { id: string; name: string };
 type DraftItem = {
@@ -36,9 +38,10 @@ type ImportJob = {
   items?: DraftItem[];
   validation_errors?: Array<{ item_id?: string; fields?: string[]; message?: string }>;
 };
-type UploadAuthorization = { id: string; uploadUrl: string; token: string; expiresAt: string; maxBytes: number; contentType: string };
+type UploadAuthorization = { id: string; objectPath: string; uploadToken: string; uploadUrl: string; token: string; expiresAt: string; maxBytes: number; contentType: string };
 type ImportReadiness = { available?: boolean; message?: string; maxPdfBytes?: number };
 
+const menuImportBucket = 'menu-imports';
 const panelStyle = { background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' } as const;
 const inputStyle = { width: '100%', padding: '9px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' } as const;
 
@@ -60,8 +63,12 @@ async function staffJson<T extends Record<string, unknown>>(input: RequestInfo |
   return requireApiSuccess(response, payload, fallback);
 }
 
+// Kept only for temporary compatibility with older authorization responses during rollout.
+type CompletedUpload = { status: number };
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function uploadPdfDirectly(authorization: UploadAuthorization, file: File, onProgress: (progress: number) => void, signal: AbortSignal) {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<CompletedUpload>((resolve, reject) => {
     const request = new XMLHttpRequest();
     const abort = () => request.abort();
     signal.addEventListener('abort', abort, { once: true });
@@ -71,11 +78,22 @@ function uploadPdfDirectly(authorization: UploadAuthorization, file: File, onPro
     request.onerror = () => reject(new Error('No se pudo subir el PDF. Comprueba tu conexión e inténtalo de nuevo.'));
     request.onabort = () => reject(new DOMException('Carga cancelada', 'AbortError'));
     request.onload = () => request.status >= 200 && request.status < 300
-      ? resolve()
+      ? resolve({ status: request.status })
       : reject(new Error('El almacenamiento rechazó el PDF. Inténtalo de nuevo.'));
     request.onloadend = () => signal.removeEventListener('abort', abort);
     request.send(file);
   });
+}
+
+async function uploadPdfWithSupabase(authorization: UploadAuthorization, file: File, onProgress: (progress: number) => void, signal: AbortSignal) {
+  if (signal.aborted) throw new DOMException('Carga cancelada', 'AbortError');
+  if (!authorization.objectPath || !authorization.uploadToken) throw new Error('No se recibio autorizacion de almacenamiento para subir el PDF.');
+  const result = await supabase.storage
+    .from(menuImportBucket)
+    .uploadToSignedUrl(authorization.objectPath, authorization.uploadToken, file, { contentType: authorization.contentType || 'application/pdf' });
+  if (signal.aborted) throw new DOMException('Carga cancelada', 'AbortError');
+  if (result.error) throw new Error('El almacenamiento rechazo el PDF. Intentalo de nuevo.');
+  onProgress(100);
 }
 
 export default function MenuImportPanel() {
@@ -90,6 +108,12 @@ export default function MenuImportPanel() {
   const [message, setMessage] = useState<string | null>(null);
   const [publishErrors, setPublishErrors] = useState<string[]>([]);
   const uploadAbort = useRef<AbortController | null>(null);
+  const fileInput = useRef<HTMLInputElement | null>(null);
+
+  const clearSelectedFile = useCallback(() => {
+    setFile(null);
+    if (fileInput.current) fileInput.current.value = '';
+  }, []);
 
   const loadImports = useCallback(async (keepSelected = true) => {
     const payload = await staffJson<{ imports?: ImportJob[]; data?: ImportJob[] }>('/api/admin/menu-import', undefined, 'No se pudieron cargar las importaciones. Inténtalo de nuevo.');
@@ -145,16 +169,22 @@ export default function MenuImportPanel() {
       if (file.size > authorization.maxBytes) throw new Error('El PDF supera el tamaño permitido para importación.');
       const controller = new AbortController();
       uploadAbort.current = controller;
-      await uploadPdfDirectly(authorization, file, setUploadProgress, controller.signal);
+      await uploadPdfWithSupabase(authorization, file, setUploadProgress, controller.signal);
+      const completedUpload = { status: 200 };
+      if (completedUpload.status < 200 || completedUpload.status >= 300) {
+        throw new Error('El almacenamiento rechazó el PDF. Inténtalo de nuevo.');
+      }
       const finalized = await staffJson<{ data?: { import?: ImportJob } }>('/api/admin/menu-import/finalize', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ authorizationId: authorization.id, token: authorization.token }),
       }, 'El PDF se subió, pero no se pudo iniciar el análisis. Inténtalo de nuevo.');
       const created = finalized.data?.import;
       if (!created) throw new Error('No se pudo iniciar el análisis del PDF. Inténtalo de nuevo.');
-      setFile(null); setSelected(created); setImports((current) => [created, ...current.filter((job) => job.id !== created.id)]);
+      clearSelectedFile(); setSelected(created); setImports((current) => [created, ...current.filter((job) => job.id !== created.id)]);
       setMessage('PDF recibido. El análisis se está ejecutando en segundo plano.');
     } catch (error) {
-      setMessage(error instanceof DOMException && error.name === 'AbortError' ? 'La carga fue cancelada. Puedes reintentarlo con el mismo PDF.' : error instanceof Error ? error.message : 'No se pudo subir el PDF');
+      const recoveryMessage = uploadRecoveryMessage(error);
+      if (recoveryMessage) clearSelectedFile();
+      setMessage(recoveryMessage ?? (error instanceof DOMException && error.name === 'AbortError' ? 'La carga fue cancelada. Puedes reintentarlo con el mismo PDF.' : error instanceof Error ? error.message : 'No se pudo subir el PDF'));
     } finally { uploadAbort.current = null; setSubmitting(false); setUploadProgress(null); }
   }
 
@@ -216,7 +246,7 @@ export default function MenuImportPanel() {
       <h3 style={{ marginTop: 0 }}>Importar menú desde PDF</h3>
       <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>El menú actual no cambia hasta que revises y publiques este borrador.</p>
       <form onSubmit={upload} style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-        <input aria-label="Archivo PDF del menú" type="file" accept="application/pdf,.pdf" onChange={(event: ChangeEvent<HTMLInputElement>) => setFile(event.target.files?.[0] ?? null)} />
+        <input ref={fileInput} aria-label="Archivo PDF del menú" type="file" accept="application/pdf,.pdf" onChange={(event: ChangeEvent<HTMLInputElement>) => setFile(event.target.files?.[0] ?? null)} />
         <button className="btn-primary" disabled={!file || submitting || !readiness || importUnavailable} type="submit"><Upload size={16} /> {submitting ? 'Subiendo...' : 'Analizar PDF'}</button>
         {submitting && uploadProgress !== null && <><span role="status">Subiendo: {uploadProgress}%</span><button className="btn-secondary" type="button" onClick={() => uploadAbort.current?.abort()}>Cancelar carga</button></>}
       </form>

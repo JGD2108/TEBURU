@@ -11,7 +11,7 @@ vi.mock('@/lib/menu-import-storage', () => ({
   menuImportBucket: 'menu-imports', ensureMenuImportBucket, menuImportStorage,
 }));
 
-import { POST as createImport } from './route';
+import { GET as listImports, POST as createImport } from './route';
 import { GET as getImport } from './[id]/route';
 import { GET as getSource } from './[id]/source/route';
 import { PATCH as updateDraft } from './[id]/draft-items/[itemId]/route';
@@ -181,8 +181,64 @@ describe('deployment-safe menu import upload APIs', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
+  it('returns a JSON database-unavailable response when the import-list query fails', async () => {
+    query.mockRejectedValueOnce(Object.assign(new Error('connect ECONNREFUSED'), { code: 'ECONNREFUSED' }));
+
+    const response = await listImports(new Request('http://localhost/api/admin/menu-import', {
+      headers: { 'x-request-id': 'list-db-down-1' },
+    }));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get('content-type')).toContain('application/json');
+    expect(await response.json()).toEqual({
+      error: expect.objectContaining({ code: 'IMPORT_DATABASE_UNAVAILABLE', requestId: 'list-db-down-1' }),
+    });
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('FROM menu_import_jobs'), ['restaurant-a']);
+  });
+
+  it('does not query PostgreSQL when storage credentials or the private bucket are unavailable', async () => {
+    ensureMenuImportBucket.mockRejectedValueOnce(new Error('Bucket not found'));
+
+    const response = await authorizeUpload(jsonRequest('http://localhost/api/admin/menu-import/upload-authorizations', {
+      filename: 'menu.pdf', size: 100, contentType: 'application/pdf',
+    }, 'storage-bucket-1'));
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({
+      error: expect.objectContaining({ code: 'IMPORT_STORAGE_UNAVAILABLE', requestId: 'storage-bucket-1' }),
+    });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('reproduces a missing authorization migration after a successful storage handshake', async () => {
+    const createSignedUploadUrl = vi.fn().mockResolvedValue({ data: { signedUrl: 'https://storage.example/upload', token: 'storage-token' }, error: null });
+    ensureMenuImportBucket.mockResolvedValue({ storage: { from: vi.fn().mockReturnValue({ createSignedUploadUrl }) } });
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    query.mockRejectedValueOnce(Object.assign(
+      new Error('relation "menu_import_upload_authorizations" does not exist'),
+      { code: '42P01' },
+    ));
+
+    const response = await authorizeUpload(jsonRequest('http://localhost/api/admin/menu-import/upload-authorizations', {
+      filename: 'menu.pdf', size: 100, contentType: 'application/pdf',
+    }, 'missing-migration-1'));
+
+    // The route has reached the database only after creating the signed storage URL.
+    // Production logs therefore distinguish this from a missing key/bucket failure.
+    expect(createSignedUploadUrl).toHaveBeenCalledOnce();
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO menu_import_upload_authorizations'), expect.any(Array));
+    expect(response.status).toBe(503);
+    const payload = await response.json();
+    expect(payload).toEqual({
+      error: expect.objectContaining({ code: 'IMPORT_DATABASE_UNAVAILABLE', requestId: 'missing-migration-1' }),
+    });
+    expect(JSON.stringify(payload)).not.toContain('42P01');
+    expect(errorLog).toHaveBeenCalledWith(expect.stringContaining('"databaseCode":"42P01"'));
+    errorLog.mockRestore();
+  });
+
   it('authorizes a configured-limit PDF through a small control request', async () => {
-    const createSignedUploadUrl = vi.fn().mockResolvedValue({ data: { signedUrl: 'https://storage.example/upload' }, error: null });
+    const createSignedUploadUrl = vi.fn().mockResolvedValue({ data: { signedUrl: 'https://storage.example/upload', token: 'storage-token' }, error: null });
     ensureMenuImportBucket.mockResolvedValue({ storage: { from: vi.fn().mockReturnValue({ createSignedUploadUrl }) } });
     query.mockResolvedValue({ rows: [{ expires_at: '2030-01-01T00:00:00.000Z' }] });
     const body = { filename: 'large-menu.pdf', size: 20 * 1024 * 1024, contentType: 'application/pdf' };
@@ -193,7 +249,7 @@ describe('deployment-safe menu import upload APIs', () => {
     expect(response.status).toBe(201);
     expect(JSON.stringify(body).length).toBeLessThan(200);
     expect(payload.data.authorization).toEqual(expect.objectContaining({
-      uploadUrl: 'https://storage.example/upload', maxBytes: 20 * 1024 * 1024, contentType: 'application/pdf',
+      uploadUrl: 'https://storage.example/upload', uploadToken: 'storage-token', maxBytes: 20 * 1024 * 1024, contentType: 'application/pdf',
     }));
     expect(createSignedUploadUrl).toHaveBeenCalledWith(expect.stringContaining('restaurants/restaurant-a/pending/'));
     expect(query.mock.calls[0][1]).toEqual(expect.arrayContaining(['restaurant-a', 'admin-1', 'large-menu.pdf', 20 * 1024 * 1024]));
@@ -225,6 +281,43 @@ describe('deployment-safe menu import upload APIs', () => {
 
     expect(response.status).toBe(410);
     expect(await response.json()).toEqual({ error: expect.objectContaining({ code: 'IMPORT_UPLOAD_EXPIRED' }) });
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_jobs'))).toBe(false);
+  });
+
+  it('returns the stable incomplete-upload error when the authorized object is absent', async () => {
+    const token = 'token-a';
+    const client = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValue(client);
+    client.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'auth-a', storage_path: 'restaurants/restaurant-a/pending/auth-a.pdf', source_filename: 'menu.pdf', expected_size_bytes: 100, expires_at: '2030-01-01T00:00:00.000Z', token_hash: createHash('sha256').update(token).digest('hex'), import_job_id: null }] })
+      .mockResolvedValueOnce({ rows: [] });
+    const list = vi.fn().mockResolvedValue({ data: [], error: null });
+    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ list }) } });
+
+    const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token }));
+
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({ error: expect.objectContaining({ code: 'IMPORT_UPLOAD_INCOMPLETE' }) });
+    expect(list).toHaveBeenCalledWith('restaurants/restaurant-a/pending', { search: 'auth-a.pdf' });
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_jobs'))).toBe(false);
+  });
+
+  it('returns the stable incomplete-upload error when object metadata differs from its authorization', async () => {
+    const token = 'token-a';
+    const client = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValue(client);
+    client.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'auth-a', storage_path: 'restaurants/restaurant-a/pending/auth-a.pdf', source_filename: 'menu.pdf', expected_size_bytes: 100, expires_at: '2030-01-01T00:00:00.000Z', token_hash: createHash('sha256').update(token).digest('hex'), import_job_id: null }] })
+      .mockResolvedValueOnce({ rows: [] });
+    const list = vi.fn().mockResolvedValue({ data: [{ name: 'auth-a.pdf', metadata: { size: 99, mimetype: 'application/pdf' } }], error: null });
+    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ list }) } });
+
+    const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token }));
+
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual({ error: expect.objectContaining({ code: 'IMPORT_UPLOAD_INCOMPLETE' }) });
     expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_jobs'))).toBe(false);
   });
 

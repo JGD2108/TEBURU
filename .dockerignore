@@ -1,9 +1,0 @@
-.git
-.github
-.next
-node_modules
-graphify-out
-.codex
-.env*
-npm-debug.log*
-coverage

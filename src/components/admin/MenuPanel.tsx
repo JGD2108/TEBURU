@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { staffFetch } from '@/lib/api-client';
 import { Trash2, Plus } from 'lucide-react';
+import MenuImportPanel from '@/components/admin/MenuImportPanel';
 
 export default function MenuPanel() {
   const [items, setItems] = useState<any[]>([]);
@@ -164,6 +165,10 @@ export default function MenuPanel() {
           </div>
         )}
       </section>
+
+      <div style={{ marginBottom: '24px' }}>
+        <MenuImportPanel />
+      </div>
 
       {showForm && (
         <form onSubmit={handleSave} style={{ background: 'var(--bg-surface)', padding: '24px', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--border-color)', display: 'grid', gap: '16px', gridTemplateColumns: '1fr 1fr' }}>

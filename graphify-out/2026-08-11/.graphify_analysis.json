@@ -1,0 +1,426 @@
+{
+  "communities": {
+    "0": [
+      "src_app_admin_login_page",
+      "src_app_admin_login_page_adminlogin",
+      "src_app_admin_login_page_authstep",
+      "src_app_admin_page",
+      "src_app_admin_page_admindashboard",
+      "src_app_admin_reset_password_page",
+      "src_app_admin_reset_password_page_resetpassword",
+      "src_app_t_table_id_menu_page",
+      "src_app_t_table_id_menu_page_cartitem",
+      "src_app_t_table_id_menu_page_tablemenu",
+      "src_app_t_table_id_page",
+      "src_app_t_table_id_page_tablelogin",
+      "src_components_admin_historypanel",
+      "src_components_admin_historypanel_historypanel",
+      "src_components_admin_kitchenpanel",
+      "src_components_admin_kitchenpanel_kitchenpanel",
+      "src_components_admin_menupanel",
+      "src_components_admin_menupanel_menupanel",
+      "src_components_admin_overviewpanel",
+      "src_components_admin_overviewpanel_overviewpanel",
+      "src_components_admin_settingspanel",
+      "src_components_admin_settingspanel_settingspanel",
+      "src_components_admin_staffpanel",
+      "src_components_admin_staffpanel_staffpanel",
+      "src_components_admin_tablesmanagerpanel",
+      "src_components_admin_tablesmanagerpanel_tablesmanagerpanel",
+      "src_components_admin_waiterpanel",
+      "src_components_admin_waiterpanel_waiterpanel",
+      "src_lib_supabase",
+      "src_lib_supabase_supabase"
+    ],
+    "1": [
+      "src_app_api_history_route",
+      "src_app_api_history_route_get",
+      "src_app_api_kds_route",
+      "src_app_api_kds_route_get",
+      "src_app_api_kds_update_route",
+      "src_app_api_kds_update_route_post",
+      "src_app_api_order_create_route",
+      "src_app_api_order_create_route_post",
+      "src_app_api_reset_test_data_route",
+      "src_app_api_reset_test_data_route_post",
+      "src_app_api_salon_route",
+      "src_app_api_salon_route_get",
+      "src_app_api_staff_route",
+      "src_app_api_staff_route_post",
+      "src_app_api_table_attention_route",
+      "src_app_api_table_attention_route_post",
+      "src_app_api_table_checkout_route",
+      "src_app_api_table_checkout_route_post",
+      "src_app_api_table_generate_pin_route",
+      "src_app_api_table_generate_pin_route_post",
+      "src_app_api_table_join_route",
+      "src_app_api_table_join_route_post",
+      "src_lib_db",
+      "src_lib_db_getpoolclient",
+      "src_lib_db_issupabase",
+      "src_lib_db_pool",
+      "src_lib_db_query"
+    ],
+    "2": [
+      "html2canvas",
+      "jspdf",
+      "lucide_react",
+      "next",
+      "package_dependencies",
+      "package_dependencies_html2canvas",
+      "package_dependencies_jspdf",
+      "package_dependencies_lucide_react",
+      "package_dependencies_next",
+      "package_dependencies_pg",
+      "package_dependencies_qrcode_react",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_supabase_supabase_js",
+      "pg",
+      "qrcode_react",
+      "react",
+      "react_dom",
+      "supabase_supabase_js"
+    ],
+    "3": [
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_esnext",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_allowjs",
+      "tsconfig_compileroptions_esmoduleinterop",
+      "tsconfig_compileroptions_incremental",
+      "tsconfig_compileroptions_isolatedmodules",
+      "tsconfig_compileroptions_jsx",
+      "tsconfig_compileroptions_lib",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_noemit",
+      "tsconfig_compileroptions_paths",
+      "tsconfig_compileroptions_plugins",
+      "tsconfig_compileroptions_resolvejsonmodule",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_strict",
+      "tsconfig_compileroptions_target"
+    ],
+    "4": [
+      "eslint",
+      "eslint_config_next",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_config_next",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_pg",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "types_node",
+      "types_pg",
+      "types_react",
+      "types_react_dom",
+      "typescript"
+    ],
+    "5": [
+      "package",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_version"
+    ],
+    "6": [
+      "ref_next_dev_types_ts",
+      "ref_next_env_d_ts",
+      "ref_next_types_ts",
+      "ref_node_modules",
+      "ref_ts",
+      "ref_tsx",
+      "tsconfig",
+      "tsconfig_exclude",
+      "tsconfig_include"
+    ],
+    "7": [
+      "src_lib_schema",
+      "src_lib_schema_menu_categories",
+      "src_lib_schema_menu_items",
+      "src_lib_schema_order_items",
+      "src_lib_schema_orders",
+      "src_lib_schema_session_users",
+      "src_lib_schema_sessions",
+      "src_lib_schema_tables"
+    ],
+    "8": [
+      "src_app_layout",
+      "src_app_layout_inter",
+      "src_app_layout_metadata",
+      "src_app_layout_rootlayout",
+      "src_components_themeprovider",
+      "src_components_themeprovider_themeprovider"
+    ],
+    "9": [
+      "eslint_config",
+      "eslint_config_compat",
+      "eslint_config_dirname",
+      "eslint_config_eslintconfig",
+      "eslint_config_filename"
+    ],
+    "10": [
+      "scripts_migrate",
+      "scripts_migrate_client",
+      "scripts_migrate_fs",
+      "scripts_migrate_path",
+      "scripts_migrate_run"
+    ],
+    "11": [
+      "scripts_update_legacy_staff",
+      "scripts_update_legacy_staff_client",
+      "scripts_update_legacy_staff_crypto",
+      "scripts_update_legacy_staff_run"
+    ],
+    "12": [
+      "scripts_add_access_code",
+      "scripts_add_access_code_client",
+      "scripts_add_access_code_run"
+    ],
+    "13": [
+      "scripts_add_email_staff",
+      "scripts_add_email_staff_client",
+      "scripts_add_email_staff_run"
+    ],
+    "14": [
+      "scripts_add_password_hash",
+      "scripts_add_password_hash_client",
+      "scripts_add_password_hash_run"
+    ],
+    "15": [
+      "scripts_add_waiter_fields",
+      "scripts_add_waiter_fields_client",
+      "scripts_add_waiter_fields_run"
+    ],
+    "16": [
+      "scripts_fix_passwords",
+      "scripts_fix_passwords_client",
+      "scripts_fix_passwords_run"
+    ],
+    "17": [
+      "scripts_migrate_ingredients",
+      "scripts_migrate_ingredients_client",
+      "scripts_migrate_ingredients_run"
+    ],
+    "18": [
+      "scripts_migrate_settings",
+      "scripts_migrate_settings_client",
+      "scripts_migrate_settings_run"
+    ],
+    "19": [
+      "scripts_migrate_staff",
+      "scripts_migrate_staff_client",
+      "scripts_migrate_staff_run"
+    ],
+    "20": [
+      "scripts_reset_mfa",
+      "scripts_reset_mfa_client",
+      "scripts_reset_mfa_run"
+    ],
+    "21": [
+      "scripts_seed_menu",
+      "scripts_seed_menu_client",
+      "scripts_seed_menu_run"
+    ],
+    "22": [
+      "scripts_setup_master_admin",
+      "scripts_setup_master_admin_client",
+      "scripts_setup_master_admin_run"
+    ],
+    "23": [
+      "src_types_database_types",
+      "src_types_database_types_database",
+      "src_types_database_types_json"
+    ],
+    "24": [
+      "next_config",
+      "next_config_nextconfig"
+    ],
+    "25": [
+      "src_app_page",
+      "src_app_page_home"
+    ]
+  },
+  "cohesion": {
+    "0": 0.11954022988505747,
+    "1": 0.150997150997151,
+    "2": 0.10526315789473684,
+    "3": 0.10526315789473684,
+    "4": 0.13333333333333333,
+    "5": 0.2222222222222222,
+    "6": 0.2222222222222222,
+    "7": 0.5,
+    "8": 0.4,
+    "9": 0.4,
+    "10": 0.4,
+    "11": 0.5,
+    "12": 0.6666666666666666,
+    "13": 0.6666666666666666,
+    "14": 0.6666666666666666,
+    "15": 0.6666666666666666,
+    "16": 0.6666666666666666,
+    "17": 0.6666666666666666,
+    "18": 0.6666666666666666,
+    "19": 0.6666666666666666,
+    "20": 0.6666666666666666,
+    "21": 0.6666666666666666,
+    "22": 0.6666666666666666,
+    "23": 0.6666666666666666,
+    "24": 1.0,
+    "25": 1.0
+  },
+  "gods": [
+    {
+      "id": "src_lib_db_query",
+      "label": "query()",
+      "degree": 17
+    },
+    {
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 16
+    },
+    {
+      "id": "src_lib_db_getpoolclient",
+      "label": "getPoolClient()",
+      "degree": 12
+    },
+    {
+      "id": "src_lib_supabase_supabase",
+      "label": "supabase",
+      "degree": 12
+    },
+    {
+      "id": "tsconfig_include",
+      "label": "include",
+      "degree": 6
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 5
+    },
+    {
+      "id": "src_lib_schema_sessions",
+      "label": "sessions",
+      "degree": 4
+    },
+    {
+      "id": "src_lib_schema_orders",
+      "label": "orders",
+      "degree": 4
+    },
+    {
+      "id": "tsconfig_compileroptions_lib",
+      "label": "lib",
+      "degree": 4
+    },
+    {
+      "id": "package_dependencies_jspdf",
+      "label": "jspdf",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "TablesManagerPanel()",
+      "target": "jspdf",
+      "source_files": [
+        "src/components/admin/TablesManagerPanel.tsx",
+        "package.json"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "GET()",
+      "target": "query()",
+      "source_files": [
+        "src/app/api/history/route.ts",
+        "src/lib/db.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `GET()` unexpectedly reaches hub `query()`"
+    },
+    {
+      "source": "GET()",
+      "target": "query()",
+      "source_files": [
+        "src/app/api/kds/route.ts",
+        "src/lib/db.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `GET()` unexpectedly reaches hub `query()`"
+    },
+    {
+      "source": "POST()",
+      "target": "query()",
+      "source_files": [
+        "src/app/api/kds/update/route.ts",
+        "src/lib/db.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `POST()` unexpectedly reaches hub `query()`"
+    },
+    {
+      "source": "POST()",
+      "target": "getPoolClient()",
+      "source_files": [
+        "src/app/api/order/create/route.ts",
+        "src/lib/db.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `POST()` unexpectedly reaches hub `getPoolClient()`"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `dependencies` connect `Community 2` to `Community 5`?",
+      "why": "High betweenness centrality (0.107) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `jspdf` connect `Community 2` to `Community 0`?",
+      "why": "High betweenness centrality (0.082) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `TablesManagerPanel()` connect `Community 0` to `Community 2`?",
+      "why": "High betweenness centrality (0.080) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `__filename`, `__dirname`, `compat` to the rest of the system?",
+      "why": "74 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.11954022988505747 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 2` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 3` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected."
+    }
+  ]
+}

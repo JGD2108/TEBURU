@@ -14,7 +14,7 @@ vi.mock('@/lib/supabase', () => ({
   },
 }));
 
-import { staffFetch } from './api-client';
+import { ApiClientError, readApiResponse, requireApiSuccess, staffFetch } from './api-client';
 
 function createMemoryStorage() {
   const store = new Map<string, string>();
@@ -60,5 +60,59 @@ describe('staffFetch', () => {
     const headers = requestInit.headers as Headers;
     expect(headers.get('Authorization')).toBe('Bearer abc123');
     expect(headers.get('X-Restaurant-ID')).toBe('rest-456');
+  });
+});
+
+describe('deployment-safe API response handling', () => {
+  it.each([
+    [404, 'text/html', '<html>Not found</html>'],
+    [413, 'text/plain', 'Request Entity Too Large'],
+  ])('does not JSON-parse a non-JSON %i response', async (status, contentType, body) => {
+    const response = new Response(body, {
+      status,
+      headers: { 'content-type': contentType, 'x-vercel-id': 'iad1::request-1' },
+    });
+
+    await expect(readApiResponse(response)).rejects.toMatchObject({
+      name: 'ApiClientError',
+      status,
+      requestId: 'iad1::request-1',
+      retryable: true,
+    } satisfies Partial<ApiClientError>);
+  });
+
+  it('preserves the application error code, message, and request identifier', () => {
+    const response = new Response(JSON.stringify({
+      error: {
+        code: 'IMPORT_STORAGE_UNAVAILABLE',
+        message: 'La importaciÃ³n estÃ¡ temporalmente no disponible.',
+        requestId: 'request-2',
+      },
+    }), { status: 503, headers: { 'content-type': 'application/json' } });
+
+    expect(() => requireApiSuccess(response, {
+      error: {
+        code: 'IMPORT_STORAGE_UNAVAILABLE',
+        message: 'La importaciÃ³n estÃ¡ temporalmente no disponible.',
+        requestId: 'request-2',
+      },
+    }, 'Error inesperado')).toThrowError(ApiClientError);
+
+    try {
+      requireApiSuccess(response, {
+        error: {
+          code: 'IMPORT_STORAGE_UNAVAILABLE',
+          message: 'La importaciÃ³n estÃ¡ temporalmente no disponible.',
+          requestId: 'request-2',
+        },
+      }, 'Error inesperado');
+    } catch (error) {
+      expect(error).toMatchObject({
+        status: 503,
+        code: 'IMPORT_STORAGE_UNAVAILABLE',
+        requestId: 'request-2',
+        message: 'La importaciÃ³n estÃ¡ temporalmente no disponible.',
+      });
+    }
   });
 });

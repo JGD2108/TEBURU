@@ -1,8 +1,8 @@
 'use client';
 
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, Check, FileText, ImageIcon, Loader2, Pencil, Trash2, Upload } from 'lucide-react';
-import { staffFetch } from '@/lib/api-client';
+import { readApiResponse, requireApiSuccess, staffFetch } from '@/lib/api-client';
 
 type DraftCategory = { id: string; name: string };
 type DraftItem = {
@@ -36,6 +36,8 @@ type ImportJob = {
   items?: DraftItem[];
   validation_errors?: Array<{ item_id?: string; fields?: string[]; message?: string }>;
 };
+type UploadAuthorization = { id: string; uploadUrl: string; token: string; expiresAt: string; maxBytes: number; contentType: string };
+type ImportReadiness = { available?: boolean; message?: string; maxPdfBytes?: number };
 
 const panelStyle = { background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' } as const;
 const inputStyle = { width: '100%', padding: '9px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' } as const;
@@ -52,20 +54,45 @@ function fieldProblems(item: DraftItem) {
   return [...new Set(problems)];
 }
 
+async function staffJson<T extends Record<string, unknown>>(input: RequestInfo | URL, init: RequestInit | undefined, fallback: string) {
+  const response = await staffFetch(input, init);
+  const payload = await readApiResponse<T>(response, fallback);
+  return requireApiSuccess(response, payload, fallback);
+}
+
+function uploadPdfDirectly(authorization: UploadAuthorization, file: File, onProgress: (progress: number) => void, signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    const abort = () => request.abort();
+    signal.addEventListener('abort', abort, { once: true });
+    request.open('PUT', authorization.uploadUrl);
+    request.setRequestHeader('Content-Type', authorization.contentType || 'application/pdf');
+    request.upload.onprogress = (event) => { if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100)); };
+    request.onerror = () => reject(new Error('No se pudo subir el PDF. Comprueba tu conexión e inténtalo de nuevo.'));
+    request.onabort = () => reject(new DOMException('Carga cancelada', 'AbortError'));
+    request.onload = () => request.status >= 200 && request.status < 300
+      ? resolve()
+      : reject(new Error('El almacenamiento rechazó el PDF. Inténtalo de nuevo.'));
+    request.onloadend = () => signal.removeEventListener('abort', abort);
+    request.send(file);
+  });
+}
+
 export default function MenuImportPanel() {
   const [imports, setImports] = useState<ImportJob[]>([]);
   const [selected, setSelected] = useState<ImportJob | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [readiness, setReadiness] = useState<ImportReadiness | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [publishErrors, setPublishErrors] = useState<string[]>([]);
+  const uploadAbort = useRef<AbortController | null>(null);
 
   const loadImports = useCallback(async (keepSelected = true) => {
-    const response = await staffFetch('/api/admin/menu-import');
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || 'No se pudieron cargar las importaciones');
+    const payload = await staffJson<{ imports?: ImportJob[]; data?: ImportJob[] }>('/api/admin/menu-import', undefined, 'No se pudieron cargar las importaciones. Inténtalo de nuevo.');
     const jobs = (payload.imports ?? payload.data ?? []) as ImportJob[];
     setImports(jobs);
     setSelected((current) => keepSelected && current ? jobs.find((job) => job.id === current.id) ?? current : jobs[0] ?? null);
@@ -73,9 +100,7 @@ export default function MenuImportPanel() {
   }, []);
 
   const loadSelected = useCallback(async (id: string) => {
-    const response = await staffFetch(`/api/admin/menu-import/${encodeURIComponent(id)}`);
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || 'No se pudo cargar el borrador');
+    const payload = await staffJson<{ import?: ImportJob; data?: ImportJob; draft?: ImportJob['draft'] }>(`/api/admin/menu-import/${encodeURIComponent(id)}`, undefined, 'No se pudo cargar el borrador. Inténtalo de nuevo.');
     const job = { ...(payload.import ?? payload.data ?? payload), draft: payload.draft } as ImportJob;
     setSelected(job);
     setImports((current) => current.map((entry) => entry.id === job.id ? { ...entry, ...job } : entry));
@@ -87,47 +112,67 @@ export default function MenuImportPanel() {
   }, [loadImports]);
 
   useEffect(() => {
+    let active = true;
+    fetch('/api/public/settings')
+      .then(async (response) => readApiResponse<{ importReadiness?: ImportReadiness; data?: { importReadiness?: ImportReadiness } }>(response, 'La disponibilidad de importación no se pudo comprobar.'))
+      .then((payload) => { if (active) setReadiness(payload.importReadiness ?? payload.data?.importReadiness ?? { available: false, message: 'La importación no está disponible temporalmente.' }); })
+      .catch((error: Error) => { if (active) setReadiness({ available: false, message: error.message }); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
     if (!selected || !['pending', 'processing'].includes(selected.status)) return;
     const interval = window.setInterval(() => loadSelected(selected.id).catch(() => undefined), 3000);
     return () => window.clearInterval(interval);
   }, [loadSelected, selected]);
 
   const validationCount = useMemo(() => jobDraft(selected).items.filter((item) => item.review_status !== 'excluded' && fieldProblems(item).length > 0).length, [selected]);
+  const importUnavailable = readiness?.available === false;
 
   async function upload(event: React.FormEvent) {
     event.preventDefault();
     if (!file) return;
+    if (!readiness || importUnavailable) { setMessage(readiness?.message || 'Comprobando la disponibilidad de importación. Inténtalo de nuevo en un momento.'); return; }
+    if (readiness?.maxPdfBytes && file.size > readiness.maxPdfBytes) { setMessage('El PDF supera el tamaño permitido para importación.'); return; }
     if (file.type !== 'application/pdf' || file.size === 0) { setMessage('Selecciona un PDF válido que no esté vacío.'); return; }
-    setSubmitting(true); setMessage(null);
+    setSubmitting(true); setMessage(null); setUploadProgress(0);
     try {
-      const body = new FormData(); body.append('file', file);
-      const response = await staffFetch('/api/admin/menu-import', { method: 'POST', body });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || 'No se pudo iniciar el análisis');
-      const created = (payload.import ?? payload.data ?? payload) as ImportJob;
+      const authorizationPayload = await staffJson<{ data?: { authorization?: UploadAuthorization } }>('/api/admin/menu-import/upload-authorizations', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }),
+      }, 'No se pudo preparar la carga del PDF. Inténtalo de nuevo.');
+      const authorization = authorizationPayload.data?.authorization;
+      if (!authorization) throw new Error('No se recibió autorización para subir el PDF. Inténtalo de nuevo.');
+      if (file.size > authorization.maxBytes) throw new Error('El PDF supera el tamaño permitido para importación.');
+      const controller = new AbortController();
+      uploadAbort.current = controller;
+      await uploadPdfDirectly(authorization, file, setUploadProgress, controller.signal);
+      const finalized = await staffJson<{ data?: { import?: ImportJob } }>('/api/admin/menu-import/finalize', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ authorizationId: authorization.id, token: authorization.token }),
+      }, 'El PDF se subió, pero no se pudo iniciar el análisis. Inténtalo de nuevo.');
+      const created = finalized.data?.import;
+      if (!created) throw new Error('No se pudo iniciar el análisis del PDF. Inténtalo de nuevo.');
       setFile(null); setSelected(created); setImports((current) => [created, ...current.filter((job) => job.id !== created.id)]);
       setMessage('PDF recibido. El análisis se está ejecutando en segundo plano.');
-    } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo subir el PDF'); }
-    finally { setSubmitting(false); }
+    } catch (error) {
+      setMessage(error instanceof DOMException && error.name === 'AbortError' ? 'La carga fue cancelada. Puedes reintentarlo con el mismo PDF.' : error instanceof Error ? error.message : 'No se pudo subir el PDF');
+    } finally { uploadAbort.current = null; setSubmitting(false); setUploadProgress(null); }
   }
 
   async function openSource() {
     if (!selected) return;
-    const response = await staffFetch(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/source`);
-    const payload = await response.json();
-    if (!response.ok) { setMessage(payload.error || 'No se pudo abrir el documento fuente'); return; }
-    window.open(payload.url ?? payload.signedUrl, '_blank', 'noopener,noreferrer');
+    let payload: { data?: { url?: string; signedUrl?: string }; url?: string; signedUrl?: string };
+    try { payload = await staffJson(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/source`, undefined, 'No se pudo abrir el documento fuente. Inténtalo de nuevo.'); }
+    catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo abrir el documento fuente.'); return; }
+    window.open(payload.data?.url ?? payload.data?.signedUrl ?? payload.url ?? payload.signedUrl, '_blank', 'noopener,noreferrer');
   }
 
   async function saveItem(item: DraftItem, patch: Partial<DraftItem>) {
     if (!selected) return;
     setSavingId(item.id); setMessage(null);
     try {
-      const response = await staffFetch(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/draft-items/${encodeURIComponent(item.id)}`, {
+      await staffJson(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/draft-items/${encodeURIComponent(item.id)}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
-      });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || 'No se pudo guardar el borrador');
+      }, 'No se pudo guardar el borrador. Inténtalo de nuevo.');
       await loadSelected(selected.id);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo guardar el borrador'); }
     finally { setSavingId(null); }
@@ -137,9 +182,7 @@ export default function MenuImportPanel() {
     if (!selected || !window.confirm(`¿Quitar “${item.name || 'este platillo'}” del borrador?`)) return;
     setSavingId(item.id);
     try {
-      const response = await staffFetch(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/draft-items/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || 'No se pudo quitar el platillo');
+      await staffJson(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/draft-items/${encodeURIComponent(item.id)}`, { method: 'DELETE' }, 'No se pudo quitar el platillo. Inténtalo de nuevo.');
       await loadSelected(selected.id);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo quitar el platillo'); }
     finally { setSavingId(null); }
@@ -153,12 +196,15 @@ export default function MenuImportPanel() {
     setSubmitting(true);
     try {
       const response = await staffFetch(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/publish`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'append' }) });
-      const payload = await response.json();
+      const payload = await readApiResponse<{ validation_errors?: unknown[]; errors?: unknown[]; error?: string | { message?: string } }>(response, 'No se pudo publicar este borrador. Inténtalo de nuevo.');
       if (!response.ok) {
-        setPublishErrors((payload.validation_errors ?? payload.errors ?? [payload.error || 'No se puede publicar este borrador']).map((entry: unknown) => typeof entry === 'string' ? entry : (entry as { message?: string }).message || 'Campo incompleto'));
+        const errorMessage = typeof payload.error === 'object' ? payload.error?.message : payload.error;
+        setPublishErrors((payload.validation_errors ?? payload.errors ?? [errorMessage || 'No se puede publicar este borrador']).map((entry: unknown) => typeof entry === 'string' ? entry : (entry as { message?: string }).message || 'Campo incompleto'));
         return;
       }
       await loadSelected(selected.id); setMessage('El borrador se agregó al menú actual.');
+    } catch (error) {
+      setPublishErrors([error instanceof Error ? error.message : 'No se pudo publicar este borrador.']);
     } finally { setSubmitting(false); }
   }
 
@@ -171,8 +217,10 @@ export default function MenuImportPanel() {
       <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>El menú actual no cambia hasta que revises y publiques este borrador.</p>
       <form onSubmit={upload} style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
         <input aria-label="Archivo PDF del menú" type="file" accept="application/pdf,.pdf" onChange={(event: ChangeEvent<HTMLInputElement>) => setFile(event.target.files?.[0] ?? null)} />
-        <button className="btn-primary" disabled={!file || submitting} type="submit"><Upload size={16} /> {submitting ? 'Subiendo...' : 'Analizar PDF'}</button>
+        <button className="btn-primary" disabled={!file || submitting || !readiness || importUnavailable} type="submit"><Upload size={16} /> {submitting ? 'Subiendo...' : 'Analizar PDF'}</button>
+        {submitting && uploadProgress !== null && <><span role="status">Subiendo: {uploadProgress}%</span><button className="btn-secondary" type="button" onClick={() => uploadAbort.current?.abort()}>Cancelar carga</button></>}
       </form>
+      {readiness && importUnavailable && <p role="alert" style={{ marginBottom: 0, color: 'var(--primary)' }}>{readiness.message || 'La importación no está disponible temporalmente.'}</p>}
       {message && <p role="status" style={{ marginBottom: 0, color: 'var(--primary)' }}>{message}</p>}
     </div>
 

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { requireRole, query, getPoolClient, ensureMenuImportBucket, menuImportStorage } = vi.hoisted(() => ({
@@ -15,6 +16,9 @@ import { GET as getImport } from './[id]/route';
 import { GET as getSource } from './[id]/source/route';
 import { PATCH as updateDraft } from './[id]/draft-items/[itemId]/route';
 import { POST as publish } from './[id]/publish/route';
+import { POST as authorizeUpload } from './upload-authorizations/route';
+import { POST as finalizeUpload } from './finalize/route';
+import { GET as publicSettings } from '@/app/api/public/settings/route';
 
 const staff = { userId: 'admin-1', name: 'Admin', role: 'admin', restaurantId: 'restaurant-a', isPlatformAdmin: false };
 const context = (id = 'import-a', itemId = 'item-a') => ({ params: Promise.resolve({ id, itemId }) });
@@ -22,6 +26,14 @@ const context = (id = 'import-a', itemId = 'item-a') => ({ params: Promise.resol
 function uploadRequest(file: File) {
   const form = new FormData(); form.set('file', file);
   return new Request('http://localhost/api/admin/menu-import', { method: 'POST', body: form });
+}
+
+function jsonRequest(url: string, body: unknown, requestId = 'request-1') {
+  return new Request(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-request-id': requestId },
+    body: JSON.stringify(body),
+  });
 }
 
 describe('PDF menu import APIs', () => {
@@ -116,7 +128,7 @@ describe('PDF menu import APIs', () => {
       .mockResolvedValueOnce({ rows: [] }); // COMMIT
     const response = await publish(new Request('http://localhost', { method: 'POST', body: JSON.stringify({ mode: 'append' }) }), context());
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ published: 1 });
+    expect(await response.json()).toEqual(expect.objectContaining({ data: { published: 1 }, published: 1, requestId: expect.any(String) }));
     expect(client.query.mock.calls.some((call: unknown[]) => {
       const [sql, params] = call as [string, unknown[]];
       return sql.includes('INSERT INTO menu_items') && params[0] === 'restaurant-a';
@@ -128,5 +140,123 @@ describe('PDF menu import APIs', () => {
     const response = await publish(new Request('http://localhost', { method: 'POST', body: JSON.stringify({ mode: 'replace' }) }), context());
     expect(response.status).toBe(400);
     expect(getPoolClient).not.toHaveBeenCalled();
+  });
+});
+
+describe('deployment-safe menu import upload APIs', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireRole.mockResolvedValue(staff);
+  });
+
+  it('keeps public settings valid JSON and reports import readiness without a table id', async () => {
+    menuImportStorage.mockReturnValue(null);
+    const response = await publicSettings(new Request('http://localhost/api/public/settings', { headers: { 'x-request-id': 'settings-1' } }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('application/json');
+    expect(await response.json()).toEqual({
+      data: null,
+      importReadiness: expect.objectContaining({
+        available: false,
+        code: 'IMPORT_STORAGE_UNAVAILABLE',
+        maxPdfBytes: 20 * 1024 * 1024,
+      }),
+      requestId: 'settings-1',
+    });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid upload authorization request with the JSON error envelope', async () => {
+    const response = await authorizeUpload(jsonRequest('http://localhost/api/admin/menu-import/upload-authorizations', {
+      filename: 'menu.pdf', size: 0, contentType: 'application/pdf',
+    }));
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get('content-type')).toContain('application/json');
+    expect(await response.json()).toEqual({
+      error: expect.objectContaining({ code: 'IMPORT_UPLOAD_INVALID', requestId: 'request-1' }),
+    });
+    expect(ensureMenuImportBucket).not.toHaveBeenCalled();
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('authorizes a configured-limit PDF through a small control request', async () => {
+    const createSignedUploadUrl = vi.fn().mockResolvedValue({ data: { signedUrl: 'https://storage.example/upload' }, error: null });
+    ensureMenuImportBucket.mockResolvedValue({ storage: { from: vi.fn().mockReturnValue({ createSignedUploadUrl }) } });
+    query.mockResolvedValue({ rows: [{ expires_at: '2030-01-01T00:00:00.000Z' }] });
+    const body = { filename: 'large-menu.pdf', size: 20 * 1024 * 1024, contentType: 'application/pdf' };
+
+    const response = await authorizeUpload(jsonRequest('http://localhost/api/admin/menu-import/upload-authorizations', body));
+    const payload = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(JSON.stringify(body).length).toBeLessThan(200);
+    expect(payload.data.authorization).toEqual(expect.objectContaining({
+      uploadUrl: 'https://storage.example/upload', maxBytes: 20 * 1024 * 1024, contentType: 'application/pdf',
+    }));
+    expect(createSignedUploadUrl).toHaveBeenCalledWith(expect.stringContaining('restaurants/restaurant-a/pending/'));
+    expect(query.mock.calls[0][1]).toEqual(expect.arrayContaining(['restaurant-a', 'admin-1', 'large-menu.pdf', 20 * 1024 * 1024]));
+  });
+
+  it('does not finalize a missing or cross-restaurant authorization', async () => {
+    const client = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValue(client);
+    client.query.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] });
+
+    const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-b', token: 'token-b' }));
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: expect.objectContaining({ code: 'IMPORT_UPLOAD_INVALID' }) });
+    expect(client.query.mock.calls[1][1]).toEqual(['auth-b', 'restaurant-a']);
+    expect(menuImportStorage).not.toHaveBeenCalled();
+    expect(client.release).toHaveBeenCalledOnce();
+  });
+
+  it('rejects an expired authorization without creating an import job', async () => {
+    const client = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValue(client);
+    client.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'auth-a', token_hash: createHash('sha256').update('token-a').digest('hex'), expires_at: '2000-01-01T00:00:00.000Z', import_job_id: null }] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token: 'token-a' }));
+
+    expect(response.status).toBe(410);
+    expect(await response.json()).toEqual({ error: expect.objectContaining({ code: 'IMPORT_UPLOAD_EXPIRED' }) });
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_jobs'))).toBe(false);
+  });
+
+  it('creates once and returns the same import when finalization is retried', async () => {
+    const token = 'token-a';
+    const record = { id: 'auth-a', storage_path: 'restaurants/restaurant-a/pending/auth-a.pdf', source_filename: 'menu.pdf', expected_size_bytes: 100, expires_at: '2030-01-01T00:00:00.000Z', token_hash: createHash('sha256').update(token).digest('hex'), import_job_id: null };
+    const importJob = { id: 'import-a', status: 'pending', source_filename: 'menu.pdf', source_size_bytes: 100, created_at: '2026-01-01T00:00:00.000Z' };
+    const firstClient = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValueOnce(firstClient);
+    firstClient.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [record] })
+      .mockResolvedValueOnce({ rows: [importJob] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ list: vi.fn().mockResolvedValue({ data: [{ name: 'auth-a.pdf', metadata: { size: 100, mimetype: 'application/pdf' } }] }) }) } });
+
+    const initial = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token }));
+    expect(initial.status).toBe(201);
+    expect(await initial.json()).toEqual({ data: { import: importJob }, requestId: 'request-1' });
+
+    const retryClient = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValueOnce(retryClient);
+    retryClient.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ ...record, import_job_id: 'import-a' }] })
+      .mockResolvedValueOnce({ rows: [importJob] })
+      .mockResolvedValueOnce({ rows: [] });
+    const retry = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token }));
+
+    expect(retry.status).toBe(200);
+    expect(await retry.json()).toEqual({ data: { import: importJob }, requestId: 'request-1' });
+    expect(retryClient.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_jobs'))).toBe(false);
   });
 });

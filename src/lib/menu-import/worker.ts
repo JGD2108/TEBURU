@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { getPoolClient } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import { analyzePdf, createPdfAnalysisProvider } from './provider';
 import type { AnalysisResult, Confidence, ExtractedImage, PdfAnalysisProvider } from './types';
 
@@ -58,14 +59,20 @@ export async function processNextMenuImport(reader: SourceReader, provider: PdfA
   try {
     await client.query('BEGIN'); job = await claimJob(client);
     if (!job) { await client.query('COMMIT'); return null; }
+    logger.info('menu_import.analysis_started', { importId: job.id, restaurantId: job.restaurant_id });
     const pdf = await reader(job.source_storage_path);
     const result = await analyzePdf(pdf, provider);
     await persistDraft(client, job, result, writeAsset);
     await client.query(`UPDATE menu_import_jobs SET status = 'needs_review', updated_at = now() WHERE id = $1`, [job.id]);
-    await client.query('COMMIT'); return job.id;
+    await client.query('COMMIT');
+    logger.info('menu_import.analysis_ready_for_review', { importId: job.id, restaurantId: job.restaurant_id });
+    return job.id;
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined);
-    if (job) await client.query(`UPDATE menu_import_jobs SET status = 'failed', failure_reason = $2, updated_at = now() WHERE id = $1`, [job.id, error instanceof Error ? error.message.slice(0, 1000) : 'Unknown analysis failure']);
+    if (job) {
+      await client.query(`UPDATE menu_import_jobs SET status = 'failed', failure_reason = $2, updated_at = now() WHERE id = $1`, [job.id, error instanceof Error ? error.message.slice(0, 1000) : 'Unknown analysis failure']);
+      logger.error('menu_import.analysis_failed', error, { importId: job.id, restaurantId: job.restaurant_id });
+    }
     throw error;
   } finally { client.release(); }
 }

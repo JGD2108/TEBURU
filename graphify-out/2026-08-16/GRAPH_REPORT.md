@@ -1,11 +1,11 @@
 # Graph Report - teburuapp  (2026-08-16)
 
 ## Corpus Check
-- 167 files · ~72,266 words
+- 169 files · ~72,780 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 771 nodes · 1411 edges · 85 communities (57 shown, 28 thin omitted)
+- 777 nodes · 1418 edges · 96 communities (65 shown, 31 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
@@ -61,7 +61,7 @@
 - ADDED Requirements
 - vercel.json
 - verify-remote-security.mjs
-- requireRole
+- finalize/route.ts
 - openspec-explore/SKILL.md
 - Decisions
 - session_tables
@@ -87,8 +87,19 @@
 - fix-menu-import-upload-finalize/proposal.md
 - fix-menu-import-upload-finalize/design.md
 - fix-menu-import-upload-finalize/tasks.md
-- jspdf
-- @supabase/supabase-js
+- auth.ts
+- staff/route.ts
+- supabase.ts
+- restaurants/route.ts
+- bulk/route.ts
+- update/route.ts
+- deliver/route.ts
+- checkout/route.ts
+- bill-split.ts
+- error-context.md
+- health/route.ts
+- lucide-react
+- @types/react-dom
 
 ## God Nodes (most connected - your core abstractions)
 1. `isAuthorizationFailure()` - 81 edges
@@ -107,37 +118,37 @@
   src/components/admin/TablesManagerPanel.tsx → package.json
 - `AdminDashboard()` --calls--> `isLocalDemo()`  [EXTRACTED]
   src/app/admin/page.tsx → src/lib/demo.ts
+- `GET()` --calls--> `query()`  [EXTRACTED]
+  src/app/api/health/route.ts → src/lib/db.ts
 - `PATCH()` --calls--> `isAuthorizationFailure()`  [EXTRACTED]
   src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
-- `PATCH()` --calls--> `query()`  [EXTRACTED]
-  src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/db.ts
-- `DELETE()` --calls--> `isAuthorizationFailure()`  [EXTRACTED]
+- `PATCH()` --calls--> `requireRole()`  [EXTRACTED]
   src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (85 total, 28 thin omitted)
+## Communities (96 total, 31 thin omitted)
 
 ### Community 0 - "isLocalDemo"
 Cohesion: 0.17
-Nodes (15): accessDestination(), AdminLogin(), AuthStep, AdminDashboard(), emptyForm, PlatformPage(), Restaurant, CartItem (+7 more)
+Nodes (16): accessDestination(), AdminLogin(), AuthStep, emptyForm, PlatformPage(), Restaurant, CartItem, TableMenu() (+8 more)
 
 ### Community 1 - "isAuthorizationFailure"
-Cohesion: 0.07
-Nodes (49): POST(), { requireRole, query }, DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query } (+41 more)
+Cohesion: 0.17
+Nodes (26): DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query }, GET(), PATCH() (+18 more)
 
 ### Community 2 - "dependencies"
 Cohesion: 0.12
-Nodes (17): html2canvas, lucide-react, next, dependencies, html2canvas, lucide-react, next, pdfjs-dist (+9 more)
+Nodes (17): html2canvas, next, dependencies, html2canvas, next, pdfjs-dist, pg, qrcode.react (+9 more)
 
 ### Community 3 - "compilerOptions"
 Cohesion: 0.07
 Nodes (27): dom, dom.iterable, esnext, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts, node_modules, **/*.ts (+19 more)
 
 ### Community 4 - "devDependencies"
-Cohesion: 0.11
-Nodes (19): eslint, eslint-config-next, devDependencies, eslint, eslint-config-next, @playwright/test, @types/node, @types/pg (+11 more)
+Cohesion: 0.12
+Nodes (17): eslint, eslint-config-next, devDependencies, eslint, eslint-config-next, @playwright/test, @types/node, @types/pg (+9 more)
 
 ### Community 5 - "What You Must Do When Invoked"
 Cohesion: 0.08
@@ -200,8 +211,8 @@ Cohesion: 0.29
 Nodes (6): Available subagents, graphify, Subagents for OpenSpec changes, This is NOT the Next.js you know, Using subagents with `openspec apply`, When to spawn each subagent
 
 ### Community 37 - "db.ts"
-Cohesion: 0.06
-Nodes (40): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions, nextStatuses, POST(), priorities, { getPoolClient, requireRole, client } (+32 more)
+Cohesion: 0.14
+Nodes (25): POST(), POST(), POST(), ImportedItem, POST(), POST(), GET(), GET() (+17 more)
 
 ### Community 39 - "202608050000_initial_schema.sql"
 Cohesion: 0.13
@@ -219,9 +230,9 @@ Nodes (6): Ambientes, Backup y restauración, Despliegue y rollback, Operación 
 Cohesion: 0.10
 Nodes (19): ADDED Requirements, Purpose, Requirement: Controlled publication to the restaurant menu, Requirement: Menu structure extraction, Requirement: Restaurant-scoped PDF import submission, Requirement: Review before live-menu publication, Requirement: Source visual preservation and image suggestions, Scenario: Administrator appends an approved draft (+11 more)
 
-### Community 49 - "requireRole"
+### Community 49 - "finalize/route.ts"
 Cohesion: 0.13
-Nodes (39): Authorization, POST(), StorageObject, verifyAuthorizedUpload(), DELETE(), PATCH(), POST(), GET() (+31 more)
+Nodes (38): Authorization, POST(), StorageObject, verifyAuthorizedUpload(), DELETE(), PATCH(), POST(), GET() (+30 more)
 
 ### Community 52 - "openspec-explore/SKILL.md"
 Cohesion: 0.18
@@ -248,16 +259,16 @@ Cohesion: 0.40
 Nodes (4): 1. Import foundation and storage, 2. Document analysis pipeline, 3. Draft review experience, 4. Publication and verification
 
 ### Community 64 - "admin/page.tsx"
-Cohesion: 0.16
-Nodes (15): HistoryPanel(), OverviewPanel(), SettingsPanel(), StaffPanel(), Draft, MenuItem, Station, StationsPanel() (+7 more)
+Cohesion: 0.15
+Nodes (17): jspdf, jspdf, AdminDashboard(), HistoryPanel(), MenuPanel(), OverviewPanel(), SettingsPanel(), StaffPanel() (+9 more)
 
 ### Community 70 - "KitchenPanel.tsx"
-Cohesion: 0.13
-Nodes (14): MenuRow, OnboardingPage(), parseMenu(), ConnectionState, KitchenItem, KitchenPanel(), KitchenStatus, lanes (+6 more)
+Cohesion: 0.18
+Nodes (10): ConnectionState, KitchenItem, KitchenPanel(), KitchenStatus, lanes, nextPriority, Priority, priorityLabels (+2 more)
 
 ### Community 71 - "MenuImportPanel.tsx"
-Cohesion: 0.13
-Nodes (16): CompletedUpload, DraftCategory, DraftItem, DraftItemCard(), Evidence, fieldProblems(), ImportJob, ImportReadiness (+8 more)
+Cohesion: 0.14
+Nodes (15): CompletedUpload, DraftCategory, DraftItem, DraftItemCard(), Evidence, fieldProblems(), ImportJob, ImportReadiness (+7 more)
 
 ### Community 72 - "ADDED Requirements"
 Cohesion: 0.17
@@ -303,25 +314,57 @@ Nodes (5): Context, Decisions, Goals / Non-Goals, Migration Plan, Risks / Trade-
 Cohesion: 0.50
 Nodes (3): 1. Finalize contract, 2. UI recovery, 3. Verification
 
+### Community 83 - "auth.ts"
+Cohesion: 0.18
+Nodes (10): POST(), { requireRole, query }, AccessRow, GET(), { requireAuthenticatedUser, query }, GET(), authClient(), requireAuthenticatedUser() (+2 more)
+
+### Community 84 - "staff/route.ts"
+Cohesion: 0.31
+Nodes (6): adminClient(), DELETE(), GET(), POST(), { query, requireRole, createUser, deleteUser }, staffRoles
+
+### Community 85 - "supabase.ts"
+Cohesion: 0.36
+Nodes (4): MenuRow, OnboardingPage(), parseMenu(), supabase
+
+### Community 86 - "restaurants/route.ts"
+Cohesion: 0.43
+Nodes (6): PATCH(), authAdmin(), GET(), POST(), slugify(), requirePlatformAdmin()
+
+### Community 87 - "bulk/route.ts"
+Cohesion: 0.33
+Nodes (4): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions
+
+### Community 88 - "update/route.ts"
+Cohesion: 0.33
+Nodes (4): nextStatuses, POST(), priorities, { getPoolClient, requireRole, client }
+
+### Community 91 - "bill-split.ts"
+Cohesion: 0.40
+Nodes (3): BillParticipantInput, BillSplitMode, guests
+
+### Community 92 - "error-context.md"
+Cohesion: 0.40
+Nodes (4): Error details, Instructions, Test info, Test source
+
 ## Knowledge Gaps
-- **294 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+289 more)
+- **298 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+293 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `dependencies` connect `dependencies` to `jspdf`, `@supabase/supabase-js`, `package.json`?**
+- **Why does `dependencies` connect `dependencies` to `admin/page.tsx`, `lucide-react`, `package.json`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `jspdf` connect `jspdf` to `admin/page.tsx`, `dependencies`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
-- **Why does `TablesManagerPanel()` connect `admin/page.tsx` to `jspdf`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `jspdf` connect `admin/page.tsx` to `dependencies`?**
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **What connects `required`, `missing`, `eslintConfig` to the rest of the system?**
-  _294 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `isAuthorizationFailure` be split into smaller, more focused modules?**
-  _Cohesion score 0.06960385042576823 - nodes in this community are weakly interconnected._
+  _298 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
   _Cohesion score 0.07142857142857142 - nodes in this community are weakly interconnected._
+- **Should `devDependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
+- **Should `What You Must Do When Invoked` be split into smaller, more focused modules?**
+  _Cohesion score 0.08 - nodes in this community are weakly interconnected._

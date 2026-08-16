@@ -1249,7 +1249,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "[itemid]/route.ts"
     },
     {
@@ -1261,7 +1261,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route_patch",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "patch()"
     },
     {
@@ -1273,7 +1273,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route_delete",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "delete()"
     },
     {
@@ -1284,7 +1284,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_publish_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "publish/route.ts"
     },
     {
@@ -1296,7 +1296,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_publish_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "post()"
     },
     {
@@ -1307,7 +1307,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "[id]/route.ts"
     },
     {
@@ -1319,7 +1319,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "get()"
     },
     {
@@ -1330,7 +1330,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_source_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "source/route.ts"
     },
     {
@@ -1342,7 +1342,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_source_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "get()"
     },
     {
@@ -1353,7 +1353,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "finalize/route.ts"
     },
     {
@@ -1366,7 +1366,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_authorization",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "authorization"
     },
     {
@@ -1379,31 +1379,56 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_storageobject",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "storageobject"
+    },
+    {
+      "label": "StorageObjectInfo",
+      "file_type": "code",
+      "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
+      "source_location": "L14",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "src_app_api_admin_menu_import_finalize_route_storageobjectinfo",
+      "community": 49,
+      "community_name": "requireRole",
+      "norm_label": "storageobjectinfo"
+    },
+    {
+      "label": "validateStoredPdf()",
+      "file_type": "code",
+      "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
+      "source_location": "L21",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_app_api_admin_menu_import_finalize_route_validatestoredpdf",
+      "community": 49,
+      "community_name": "requireRole",
+      "norm_label": "validatestoredpdf()"
     },
     {
       "label": "verifyAuthorizedUpload()",
       "file_type": "code",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L15",
+      "source_location": "L41",
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_verifyauthorizedupload",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "verifyauthorizedupload()"
     },
     {
       "label": "POST()",
       "file_type": "code",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L35",
+      "source_location": "L59",
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "post()"
     },
     {
@@ -1414,7 +1439,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "admin/menu-import/route.ts"
     },
     {
@@ -1426,7 +1451,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "get()"
     },
     {
@@ -1438,7 +1463,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "post()"
     },
     {
@@ -1449,7 +1474,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "menu-import/routes.test.ts"
     },
     {
@@ -1460,7 +1485,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_requirerole_query_getpoolclient_ensuremenuimportbucket_menuimportstorage",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "{ requirerole, query, getpoolclient, ensuremenuimportbucket, menuimportstorage }"
     },
     {
@@ -1471,7 +1496,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_staff",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "staff"
     },
     {
@@ -1483,7 +1508,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_context",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "context()"
     },
     {
@@ -1495,7 +1520,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_uploadrequest",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "uploadrequest()"
     },
     {
@@ -1507,7 +1532,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_jsonrequest",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "jsonrequest()"
     },
     {
@@ -1518,7 +1543,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_upload_authorizations_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "upload-authorizations/route.ts"
     },
     {
@@ -1530,7 +1555,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_upload_authorizations_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "post()"
     },
     {
@@ -1540,8 +1565,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "categories/route.test.ts"
     },
     {
@@ -1551,8 +1576,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test_requirerole_query",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "{ requirerole, query }"
     },
     {
@@ -1563,8 +1588,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test_requestfor",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "requestfor()"
     },
     {
@@ -1574,8 +1599,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "categories/route.ts"
     },
     {
@@ -1586,8 +1611,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_post",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -1875,8 +1900,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_test",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "destination/route.test.ts"
     },
     {
@@ -1886,8 +1911,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_test_requireauthenticateduser_query",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "{ requireauthenticateduser, query }"
     },
     {
@@ -1897,8 +1922,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "destination/route.ts"
     },
     {
@@ -1910,8 +1935,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_accessrow",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "accessrow"
     },
     {
@@ -1922,8 +1947,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_get",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -1968,8 +1993,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_health_route",
-      "community": 93,
-      "community_name": "health/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "health/route.ts"
     },
     {
@@ -1979,8 +2004,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_health_route_dynamic",
-      "community": 93,
-      "community_name": "health/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "dynamic"
     },
     {
@@ -1991,8 +2016,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_health_route_get",
-      "community": 93,
-      "community_name": "health/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -2026,7 +2051,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "guest-sessions/route.ts"
     },
     {
@@ -2038,7 +2063,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_authorized",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "authorized()"
     },
     {
@@ -2050,7 +2075,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "get()"
     },
     {
@@ -2061,7 +2086,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "post"
     },
     {
@@ -2175,8 +2200,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test",
-      "community": 88,
-      "community_name": "update/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "update/route.test.ts"
     },
     {
@@ -2186,8 +2211,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test_getpoolclient_requirerole_client",
-      "community": 88,
-      "community_name": "update/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2198,8 +2223,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test_requestfor",
-      "community": 88,
-      "community_name": "update/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2209,8 +2234,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route",
-      "community": 88,
-      "community_name": "update/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "update/route.ts"
     },
     {
@@ -2220,8 +2245,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_nextstatuses",
-      "community": 88,
-      "community_name": "update/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "nextstatuses"
     },
     {
@@ -2231,8 +2256,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_priorities",
-      "community": 88,
-      "community_name": "update/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "priorities"
     },
     {
@@ -2243,8 +2268,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_post",
-      "community": 88,
-      "community_name": "update/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "post()"
     },
     {
@@ -2381,8 +2406,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test",
-      "community": 89,
-      "community_name": "deliver/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "deliver/route.test.ts"
     },
     {
@@ -2392,8 +2417,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test_getpoolclient_requirerole_client",
-      "community": 89,
-      "community_name": "deliver/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2404,8 +2429,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test_requestfor",
-      "community": 89,
-      "community_name": "deliver/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2415,8 +2440,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route",
-      "community": 89,
-      "community_name": "deliver/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "deliver/route.ts"
     },
     {
@@ -2427,8 +2452,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_post",
-      "community": 89,
-      "community_name": "deliver/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "post()"
     },
     {
@@ -2462,7 +2487,7 @@
       "_origin": "ast",
       "id": "src_app_api_public_settings_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "public/settings/route.ts"
     },
     {
@@ -2474,7 +2499,7 @@
       "_origin": "ast",
       "id": "src_app_api_public_settings_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "get()"
     },
     {
@@ -2507,8 +2532,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_restaurants_id_status_route",
-      "community": 86,
-      "community_name": "restaurants/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "status/route.ts"
     },
     {
@@ -2519,8 +2544,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_id_status_route_patch",
-      "community": 86,
-      "community_name": "restaurants/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "patch()"
     },
     {
@@ -2566,8 +2591,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_restaurants_route",
-      "community": 86,
-      "community_name": "restaurants/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "restaurants/route.ts"
     },
     {
@@ -2578,8 +2603,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_slugify",
-      "community": 86,
-      "community_name": "restaurants/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "slugify()"
     },
     {
@@ -2590,8 +2615,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_authadmin",
-      "community": 86,
-      "community_name": "restaurants/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "authadmin()"
     },
     {
@@ -2602,8 +2627,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_post",
-      "community": 86,
-      "community_name": "restaurants/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -2614,8 +2639,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_get",
-      "community": 86,
-      "community_name": "restaurants/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -2648,8 +2673,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_me_route",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "me/route.ts"
     },
     {
@@ -2660,8 +2685,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_me_route_get",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -2671,8 +2696,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_route_test",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "staff/route.test.ts"
     },
     {
@@ -2682,8 +2707,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_staff_route_test_query_requirerole_createuser_deleteuser",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "{ query, requirerole, createuser, deleteuser }"
     },
     {
@@ -2694,8 +2719,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_test_requestfor",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "requestfor()"
     },
     {
@@ -2705,8 +2730,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_route",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "staff/route.ts"
     },
     {
@@ -2717,8 +2742,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_adminclient",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "adminclient()"
     },
     {
@@ -2729,8 +2754,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_get",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -2741,8 +2766,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_post",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -2753,8 +2778,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_delete",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "delete()"
     },
     {
@@ -2764,8 +2789,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "activate/route.test.ts"
     },
     {
@@ -2775,8 +2800,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test_requirerole_getpoolclient_activatetables_client",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "{ requirerole, getpoolclient, activatetables, client }"
     },
     {
@@ -2787,8 +2812,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test_requestfor",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2798,8 +2823,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_activate_route",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "activate/route.ts"
     },
     {
@@ -2809,8 +2834,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_messages",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "messages"
     },
     {
@@ -2821,8 +2846,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_post",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "post()"
     },
     {
@@ -2913,8 +2938,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test",
-      "community": 90,
-      "community_name": "checkout/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "checkout/route.test.ts"
     },
     {
@@ -2924,8 +2949,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test_getpoolclient_requirerole_client",
-      "community": 90,
-      "community_name": "checkout/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2936,8 +2961,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test_requestfor",
-      "community": 90,
-      "community_name": "checkout/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2947,8 +2972,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route",
-      "community": 90,
-      "community_name": "checkout/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "checkout/route.ts"
     },
     {
@@ -2959,8 +2984,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_post",
-      "community": 90,
-      "community_name": "checkout/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "post()"
     },
     {
@@ -2970,8 +2995,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_generate_pin_route",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "generate-pin/route.ts"
     },
     {
@@ -2982,8 +3007,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_generate_pin_route_post",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "post()"
     },
     {
@@ -4083,7 +4108,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "api-response.ts"
     },
     {
@@ -4096,7 +4121,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_apierrorcode",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "apierrorcode"
     },
     {
@@ -4108,7 +4133,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_requestid",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "requestid()"
     },
     {
@@ -4120,7 +4145,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonsuccess",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "jsonsuccess()"
     },
     {
@@ -4132,7 +4157,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonerror",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "jsonerror()"
     },
     {
@@ -4144,7 +4169,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonauthorizationerror",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "jsonauthorizationerror()"
     },
     {
@@ -4156,7 +4181,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_readjsonobject",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "readjsonobject()"
     },
     {
@@ -4166,8 +4191,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_auth",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "auth.ts"
     },
     {
@@ -4177,8 +4202,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_auth_staffroles",
-      "community": 84,
-      "community_name": "staff/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "staffroles"
     },
     {
@@ -4190,8 +4215,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_auth_staffrole",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "staffrole"
     },
     {
@@ -4203,8 +4228,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_auth_staffsession",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "staffsession"
     },
     {
@@ -4215,8 +4240,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_authclient",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "authclient()"
     },
     {
@@ -4227,8 +4252,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requireauthenticateduser",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "requireauthenticateduser()"
     },
     {
@@ -4239,8 +4264,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requirestaff",
-      "community": 83,
-      "community_name": "auth.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "requirestaff()"
     },
     {
@@ -4251,8 +4276,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requireplatformadmin",
-      "community": 86,
-      "community_name": "restaurants/route.ts",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "requireplatformadmin()"
     },
     {
@@ -4263,8 +4288,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requirerole",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 49,
+      "community_name": "requireRole",
       "norm_label": "requirerole()"
     },
     {
@@ -4286,8 +4311,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_bill_split_test",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "bill-split.test.ts"
     },
     {
@@ -4297,8 +4322,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_bill_split_test_guests",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "guests"
     },
     {
@@ -4308,8 +4333,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_bill_split",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "bill-split.ts"
     },
     {
@@ -4321,8 +4346,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_bill_split_billsplitmode",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "billsplitmode"
     },
     {
@@ -4334,8 +4359,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_bill_split_billparticipantinput",
-      "community": 91,
-      "community_name": "bill-split.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "billparticipantinput"
     },
     {
@@ -4602,7 +4627,7 @@
       "_origin": "ast",
       "id": "src_lib_logger",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "logger.ts"
     },
     {
@@ -4615,7 +4640,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_logfields",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "logfields"
     },
     {
@@ -4627,7 +4652,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_write",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "write()"
     },
     {
@@ -4638,7 +4663,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_logger",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "logger"
     },
     {
@@ -4649,7 +4674,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "menu-import-errors.ts"
     },
     {
@@ -4662,7 +4687,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors_databaseerror",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "databaseerror"
     },
     {
@@ -4674,7 +4699,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors_menuimportdatabasefailure",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "menuimportdatabasefailure()"
     },
     {
@@ -4685,7 +4710,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "menu-import-storage.ts"
     },
     {
@@ -4696,7 +4721,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_menuimportbucket",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "menuimportbucket"
     },
     {
@@ -4708,7 +4733,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_menuimportstorage",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "menuimportstorage()"
     },
     {
@@ -4720,7 +4745,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_ensuremenuimportbucket",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "ensuremenuimportbucket()"
     },
     {
@@ -4776,7 +4801,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "menu-import.ts"
     },
     {
@@ -4787,7 +4812,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdf_menu_max_bytes",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "pdf_menu_max_bytes"
     },
     {
@@ -4798,7 +4823,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdfmenuimportstatuses",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "pdfmenuimportstatuses"
     },
     {
@@ -4811,7 +4836,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdfmenuimportstatus",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "pdfmenuimportstatus"
     },
     {
@@ -4822,7 +4847,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_draftreviewstatuses",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "draftreviewstatuses"
     },
     {
@@ -4835,7 +4860,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_draftreviewstatus",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "draftreviewstatus"
     },
     {
@@ -4847,7 +4872,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_validatepdfupload",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "validatepdfupload()"
     },
     {
@@ -4859,7 +4884,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_validatepublicationinput",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "requireRole",
       "norm_label": "validatepublicationinput()"
     },
     {
@@ -5347,8 +5372,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_table_activation",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "table-activation.ts"
     },
     {
@@ -5360,8 +5385,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_table_activation_tableforactivation",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "tableforactivation"
     },
     {
@@ -5373,8 +5398,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_table_activation_tableactivationerror",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "tableactivationerror"
     },
     {
@@ -5385,8 +5410,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_table_activation_tableactivationerror_constructor",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": ".constructor()"
     },
     {
@@ -5397,8 +5422,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_table_activation_normalizetableids",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "normalizetableids()"
     },
     {
@@ -5409,8 +5434,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_table_activation_newaccesscode",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "newaccesscode()"
     },
     {
@@ -5421,8 +5446,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_table_activation_activatetables",
-      "community": 6,
-      "community_name": "activate/route.ts",
+      "community": 37,
+      "community_name": "db.ts",
       "norm_label": "activatetables()"
     },
     {
@@ -11530,7 +11555,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L35",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route",
@@ -11552,7 +11577,29 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L15",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_admin_menu_import_finalize_route",
+      "target": "src_app_api_admin_menu_import_finalize_route_storageobjectinfo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_admin_menu_import_finalize_route",
+      "target": "src_app_api_admin_menu_import_finalize_route_validatestoredpdf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route",
@@ -11804,7 +11851,19 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L68",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_api_admin_menu_import_finalize_route_verifyauthorizedupload",
+      "target": "src_app_api_admin_menu_import_finalize_route_validatestoredpdf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
+      "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11817,7 +11876,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L38",
+      "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11829,7 +11888,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L57",
+      "source_location": "L81",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11841,7 +11900,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L39",
+      "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11853,7 +11912,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L36",
+      "source_location": "L60",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11865,7 +11924,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L38",
+      "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11877,7 +11936,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L37",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11889,7 +11948,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L45",
+      "source_location": "L69",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11901,7 +11960,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L94",
+      "source_location": "L118",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -11913,7 +11972,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/finalize/route.ts",
-      "source_location": "L63",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_finalize_route_post",
@@ -25243,5 +25302,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a9a4fb8bd05ab2a66e65b04d45b768da726ef6c9"
+  "built_at_commit": "3b983606cd48f9a3eaf525dcdfebd12fd8807c19"
 }

@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1786907495.2482884,
-    "ast_hash": "809ccf3a3ceecfb1d17df36e524cf7a2",
+    "mtime": 1786907907.4117248,
+    "ast_hash": "0e26c847f711ca442d3121f7beda4da1",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -850,8 +850,18 @@
     "semantic_hash": ""
   },
   "openspec/changes/fix-menu-import-upload-finalize/tasks.md": {
-    "mtime": 1786907648.7067554,
-    "ast_hash": "28013b02aa7c12ac4bd0e0c8b81255dd",
+    "mtime": 1786907956.2513645,
+    "ast_hash": "860dbcde027fb9de64a8833445f51833",
+    "semantic_hash": ""
+  },
+  "test-results/.last-run.json": {
+    "mtime": 1786907926.7985055,
+    "ast_hash": "66954584d3ce62d9d40f8f564ebb01d8",
+    "semantic_hash": ""
+  },
+  "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md": {
+    "mtime": 1786907926.7534275,
+    "ast_hash": "c70f6f5bcb5729d360879b92b6500f59",
     "semantic_hash": ""
   }
 }

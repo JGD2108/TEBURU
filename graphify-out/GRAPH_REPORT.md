@@ -1,16 +1,16 @@
 # Graph Report - teburuapp  (2026-08-16)
 
 ## Corpus Check
-- 169 files · ~72,780 words
+- 169 files · ~73,082 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 777 nodes · 1418 edges · 96 communities (65 shown, 31 thin omitted)
+- 779 nodes · 1421 edges · 87 communities (59 shown, 28 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a9a4fb8b`
+- Built from commit: `3b983606`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,7 +21,6 @@
 - compilerOptions
 - devDependencies
 - What You Must Do When Invoked
-- activate/route.ts
 - schema.sql
 - orders
 - eslint.config.mjs
@@ -61,7 +60,7 @@
 - ADDED Requirements
 - vercel.json
 - verify-remote-security.mjs
-- finalize/route.ts
+- requireRole
 - openspec-explore/SKILL.md
 - Decisions
 - session_tables
@@ -87,17 +86,9 @@
 - fix-menu-import-upload-finalize/proposal.md
 - fix-menu-import-upload-finalize/design.md
 - fix-menu-import-upload-finalize/tasks.md
-- auth.ts
-- staff/route.ts
 - supabase.ts
-- restaurants/route.ts
 - bulk/route.ts
-- update/route.ts
-- deliver/route.ts
-- checkout/route.ts
-- bill-split.ts
 - error-context.md
-- health/route.ts
 - lucide-react
 - @types/react-dom
 
@@ -118,25 +109,25 @@
   src/components/admin/TablesManagerPanel.tsx → package.json
 - `AdminDashboard()` --calls--> `isLocalDemo()`  [EXTRACTED]
   src/app/admin/page.tsx → src/lib/demo.ts
-- `GET()` --calls--> `query()`  [EXTRACTED]
-  src/app/api/health/route.ts → src/lib/db.ts
 - `PATCH()` --calls--> `isAuthorizationFailure()`  [EXTRACTED]
   src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
-- `PATCH()` --calls--> `requireRole()`  [EXTRACTED]
+- `PATCH()` --calls--> `query()`  [EXTRACTED]
+  src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/db.ts
+- `DELETE()` --calls--> `isAuthorizationFailure()`  [EXTRACTED]
   src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (96 total, 31 thin omitted)
+## Communities (87 total, 28 thin omitted)
 
 ### Community 0 - "isLocalDemo"
 Cohesion: 0.17
 Nodes (16): accessDestination(), AdminLogin(), AuthStep, emptyForm, PlatformPage(), Restaurant, CartItem, TableMenu() (+8 more)
 
 ### Community 1 - "isAuthorizationFailure"
-Cohesion: 0.17
-Nodes (26): DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query }, GET(), PATCH() (+18 more)
+Cohesion: 0.07
+Nodes (50): POST(), { requireRole, query }, DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query } (+42 more)
 
 ### Community 2 - "dependencies"
 Cohesion: 0.12
@@ -153,10 +144,6 @@ Nodes (17): eslint, eslint-config-next, devDependencies, eslint, eslint-config-n
 ### Community 5 - "What You Must Do When Invoked"
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
-
-### Community 6 - "activate/route.ts"
-Cohesion: 0.23
-Nodes (10): messages, POST(), { requireRole, getPoolClient, activateTables, client }, POST(), StaffSession, activateTables(), newAccessCode(), normalizeTableIds() (+2 more)
 
 ### Community 7 - "schema.sql"
 Cohesion: 0.50
@@ -211,8 +198,8 @@ Cohesion: 0.29
 Nodes (6): Available subagents, graphify, Subagents for OpenSpec changes, This is NOT the Next.js you know, Using subagents with `openspec apply`, When to spawn each subagent
 
 ### Community 37 - "db.ts"
-Cohesion: 0.14
-Nodes (25): POST(), POST(), POST(), ImportedItem, POST(), POST(), GET(), GET() (+17 more)
+Cohesion: 0.06
+Nodes (45): nextStatuses, POST(), priorities, { getPoolClient, requireRole, client }, POST(), POST(), POST(), { getPoolClient, requireRole, client } (+37 more)
 
 ### Community 39 - "202608050000_initial_schema.sql"
 Cohesion: 0.13
@@ -230,9 +217,9 @@ Nodes (6): Ambientes, Backup y restauración, Despliegue y rollback, Operación 
 Cohesion: 0.10
 Nodes (19): ADDED Requirements, Purpose, Requirement: Controlled publication to the restaurant menu, Requirement: Menu structure extraction, Requirement: Restaurant-scoped PDF import submission, Requirement: Review before live-menu publication, Requirement: Source visual preservation and image suggestions, Scenario: Administrator appends an approved draft (+11 more)
 
-### Community 49 - "finalize/route.ts"
-Cohesion: 0.13
-Nodes (38): Authorization, POST(), StorageObject, verifyAuthorizedUpload(), DELETE(), PATCH(), POST(), GET() (+30 more)
+### Community 49 - "requireRole"
+Cohesion: 0.12
+Nodes (41): Authorization, POST(), StorageObject, StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE(), PATCH() (+33 more)
 
 ### Community 52 - "openspec-explore/SKILL.md"
 Cohesion: 0.18
@@ -314,42 +301,22 @@ Nodes (5): Context, Decisions, Goals / Non-Goals, Migration Plan, Risks / Trade-
 Cohesion: 0.50
 Nodes (3): 1. Finalize contract, 2. UI recovery, 3. Verification
 
-### Community 83 - "auth.ts"
-Cohesion: 0.18
-Nodes (10): POST(), { requireRole, query }, AccessRow, GET(), { requireAuthenticatedUser, query }, GET(), authClient(), requireAuthenticatedUser() (+2 more)
-
-### Community 84 - "staff/route.ts"
-Cohesion: 0.31
-Nodes (6): adminClient(), DELETE(), GET(), POST(), { query, requireRole, createUser, deleteUser }, staffRoles
-
 ### Community 85 - "supabase.ts"
 Cohesion: 0.36
 Nodes (4): MenuRow, OnboardingPage(), parseMenu(), supabase
 
-### Community 86 - "restaurants/route.ts"
-Cohesion: 0.43
-Nodes (6): PATCH(), authAdmin(), GET(), POST(), slugify(), requirePlatformAdmin()
-
 ### Community 87 - "bulk/route.ts"
 Cohesion: 0.33
 Nodes (4): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions
-
-### Community 88 - "update/route.ts"
-Cohesion: 0.33
-Nodes (4): nextStatuses, POST(), priorities, { getPoolClient, requireRole, client }
-
-### Community 91 - "bill-split.ts"
-Cohesion: 0.40
-Nodes (3): BillParticipantInput, BillSplitMode, guests
 
 ### Community 92 - "error-context.md"
 Cohesion: 0.40
 Nodes (4): Error details, Instructions, Test info, Test source
 
 ## Knowledge Gaps
-- **298 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+293 more)
+- **299 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+294 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -359,12 +326,12 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `jspdf` connect `admin/page.tsx` to `dependencies`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **What connects `required`, `missing`, `eslintConfig` to the rest of the system?**
-  _298 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _299 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `isAuthorizationFailure` be split into smaller, more focused modules?**
+  _Cohesion score 0.0681081081081081 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
   _Cohesion score 0.07142857142857142 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
-- **Should `What You Must Do When Invoked` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._

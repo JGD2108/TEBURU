@@ -292,8 +292,9 @@ describe('deployment-safe menu import upload APIs', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 'auth-a', storage_path: 'restaurants/restaurant-a/pending/auth-a.pdf', source_filename: 'menu.pdf', expected_size_bytes: 100, expires_at: '2030-01-01T00:00:00.000Z', token_hash: createHash('sha256').update(token).digest('hex'), import_job_id: null }] })
       .mockResolvedValueOnce({ rows: [] });
+    const info = vi.fn().mockResolvedValue({ data: null, error: new Error('not found') });
     const list = vi.fn().mockResolvedValue({ data: [], error: null });
-    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ list }) } });
+    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ info, list }) } });
 
     const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token }));
 
@@ -311,14 +312,36 @@ describe('deployment-safe menu import upload APIs', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 'auth-a', storage_path: 'restaurants/restaurant-a/pending/auth-a.pdf', source_filename: 'menu.pdf', expected_size_bytes: 100, expires_at: '2030-01-01T00:00:00.000Z', token_hash: createHash('sha256').update(token).digest('hex'), import_job_id: null }] })
       .mockResolvedValueOnce({ rows: [] });
-    const list = vi.fn().mockResolvedValue({ data: [{ name: 'auth-a.pdf', metadata: { size: 99, mimetype: 'application/pdf' } }], error: null });
-    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ list }) } });
+    const info = vi.fn().mockResolvedValue({ data: { size: 99, contentType: 'application/pdf' }, error: null });
+    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ info }) } });
 
     const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token }));
 
     expect(response.status).toBe(422);
     expect(await response.json()).toEqual({ error: expect.objectContaining({ code: 'IMPORT_UPLOAD_INCOMPLETE' }) });
     expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_jobs'))).toBe(false);
+  });
+
+  it('finalizes a visible object when Storage omits list metadata', async () => {
+    const token = 'token-a';
+    const record = { id: 'auth-a', storage_path: 'restaurants/restaurant-a/pending/auth-a.pdf', source_filename: 'menu.pdf', expected_size_bytes: 100, expires_at: '2030-01-01T00:00:00.000Z', token_hash: createHash('sha256').update(token).digest('hex'), import_job_id: null };
+    const importJob = { id: 'import-a', status: 'pending', source_filename: 'menu.pdf', source_size_bytes: 100, created_at: '2026-01-01T00:00:00.000Z' };
+    const client = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValue(client);
+    client.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [record] })
+      .mockResolvedValueOnce({ rows: [importJob] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+    const info = vi.fn().mockResolvedValue({ data: null, error: new Error('metadata unavailable') });
+    const list = vi.fn().mockResolvedValue({ data: [{ name: 'auth-a.pdf' }], error: null });
+    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ info, list }) } });
+
+    const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token }));
+
+    expect(response.status).toBe(201);
+    expect(await response.json()).toEqual({ data: { import: importJob }, requestId: 'request-1' });
   });
 
   it('creates once and returns the same import when finalization is retried', async () => {
@@ -333,7 +356,7 @@ describe('deployment-safe menu import upload APIs', () => {
       .mockResolvedValueOnce({ rows: [importJob] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] });
-    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ list: vi.fn().mockResolvedValue({ data: [{ name: 'auth-a.pdf', metadata: { size: 100, mimetype: 'application/pdf' } }] }) }) } });
+    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ info: vi.fn().mockResolvedValue({ data: { size: 100, contentType: 'application/pdf' }, error: null }) }) } });
 
     const initial = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token }));
     expect(initial.status).toBe(201);

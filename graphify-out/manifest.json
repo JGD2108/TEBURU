@@ -760,8 +760,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/routes.test.ts": {
-    "mtime": 1786907611.0073068,
-    "ast_hash": "d6bfd6f413a931173f732d31c7a5b911",
+    "mtime": 1786908727.4979904,
+    "ast_hash": "92e11fba3d57d8e1647ce4976e4d2518",
     "semantic_hash": ""
   },
   "openspec/changes/harden-menu-import-deployment/.openspec.yaml": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/finalize/route.ts": {
-    "mtime": 1786907518.699372,
-    "ast_hash": "24b6a64bd60efab45ae019ac2ee2037f",
+    "mtime": 1786908761.1952121,
+    "ast_hash": "e599ce1315b836dbefbc6efd821376a6",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/upload-authorizations/route.ts": {

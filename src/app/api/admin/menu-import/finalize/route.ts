@@ -10,26 +10,50 @@ import { menuImportBucket, menuImportStorage } from '@/lib/menu-import-storage';
 
 type Authorization = { id: string; storage_path: string; source_filename: string; expected_size_bytes: number; expires_at: string; token_hash: string; import_job_id: string | null };
 
-type StorageObject = { name: string; metadata?: { size?: number | string; mimetype?: string } };
+type StorageObject = { name: string; metadata?: { size?: number | string; mimetype?: string; contentType?: string; content_type?: string } | null };
+type StorageObjectInfo = {
+  size?: number | string;
+  contentType?: string;
+  content_type?: string;
+  metadata?: { size?: number | string; mimetype?: string; contentType?: string; content_type?: string } | null;
+};
+
+function validateStoredPdf(object: StorageObjectInfo, record: Authorization) {
+  const rawSize = object.size ?? object.metadata?.size;
+  const type = object.contentType ?? object.content_type ?? object.metadata?.mimetype ?? object.metadata?.contentType ?? object.metadata?.content_type;
+  const hasSize = rawSize !== undefined && rawSize !== null;
+  const hasType = type !== undefined && type !== null;
+  const size = hasSize ? Number(rawSize) : undefined;
+
+  // `list()` has historically returned a named object before all metadata is
+  // present (and some Storage versions omit it altogether). Presence at the
+  // authorization-bound path is sufficient in that case; reject only metadata
+  // values Storage actually returned and which contradict the authorization.
+  if (
+    (hasSize && (size === undefined || !Number.isSafeInteger(size) || size < 1 || size > PDF_MENU_MAX_BYTES || size !== record.expected_size_bytes))
+    || (hasType && type !== 'application/pdf')
+  ) {
+    return { kind: 'metadata_mismatch' as const, size, type };
+  }
+  return { kind: 'verified' as const, size: size ?? record.expected_size_bytes };
+}
 
 async function verifyAuthorizedUpload(storage: NonNullable<ReturnType<typeof menuImportStorage>>, record: Authorization) {
+  const bucket = storage.storage.from(menuImportBucket);
+  const info = await bucket.info(record.storage_path);
+  if (!info.error && info.data) return validateStoredPdf(info.data as StorageObjectInfo, record);
+
   const slashIndex = record.storage_path.lastIndexOf('/');
   const folder = record.storage_path.slice(0, slashIndex);
   const filename = record.storage_path.slice(slashIndex + 1);
-  const listed = await storage.storage.from(menuImportBucket).list(folder, { search: filename });
+  const listed = await bucket.list(folder, { search: filename });
 
   if (listed.error) return { kind: 'storage_error' as const, error: listed.error };
 
   const object = (listed.data as StorageObject[] | null)?.find((entry) => entry.name === filename);
   if (!object) return { kind: 'missing' as const };
 
-  const size = Number(object.metadata?.size);
-  const type = object.metadata?.mimetype;
-  if (!Number.isSafeInteger(size) || size < 1 || size > PDF_MENU_MAX_BYTES || size !== record.expected_size_bytes || type !== 'application/pdf') {
-    return { kind: 'metadata_mismatch' as const, size, type };
-  }
-
-  return { kind: 'verified' as const, size };
+  return validateStoredPdf({ metadata: object.metadata }, record);
 }
 
 export async function POST(request: Request) {

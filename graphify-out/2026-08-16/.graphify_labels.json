@@ -48,7 +48,7 @@
   "46": "ADDED Requirements",
   "47": "vercel.json",
   "48": "verify-remote-security.mjs",
-  "49": "requireRole",
+  "49": "finalize/route.ts",
   "50": "production-smoke.spec.ts",
   "51": "playwright.config.ts",
   "52": "openspec-explore/SKILL.md",
@@ -82,6 +82,17 @@
   "80": "fix-menu-import-upload-finalize/proposal.md",
   "81": "fix-menu-import-upload-finalize/design.md",
   "82": "fix-menu-import-upload-finalize/tasks.md",
-  "83": "jspdf",
-  "84": "@supabase/supabase-js"
+  "83": "auth.ts",
+  "84": "staff/route.ts",
+  "85": "supabase.ts",
+  "86": "restaurants/route.ts",
+  "87": "bulk/route.ts",
+  "88": "update/route.ts",
+  "89": "deliver/route.ts",
+  "90": "checkout/route.ts",
+  "91": "bill-split.ts",
+  "92": "error-context.md",
+  "93": "health/route.ts",
+  "94": "lucide-react",
+  "95": "@types/react-dom"
 }

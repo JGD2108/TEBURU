@@ -241,8 +241,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "package_dependencies_supabase_supabase_js",
-      "community": 84,
-      "community_name": "@supabase/supabase-js",
+      "community": 2,
+      "community_name": "dependencies",
       "norm_label": "@supabase/supabase-js"
     },
     {
@@ -252,8 +252,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "supabase_supabase_js",
-      "community": 84,
-      "community_name": "@supabase/supabase-js",
+      "community": 2,
+      "community_name": "dependencies",
       "norm_label": "@supabase/supabase-js"
     },
     {
@@ -285,8 +285,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "package_dependencies_jspdf",
-      "community": 83,
-      "community_name": "jspdf",
+      "community": 64,
+      "community_name": "admin/page.tsx",
       "norm_label": "jspdf"
     },
     {
@@ -296,8 +296,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "jspdf",
-      "community": 83,
-      "community_name": "jspdf",
+      "community": 64,
+      "community_name": "admin/page.tsx",
       "norm_label": "jspdf"
     },
     {
@@ -307,8 +307,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "package_dependencies_lucide_react",
-      "community": 2,
-      "community_name": "dependencies",
+      "community": 94,
+      "community_name": "lucide-react",
       "norm_label": "lucide-react"
     },
     {
@@ -318,8 +318,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "lucide_react",
-      "community": 2,
-      "community_name": "dependencies",
+      "community": 94,
+      "community_name": "lucide-react",
       "norm_label": "lucide-react"
     },
     {
@@ -560,8 +560,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "package_devdependencies_types_react_dom",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 95,
+      "community_name": "@types/react-dom",
       "norm_label": "@types/react-dom"
     },
     {
@@ -571,8 +571,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "types_react_dom",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 95,
+      "community_name": "@types/react-dom",
       "norm_label": "@types/react-dom"
     },
     {
@@ -1214,8 +1214,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_admin_page_admindashboard",
-      "community": 0,
-      "community_name": "isLocalDemo",
+      "community": 64,
+      "community_name": "admin/page.tsx",
       "norm_label": "admindashboard()"
     },
     {
@@ -1225,8 +1225,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_admin_reset_password_page",
-      "community": 70,
-      "community_name": "KitchenPanel.tsx",
+      "community": 85,
+      "community_name": "supabase.ts",
       "norm_label": "reset-password/page.tsx"
     },
     {
@@ -1237,8 +1237,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_admin_reset_password_page_resetpassword",
-      "community": 70,
-      "community_name": "KitchenPanel.tsx",
+      "community": 85,
+      "community_name": "supabase.ts",
       "norm_label": "resetpassword()"
     },
     {
@@ -1249,7 +1249,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "[itemid]/route.ts"
     },
     {
@@ -1261,7 +1261,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route_patch",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "patch()"
     },
     {
@@ -1273,7 +1273,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route_delete",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "delete()"
     },
     {
@@ -1284,7 +1284,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_publish_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "publish/route.ts"
     },
     {
@@ -1296,7 +1296,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_publish_route_post",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "post()"
     },
     {
@@ -1307,7 +1307,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "[id]/route.ts"
     },
     {
@@ -1319,7 +1319,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_route_get",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "get()"
     },
     {
@@ -1330,7 +1330,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_source_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "source/route.ts"
     },
     {
@@ -1342,7 +1342,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_source_route_get",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "get()"
     },
     {
@@ -1353,7 +1353,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "finalize/route.ts"
     },
     {
@@ -1366,7 +1366,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_authorization",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "authorization"
     },
     {
@@ -1379,7 +1379,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_storageobject",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "storageobject"
     },
     {
@@ -1391,7 +1391,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_verifyauthorizedupload",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "verifyauthorizedupload()"
     },
     {
@@ -1403,7 +1403,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_post",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "post()"
     },
     {
@@ -1414,7 +1414,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "admin/menu-import/route.ts"
     },
     {
@@ -1426,7 +1426,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route_get",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "get()"
     },
     {
@@ -1438,7 +1438,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route_post",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "post()"
     },
     {
@@ -1449,7 +1449,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "menu-import/routes.test.ts"
     },
     {
@@ -1460,7 +1460,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_requirerole_query_getpoolclient_ensuremenuimportbucket_menuimportstorage",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "{ requirerole, query, getpoolclient, ensuremenuimportbucket, menuimportstorage }"
     },
     {
@@ -1471,7 +1471,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_staff",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "staff"
     },
     {
@@ -1483,7 +1483,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_context",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "context()"
     },
     {
@@ -1495,7 +1495,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_uploadrequest",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "uploadrequest()"
     },
     {
@@ -1507,7 +1507,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_jsonrequest",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "jsonrequest()"
     },
     {
@@ -1518,7 +1518,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_upload_authorizations_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "upload-authorizations/route.ts"
     },
     {
@@ -1530,7 +1530,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_upload_authorizations_route_post",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "post()"
     },
     {
@@ -1540,8 +1540,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "categories/route.test.ts"
     },
     {
@@ -1551,8 +1551,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test_requirerole_query",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "{ requirerole, query }"
     },
     {
@@ -1563,8 +1563,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test_requestfor",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -1574,8 +1574,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "categories/route.ts"
     },
     {
@@ -1586,8 +1586,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_post",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "post()"
     },
     {
@@ -1875,8 +1875,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_test",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "destination/route.test.ts"
     },
     {
@@ -1886,8 +1886,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_test_requireauthenticateduser_query",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "{ requireauthenticateduser, query }"
     },
     {
@@ -1897,8 +1897,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "destination/route.ts"
     },
     {
@@ -1910,8 +1910,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_accessrow",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "accessrow"
     },
     {
@@ -1922,8 +1922,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_get",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "get()"
     },
     {
@@ -1968,8 +1968,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_health_route",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 93,
+      "community_name": "health/route.ts",
       "norm_label": "health/route.ts"
     },
     {
@@ -1979,8 +1979,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_health_route_dynamic",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 93,
+      "community_name": "health/route.ts",
       "norm_label": "dynamic"
     },
     {
@@ -1991,8 +1991,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_health_route_get",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 93,
+      "community_name": "health/route.ts",
       "norm_label": "get()"
     },
     {
@@ -2026,7 +2026,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "guest-sessions/route.ts"
     },
     {
@@ -2038,7 +2038,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_authorized",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "authorized()"
     },
     {
@@ -2050,7 +2050,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_get",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "get()"
     },
     {
@@ -2061,7 +2061,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_post",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "post"
     },
     {
@@ -2071,8 +2071,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_test",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 87,
+      "community_name": "bulk/route.ts",
       "norm_label": "bulk/route.test.ts"
     },
     {
@@ -2082,8 +2082,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_test_getpoolclient_requirerole_client",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 87,
+      "community_name": "bulk/route.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2094,8 +2094,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_test_requestfor",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 87,
+      "community_name": "bulk/route.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2105,8 +2105,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 87,
+      "community_name": "bulk/route.ts",
       "norm_label": "bulk/route.ts"
     },
     {
@@ -2118,8 +2118,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_bulkitem",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 87,
+      "community_name": "bulk/route.ts",
       "norm_label": "bulkitem"
     },
     {
@@ -2129,8 +2129,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_transitions",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 87,
+      "community_name": "bulk/route.ts",
       "norm_label": "transitions"
     },
     {
@@ -2141,8 +2141,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_post",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 87,
+      "community_name": "bulk/route.ts",
       "norm_label": "post()"
     },
     {
@@ -2175,8 +2175,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 88,
+      "community_name": "update/route.ts",
       "norm_label": "update/route.test.ts"
     },
     {
@@ -2186,8 +2186,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test_getpoolclient_requirerole_client",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 88,
+      "community_name": "update/route.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2198,8 +2198,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test_requestfor",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 88,
+      "community_name": "update/route.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2209,8 +2209,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 88,
+      "community_name": "update/route.ts",
       "norm_label": "update/route.ts"
     },
     {
@@ -2220,8 +2220,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_nextstatuses",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 88,
+      "community_name": "update/route.ts",
       "norm_label": "nextstatuses"
     },
     {
@@ -2231,8 +2231,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_priorities",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 88,
+      "community_name": "update/route.ts",
       "norm_label": "priorities"
     },
     {
@@ -2243,8 +2243,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_post",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 88,
+      "community_name": "update/route.ts",
       "norm_label": "post()"
     },
     {
@@ -2381,8 +2381,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 89,
+      "community_name": "deliver/route.ts",
       "norm_label": "deliver/route.test.ts"
     },
     {
@@ -2392,8 +2392,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test_getpoolclient_requirerole_client",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 89,
+      "community_name": "deliver/route.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2404,8 +2404,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test_requestfor",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 89,
+      "community_name": "deliver/route.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2415,8 +2415,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 89,
+      "community_name": "deliver/route.ts",
       "norm_label": "deliver/route.ts"
     },
     {
@@ -2427,8 +2427,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_post",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 89,
+      "community_name": "deliver/route.ts",
       "norm_label": "post()"
     },
     {
@@ -2462,7 +2462,7 @@
       "_origin": "ast",
       "id": "src_app_api_public_settings_route",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "public/settings/route.ts"
     },
     {
@@ -2474,7 +2474,7 @@
       "_origin": "ast",
       "id": "src_app_api_public_settings_route_get",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "get()"
     },
     {
@@ -2507,8 +2507,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_restaurants_id_status_route",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 86,
+      "community_name": "restaurants/route.ts",
       "norm_label": "status/route.ts"
     },
     {
@@ -2519,8 +2519,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_id_status_route_patch",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 86,
+      "community_name": "restaurants/route.ts",
       "norm_label": "patch()"
     },
     {
@@ -2566,8 +2566,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_restaurants_route",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 86,
+      "community_name": "restaurants/route.ts",
       "norm_label": "restaurants/route.ts"
     },
     {
@@ -2578,8 +2578,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_slugify",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 86,
+      "community_name": "restaurants/route.ts",
       "norm_label": "slugify()"
     },
     {
@@ -2590,8 +2590,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_authadmin",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 86,
+      "community_name": "restaurants/route.ts",
       "norm_label": "authadmin()"
     },
     {
@@ -2602,8 +2602,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_post",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 86,
+      "community_name": "restaurants/route.ts",
       "norm_label": "post()"
     },
     {
@@ -2614,8 +2614,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_get",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 86,
+      "community_name": "restaurants/route.ts",
       "norm_label": "get()"
     },
     {
@@ -2648,8 +2648,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_me_route",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "me/route.ts"
     },
     {
@@ -2660,8 +2660,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_me_route_get",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "get()"
     },
     {
@@ -2671,8 +2671,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_route_test",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "staff/route.test.ts"
     },
     {
@@ -2682,8 +2682,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_staff_route_test_query_requirerole_createuser_deleteuser",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "{ query, requirerole, createuser, deleteuser }"
     },
     {
@@ -2694,8 +2694,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_test_requestfor",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2705,8 +2705,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_route",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "staff/route.ts"
     },
     {
@@ -2717,8 +2717,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_adminclient",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "adminclient()"
     },
     {
@@ -2729,8 +2729,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_get",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "get()"
     },
     {
@@ -2741,8 +2741,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_post",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "post()"
     },
     {
@@ -2753,8 +2753,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_delete",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "delete()"
     },
     {
@@ -2913,8 +2913,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 90,
+      "community_name": "checkout/route.ts",
       "norm_label": "checkout/route.test.ts"
     },
     {
@@ -2924,8 +2924,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test_getpoolclient_requirerole_client",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 90,
+      "community_name": "checkout/route.ts",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2936,8 +2936,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test_requestfor",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 90,
+      "community_name": "checkout/route.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -2947,8 +2947,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 90,
+      "community_name": "checkout/route.ts",
       "norm_label": "checkout/route.ts"
     },
     {
@@ -2959,8 +2959,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_post",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 90,
+      "community_name": "checkout/route.ts",
       "norm_label": "post()"
     },
     {
@@ -3118,8 +3118,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_onboarding_page",
-      "community": 70,
-      "community_name": "KitchenPanel.tsx",
+      "community": 85,
+      "community_name": "supabase.ts",
       "norm_label": "onboarding/page.tsx"
     },
     {
@@ -3131,8 +3131,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_app_onboarding_page_menurow",
-      "community": 70,
-      "community_name": "KitchenPanel.tsx",
+      "community": 85,
+      "community_name": "supabase.ts",
       "norm_label": "menurow"
     },
     {
@@ -3143,8 +3143,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_onboarding_page_parsemenu",
-      "community": 70,
-      "community_name": "KitchenPanel.tsx",
+      "community": 85,
+      "community_name": "supabase.ts",
       "norm_label": "parsemenu()"
     },
     {
@@ -3155,8 +3155,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_onboarding_page_onboardingpage",
-      "community": 70,
-      "community_name": "KitchenPanel.tsx",
+      "community": 85,
+      "community_name": "supabase.ts",
       "norm_label": "onboardingpage()"
     },
     {
@@ -3329,8 +3329,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_demoworkspace",
-      "community": 64,
-      "community_name": "admin/page.tsx",
+      "community": 0,
+      "community_name": "isLocalDemo",
       "norm_label": "demoworkspace.tsx"
     },
     {
@@ -3340,8 +3340,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_demoworkspace_content",
-      "community": 64,
-      "community_name": "admin/page.tsx",
+      "community": 0,
+      "community_name": "isLocalDemo",
       "norm_label": "content"
     },
     {
@@ -3551,7 +3551,7 @@
       "label": "DraftCategory",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -3564,7 +3564,7 @@
       "label": "DraftItem",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -3577,7 +3577,7 @@
       "label": "Evidence",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -3590,7 +3590,7 @@
       "label": "ImportJob",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -3603,7 +3603,7 @@
       "label": "UploadAuthorization",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L40",
+      "source_location": "L41",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -3616,7 +3616,7 @@
       "label": "ImportReadiness",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -3629,7 +3629,7 @@
       "label": "panelStyle",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L43",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "src_components_admin_menuimportpanel_panelstyle",
       "community": 71,
@@ -3640,7 +3640,7 @@
       "label": "inputStyle",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "src_components_admin_menuimportpanel_inputstyle",
       "community": 71,
@@ -3651,7 +3651,7 @@
       "label": "jobDraft()",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L46",
+      "source_location": "L48",
       "_callable": true,
       "_origin": "ast",
       "id": "src_components_admin_menuimportpanel_jobdraft",
@@ -3663,7 +3663,7 @@
       "label": "fieldProblems()",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L50",
+      "source_location": "L52",
       "_callable": true,
       "_origin": "ast",
       "id": "src_components_admin_menuimportpanel_fieldproblems",
@@ -3675,7 +3675,7 @@
       "label": "staffJson()",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L58",
+      "source_location": "L60",
       "_callable": true,
       "_origin": "ast",
       "id": "src_components_admin_menuimportpanel_staffjson",
@@ -3687,7 +3687,7 @@
       "label": "CompletedUpload",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L64",
+      "source_location": "L67",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -3700,7 +3700,7 @@
       "label": "uploadPdfDirectly()",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L66",
+      "source_location": "L70",
       "_callable": true,
       "_origin": "ast",
       "id": "src_components_admin_menuimportpanel_uploadpdfdirectly",
@@ -3709,10 +3709,22 @@
       "norm_label": "uploadpdfdirectly()"
     },
     {
+      "label": "uploadPdfWithSupabase()",
+      "file_type": "code",
+      "source_file": "src/components/admin/MenuImportPanel.tsx",
+      "source_location": "L88",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_components_admin_menuimportpanel_uploadpdfwithsupabase",
+      "community": 71,
+      "community_name": "MenuImportPanel.tsx",
+      "norm_label": "uploadpdfwithsupabase()"
+    },
+    {
       "label": "MenuImportPanel()",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L84",
+      "source_location": "L99",
       "_callable": true,
       "_origin": "ast",
       "id": "src_components_admin_menuimportpanel_menuimportpanel",
@@ -3724,7 +3736,7 @@
       "label": "DraftItemCard()",
       "file_type": "code",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L264",
+      "source_location": "L280",
       "_callable": true,
       "_origin": "ast",
       "id": "src_components_admin_menuimportpanel_draftitemcard",
@@ -3739,8 +3751,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_menupanel",
-      "community": 71,
-      "community_name": "MenuImportPanel.tsx",
+      "community": 64,
+      "community_name": "admin/page.tsx",
       "norm_label": "menupanel.tsx"
     },
     {
@@ -3751,8 +3763,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_components_admin_menupanel_menupanel",
-      "community": 71,
-      "community_name": "MenuImportPanel.tsx",
+      "community": 64,
+      "community_name": "admin/page.tsx",
       "norm_label": "menupanel()"
     },
     {
@@ -4071,7 +4083,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "api-response.ts"
     },
     {
@@ -4084,7 +4096,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_apierrorcode",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "apierrorcode"
     },
     {
@@ -4096,7 +4108,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_requestid",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "requestid()"
     },
     {
@@ -4108,7 +4120,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonsuccess",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "jsonsuccess()"
     },
     {
@@ -4120,7 +4132,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonerror",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "jsonerror()"
     },
     {
@@ -4132,7 +4144,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonauthorizationerror",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "jsonauthorizationerror()"
     },
     {
@@ -4144,7 +4156,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_readjsonobject",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "readjsonobject()"
     },
     {
@@ -4154,8 +4166,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_auth",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "auth.ts"
     },
     {
@@ -4165,8 +4177,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_auth_staffroles",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 84,
+      "community_name": "staff/route.ts",
       "norm_label": "staffroles"
     },
     {
@@ -4178,8 +4190,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_auth_staffrole",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "staffrole"
     },
     {
@@ -4203,8 +4215,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_authclient",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "authclient()"
     },
     {
@@ -4215,8 +4227,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requireauthenticateduser",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "requireauthenticateduser()"
     },
     {
@@ -4227,8 +4239,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requirestaff",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 83,
+      "community_name": "auth.ts",
       "norm_label": "requirestaff()"
     },
     {
@@ -4239,8 +4251,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requireplatformadmin",
-      "community": 1,
-      "community_name": "isAuthorizationFailure",
+      "community": 86,
+      "community_name": "restaurants/route.ts",
       "norm_label": "requireplatformadmin()"
     },
     {
@@ -4251,8 +4263,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requirerole",
-      "community": 49,
-      "community_name": "requireRole",
+      "community": 1,
+      "community_name": "isAuthorizationFailure",
       "norm_label": "requirerole()"
     },
     {
@@ -4274,8 +4286,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_bill_split_test",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 91,
+      "community_name": "bill-split.ts",
       "norm_label": "bill-split.test.ts"
     },
     {
@@ -4285,8 +4297,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_bill_split_test_guests",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 91,
+      "community_name": "bill-split.ts",
       "norm_label": "guests"
     },
     {
@@ -4296,8 +4308,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_bill_split",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 91,
+      "community_name": "bill-split.ts",
       "norm_label": "bill-split.ts"
     },
     {
@@ -4309,8 +4321,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_bill_split_billsplitmode",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 91,
+      "community_name": "bill-split.ts",
       "norm_label": "billsplitmode"
     },
     {
@@ -4322,8 +4334,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_bill_split_billparticipantinput",
-      "community": 37,
-      "community_name": "db.ts",
+      "community": 91,
+      "community_name": "bill-split.ts",
       "norm_label": "billparticipantinput"
     },
     {
@@ -4427,8 +4439,8 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_demo_demorole",
-      "community": 64,
-      "community_name": "admin/page.tsx",
+      "community": 0,
+      "community_name": "isLocalDemo",
       "norm_label": "demorole"
     },
     {
@@ -4590,7 +4602,7 @@
       "_origin": "ast",
       "id": "src_lib_logger",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "logger.ts"
     },
     {
@@ -4603,7 +4615,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_logfields",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "logfields"
     },
     {
@@ -4615,7 +4627,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_write",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "write()"
     },
     {
@@ -4626,7 +4638,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_logger",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "logger"
     },
     {
@@ -4637,7 +4649,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "menu-import-errors.ts"
     },
     {
@@ -4650,7 +4662,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors_databaseerror",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "databaseerror"
     },
     {
@@ -4662,7 +4674,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors_menuimportdatabasefailure",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "menuimportdatabasefailure()"
     },
     {
@@ -4673,7 +4685,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "menu-import-storage.ts"
     },
     {
@@ -4684,7 +4696,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_menuimportbucket",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "menuimportbucket"
     },
     {
@@ -4696,7 +4708,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_menuimportstorage",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "menuimportstorage()"
     },
     {
@@ -4708,7 +4720,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_ensuremenuimportbucket",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "ensuremenuimportbucket()"
     },
     {
@@ -4764,7 +4776,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "menu-import.ts"
     },
     {
@@ -4775,7 +4787,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdf_menu_max_bytes",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "pdf_menu_max_bytes"
     },
     {
@@ -4786,7 +4798,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdfmenuimportstatuses",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "pdfmenuimportstatuses"
     },
     {
@@ -4799,7 +4811,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdfmenuimportstatus",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "pdfmenuimportstatus"
     },
     {
@@ -4810,7 +4822,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_draftreviewstatuses",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "draftreviewstatuses"
     },
     {
@@ -4823,7 +4835,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_draftreviewstatus",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "draftreviewstatus"
     },
     {
@@ -4835,7 +4847,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_validatepdfupload",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "validatepdfupload()"
     },
     {
@@ -4847,7 +4859,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_validatepublicationinput",
       "community": 49,
-      "community_name": "requireRole",
+      "community_name": "finalize/route.ts",
       "norm_label": "validatepublicationinput()"
     },
     {
@@ -5313,8 +5325,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_supabase",
-      "community": 70,
-      "community_name": "KitchenPanel.tsx",
+      "community": 85,
+      "community_name": "supabase.ts",
       "norm_label": "supabase.ts"
     },
     {
@@ -5324,8 +5336,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_lib_supabase_supabase",
-      "community": 70,
-      "community_name": "KitchenPanel.tsx",
+      "community": 85,
+      "community_name": "supabase.ts",
       "norm_label": "supabase"
     },
     {
@@ -8772,6 +8784,61 @@
       "community": 78,
       "community_name": "harden-menu-import-deployment/tasks.md",
       "norm_label": "3. diagnostics and verification"
+    },
+    {
+      "label": "error-context.md",
+      "file_type": "document",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context",
+      "community": 92,
+      "community_name": "error-context.md",
+      "norm_label": "error-context.md"
+    },
+    {
+      "label": "Instructions",
+      "file_type": "document",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context_instructions",
+      "community": 92,
+      "community_name": "error-context.md",
+      "norm_label": "instructions"
+    },
+    {
+      "label": "Test info",
+      "file_type": "document",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context_test_info",
+      "community": 92,
+      "community_name": "error-context.md",
+      "norm_label": "test info"
+    },
+    {
+      "label": "Error details",
+      "file_type": "document",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context_error_details",
+      "community": 92,
+      "community_name": "error-context.md",
+      "norm_label": "error details"
+    },
+    {
+      "label": "Test source",
+      "file_type": "document",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context_test_source",
+      "community": 92,
+      "community_name": "error-context.md",
+      "norm_label": "test source"
     }
   ],
   "links": [
@@ -19222,7 +19289,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L64",
+      "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19233,7 +19300,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19244,7 +19311,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19255,7 +19322,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L264",
+      "source_location": "L280",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19266,7 +19333,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19277,7 +19344,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L50",
+      "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19288,7 +19355,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19299,7 +19366,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19310,7 +19377,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L44",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19321,7 +19388,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L46",
+      "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19332,7 +19399,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L84",
+      "source_location": "L99",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19343,7 +19410,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L43",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19354,7 +19421,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L58",
+      "source_location": "L60",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19365,7 +19432,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L40",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
@@ -19376,11 +19443,22 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L66",
+      "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel",
       "target": "src_components_admin_menuimportpanel_uploadpdfdirectly",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/MenuImportPanel.tsx",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_menuimportpanel",
+      "target": "src_components_admin_menuimportpanel_uploadpdfwithsupabase",
       "confidence_score": 1.0
     },
     {
@@ -19459,6 +19537,30 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/MenuImportPanel.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_menuimportpanel",
+      "target": "src_lib_supabase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/MenuImportPanel.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_menuimportpanel",
+      "target": "src_lib_supabase_supabase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuPanel.tsx",
       "source_location": "L4",
       "weight": 1.0,
@@ -19472,7 +19574,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L138",
+      "source_location": "L153",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel_menuimportpanel",
@@ -19484,7 +19586,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L268",
+      "source_location": "L284",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel_draftitemcard",
@@ -19496,7 +19598,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L138",
+      "source_location": "L153",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel_menuimportpanel",
@@ -19508,7 +19610,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L61",
+      "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel_staffjson",
@@ -19520,7 +19622,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L59",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel_staffjson",
@@ -19533,7 +19635,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/admin/MenuImportPanel.tsx",
-      "source_location": "L126",
+      "source_location": "L141",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_menuimportpanel_menuimportpanel",
@@ -25093,6 +25195,50 @@
       "_origin": "ast",
       "source": "openspec_changes_harden_menu_import_deployment_tasks",
       "target": "openspec_changes_harden_menu_import_deployment_tasks_3_diagnostics_and_verification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context",
+      "target": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context_error_details",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context",
+      "target": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context_instructions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context",
+      "target": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context_test_info",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context",
+      "target": "test_results_production_smoke_health_pu_0b526_mous_authorization_boundary_error_context_test_source",
       "confidence_score": 1.0
     }
   ],

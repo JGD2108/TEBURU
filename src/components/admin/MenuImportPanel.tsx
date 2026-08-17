@@ -37,6 +37,28 @@ type ImportJob = {
   categories?: DraftCategory[];
   items?: DraftItem[];
   validation_errors?: Array<{ item_id?: string; fields?: string[]; message?: string }>;
+  source_sha256?: string | null;
+  sourceSha256?: string | null;
+  analysis_execution_id?: string | null;
+  analysisExecutionId?: string | null;
+  analysis_attempt?: number | null;
+  analysisAttempt?: number | null;
+  analyzer_version?: string | null;
+  analyzerVersion?: string | null;
+  analysis_status?: string | null;
+  analysisStatus?: string | null;
+  analysis_run?: AnalysisRun | null;
+  analysisRun?: AnalysisRun | null;
+};
+type AnalysisRun = {
+  analysis_execution_id?: string | null;
+  analysisExecutionId?: string | null;
+  attempt?: number | null;
+  source_sha256?: string | null;
+  sourceSha256?: string | null;
+  analyzer_version?: string | null;
+  analyzerVersion?: string | null;
+  status?: string | null;
 };
 type UploadAuthorization = { id: string; objectPath: string; uploadToken: string; uploadUrl: string; token: string; expiresAt: string; maxBytes: number; contentType: string };
 type ImportReadiness = { available?: boolean; message?: string; maxPdfBytes?: number };
@@ -55,6 +77,17 @@ function fieldProblems(item: DraftItem) {
   if (item.price === null || item.price === '' || !Number.isFinite(Number(item.price)) || Number(item.price) < 0) problems.push('El precio no es válido');
   if (!item.category_id && !item.category_name) problems.push('Falta la categoría');
   return [...new Set(problems)];
+}
+
+function lineageFor(job: ImportJob) {
+  const run = job.analysis_run ?? job.analysisRun;
+  return {
+    executionId: run?.analysis_execution_id ?? run?.analysisExecutionId ?? job.analysis_execution_id ?? job.analysisExecutionId,
+    attempt: run?.attempt ?? job.analysis_attempt ?? job.analysisAttempt,
+    sourceHash: run?.source_sha256 ?? run?.sourceSha256 ?? job.source_sha256 ?? job.sourceSha256,
+    analyzerVersion: run?.analyzer_version ?? run?.analyzerVersion ?? job.analyzer_version ?? job.analyzerVersion,
+    status: run?.status ?? job.analysis_status ?? job.analysisStatus,
+  };
 }
 
 async function staffJson<T extends Record<string, unknown>>(input: RequestInfo | URL, init: RequestInit | undefined, fallback: string) {
@@ -196,6 +229,17 @@ export default function MenuImportPanel() {
     window.open(payload.data?.url ?? payload.data?.signedUrl ?? payload.url ?? payload.signedUrl, '_blank', 'noopener,noreferrer');
   }
 
+  async function retryImport() {
+    if (!selected) return;
+    setSubmitting(true); setMessage(null);
+    try {
+      await staffJson(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/retry`, { method: 'POST' }, 'No se pudo reintentar el análisis.');
+      await loadSelected(selected.id);
+      setMessage('El análisis fue reprogramado.');
+    } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo reintentar el análisis.'); }
+    finally { setSubmitting(false); }
+  }
+
   async function saveItem(item: DraftItem, patch: Partial<DraftItem>) {
     if (!selected) return;
     setSavingId(item.id); setMessage(null);
@@ -241,6 +285,7 @@ export default function MenuImportPanel() {
   if (loading) return <section style={panelStyle}>Cargando importaciones...</section>;
   const { categories, items, evidence } = jobDraft(selected);
   const visibleItems = items.filter((item) => item.review_status !== 'excluded');
+  const lineage = selected ? lineageFor(selected) : null;
   return <section aria-label="Importar menú PDF" style={{ display: 'grid', gap: '20px' }}>
     <div style={panelStyle}>
       <h3 style={{ marginTop: 0 }}>Importar menú desde PDF</h3>
@@ -266,8 +311,17 @@ export default function MenuImportPanel() {
         <div><h3 style={{ margin: 0 }}>{selected.file_name || selected.source_filename || 'Borrador de menú'}</h3><p style={{ color: 'var(--text-muted)', marginBottom: 0 }}>Estado: <strong>{selected.status}</strong>{selected.error_message || selected.failure_reason ? ` — ${selected.error_message || selected.failure_reason}` : ''}</p></div>
         <button className="btn-secondary" onClick={openSource}><FileText size={16} /> Ver PDF original</button>
       </div>
+      {lineage && (lineage.executionId || lineage.sourceHash || lineage.analyzerVersion) && <div aria-label="Linaje del análisis" style={{ padding: 12, borderRadius: 6, background: 'var(--bg-base)', display: 'grid', gap: 4 }}>
+        <strong>Linaje del análisis</strong>
+        <small>Importación: {selected.id}</small>
+        {lineage.executionId && <small>Ejecución: {lineage.executionId}</small>}
+        {lineage.attempt !== null && lineage.attempt !== undefined && <small>Intento: {lineage.attempt}</small>}
+        {lineage.status && <small>Resultado: {lineage.status}</small>}
+        {lineage.analyzerVersion && <small>Analizador: {lineage.analyzerVersion}</small>}
+        {lineage.sourceHash && <small style={{ overflowWrap: 'anywhere' }}>Huella SHA-256: {lineage.sourceHash}</small>}
+      </div>}
       {['pending', 'processing'].includes(selected.status) && <p role="status"><Loader2 size={16} className="spin" /> Analizando el documento; esta vista se actualiza automáticamente.</p>}
-      {selected.status === 'failed' && <p role="alert" style={{ color: 'var(--primary)' }}>No fue posible analizar este archivo. {selected.error_message || selected.failure_reason}</p>}
+      {selected.status === 'failed' && <div role="alert" style={{ color: 'var(--primary)', display: 'grid', gap: 8 }}><span>No fue posible analizar este archivo. {selected.error_message || selected.failure_reason}</span><button className="btn-secondary" type="button" disabled={submitting} onClick={retryImport}>Reintentar análisis</button></div>}
       {selected.status === 'needs_review' && <>
         {(validationCount > 0 || publishErrors.length > 0) && <div role="alert" style={{ padding: 12, borderRadius: 6, background: 'rgba(255,71,87,.12)', color: 'var(--primary)' }}><AlertTriangle size={16} /> {validationCount ? `${validationCount} platillo(s) requieren corrección.` : null}{publishErrors.map((error) => <div key={error}>{error}</div>)}</div>}
         {visibleItems.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : visibleItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.find((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}

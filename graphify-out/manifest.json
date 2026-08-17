@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1786897572.8061733,
-    "ast_hash": "9ed02fbb39cf5b44f9ceb63bdde5192d",
+    "mtime": 1786938066.5649855,
+    "ast_hash": "6cf3248babc7c8b20390140d23131e63",
     "semantic_hash": ""
   },
   "scripts/add_access_code.js": {
@@ -230,9 +230,9 @@
     "semantic_hash": ""
   },
   "tsconfig.json": {
-    "mtime": 1785979588.6356726,
-    "ast_hash": "e71b9422f68fdd7aec3ce10e79f878f3",
-    "semantic_hash": "e71b9422f68fdd7aec3ce10e79f878f3"
+    "mtime": 1786913677.8631172,
+    "ast_hash": "50b69d67af5d170805d3e0f4e2616cdd",
+    "semantic_hash": ""
   },
   "supabase/migrations/202608050001_normalize_order_statuses_and_add_indexes.sql": {
     "mtime": 1785981338.2782147,
@@ -640,8 +640,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/route.ts": {
-    "mtime": 1786901568.7950447,
-    "ast_hash": "1d774360655b9d2f4aaef4fb26af28be",
+    "mtime": 1786912139.892622,
+    "ast_hash": "d794393102de24deed88a3bff715ef2a",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/source/route.ts": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1786907907.4117248,
-    "ast_hash": "0e26c847f711ca442d3121f7beda4da1",
+    "mtime": 1786912836.4775417,
+    "ast_hash": "84d5dea2ad9f21d6b82478f8706dfd81",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -690,8 +690,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.ts": {
-    "mtime": 1786901153.1368313,
-    "ast_hash": "c39b8a2e99d842ba6fc40fb8db623c55",
+    "mtime": 1786913423.0137527,
+    "ast_hash": "f260e1b8b1e0a843a68492d720e726ee",
     "semantic_hash": ""
   },
   "supabase/migrations/20260816120000_pdf_menu_imports.sql": {
@@ -862,6 +862,126 @@
   "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md": {
     "mtime": 1786907926.7534275,
     "ast_hash": "c70f6f5bcb5729d360879b92b6500f59",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260816200000_event_driven_menu_import_analysis.sql": {
+    "mtime": 1786938689.5241928,
+    "ast_hash": "60b1ab94330141c47475246ce359bb90",
+    "semantic_hash": ""
+  },
+  "openspec/changes/event-driven-menu-import-analysis/.openspec.yaml": {
+    "mtime": 1786911605.7807634,
+    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
+    "semantic_hash": ""
+  },
+  "openspec/changes/event-driven-menu-import-analysis/design.md": {
+    "mtime": 1786911833.9214692,
+    "ast_hash": "6fe4c8f2a24e2e32df911736570663ca",
+    "semantic_hash": ""
+  },
+  "openspec/changes/event-driven-menu-import-analysis/proposal.md": {
+    "mtime": 1786911703.5686927,
+    "ast_hash": "85a1cf3f934161b936ee637f7515574b",
+    "semantic_hash": ""
+  },
+  "openspec/changes/event-driven-menu-import-analysis/specs/event-driven-menu-import-analysis/spec.md": {
+    "mtime": 1786911758.9697087,
+    "ast_hash": "028f5c619a7a9f1e11e9f8a08a963f3d",
+    "semantic_hash": ""
+  },
+  "openspec/changes/event-driven-menu-import-analysis/tasks.md": {
+    "mtime": 1786913788.180826,
+    "ast_hash": "ccf6c10b7fa5d400930161eb5eb9b225",
+    "semantic_hash": ""
+  },
+  "openspec/changes/orchestrate-menu-import-analysis/.openspec.yaml": {
+    "mtime": 1786911059.6282713,
+    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
+    "semantic_hash": ""
+  },
+  "openspec/changes/orchestrate-menu-import-analysis/design.md": {
+    "mtime": 1786911345.5915365,
+    "ast_hash": "b9f8f8e2f1d850414f0ba646c0c9acb4",
+    "semantic_hash": ""
+  },
+  "openspec/changes/orchestrate-menu-import-analysis/proposal.md": {
+    "mtime": 1786911143.6108222,
+    "ast_hash": "b1832bbeb5f3e39a292edfe26abc0ad8",
+    "semantic_hash": ""
+  },
+  "openspec/changes/orchestrate-menu-import-analysis/specs/menu-import-analysis-orchestration/spec.md": {
+    "mtime": 1786911288.048383,
+    "ast_hash": "cb1345d08ff2f3968d6280958d69d784",
+    "semantic_hash": ""
+  },
+  "openspec/changes/orchestrate-menu-import-analysis/tasks.md": {
+    "mtime": 1786911389.5997531,
+    "ast_hash": "6dab126918ff9ca6d2697ce84df54994",
+    "semantic_hash": ""
+  },
+  "src/app/api/internal/menu-import-analysis/route.test.ts": {
+    "mtime": 1786913053.7669606,
+    "ast_hash": "6b2a189ff0739faab9b9b460a0e7763f",
+    "semantic_hash": ""
+  },
+  "src/app/api/internal/menu-import-analysis/route.ts": {
+    "mtime": 1786912879.3658626,
+    "ast_hash": "54079103d2244b5f9bc31afb86751222",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/worker.test.ts": {
+    "mtime": 1786913358.7485733,
+    "ast_hash": "d151c55d020b4600a7413534c13b6f6d",
+    "semantic_hash": ""
+  },
+  "src/app/api/admin/menu-import/[id]/retry/route.ts": {
+    "mtime": 1786913191.3112538,
+    "ast_hash": "b81af376849897728537295dc51ad5f2",
+    "semantic_hash": ""
+  },
+  "supabase/functions/menu-import-analysis/index.ts": {
+    "mtime": 1786913564.0171962,
+    "ast_hash": "532675e54f65c2a81673b545d7699535",
+    "semantic_hash": ""
+  },
+  "docs/menu-import-analysis.md": {
+    "mtime": 1786913623.9439752,
+    "ast_hash": "d6bed14c670db6220cae4c153962c52a",
+    "semantic_hash": ""
+  },
+  "scripts/verify-menu-import-pgcrypto-migration.mjs": {
+    "mtime": 1786938818.0196128,
+    "ast_hash": "20400b84d57df089164111414a2370c1",
+    "semantic_hash": ""
+  },
+  "docs/menu-import-migration-recovery.md": {
+    "mtime": 1786938731.2914398,
+    "ast_hash": "7ee7ccfec7627e7216c84e20be6bb5cd",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-pgcrypto-migration/.openspec.yaml": {
+    "mtime": 1786937593.236061,
+    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-pgcrypto-migration/design.md": {
+    "mtime": 1786938330.469846,
+    "ast_hash": "c7a2320517e481066bba35e2ef407fba",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-pgcrypto-migration/proposal.md": {
+    "mtime": 1786938258.091914,
+    "ast_hash": "53acbef116d749bb21527bf452679fb9",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-pgcrypto-migration/specs/menu-import-migration-reliability/spec.md": {
+    "mtime": 1786938268.255827,
+    "ast_hash": "39af90ed6ee2091d7d3733d8ffb054e1",
+    "semantic_hash": ""
+  },
+  "openspec/changes/fix-menu-import-pgcrypto-migration/tasks.md": {
+    "mtime": 1786938278.4342377,
+    "ast_hash": "c45ef5ddff680378cedd7d74c6511afd",
     "semantic_hash": ""
   }
 }

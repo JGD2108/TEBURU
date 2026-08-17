@@ -1,27 +1,27 @@
 # Graph Report - teburuapp  (2026-08-16)
 
 ## Corpus Check
-- 169 files · ~73,240 words
+- 184 files · ~83,631 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 778 nodes · 1420 edges · 95 communities (64 shown, 31 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.5)
+- 917 nodes · 1604 edges · 105 communities (73 shown, 32 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `473390de`
+- Built from commit: `a00dfda8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - isLocalDemo
-- isAuthorizationFailure
+- ADDED Requirements
 - dependencies
 - compilerOptions
 - devDependencies
 - What You Must Do When Invoked
-- db.ts
+- getPoolClient
 - schema.sql
 - orders
 - eslint.config.mjs
@@ -39,7 +39,7 @@
 - seed_menu.js
 - guest_access_tokens
 - database.types.ts
-- images/route.ts
+- ADDED Requirements
 - graphify reference: extra exports and benchmark
 - graphify reference: query, path, explain
 - Teburu (テーブル) Restaurant OS
@@ -66,7 +66,7 @@
 - Decisions
 - session_tables
 - proposal.md
-- restaurants
+- menu_import_jobs
 - menu_categories
 - menu_items
 - order_items
@@ -88,27 +88,37 @@
 - fix-menu-import-upload-finalize/design.md
 - fix-menu-import-upload-finalize/tasks.md
 - auth.ts
+- Decisions
+- platform/page.tsx
+- Decisions
+- event-driven-menu-import-analysis/proposal.md
+- orchestrate-menu-import-analysis/proposal.md
+- orchestrate-menu-import-analysis/tasks.md
+- event-driven-menu-import-analysis/tasks.md
+- images/route.ts
+- error-context.md
+- isAuthorizationFailure
+- categories/route.ts
+- db.ts
 - staff/route.ts
-- supabase.ts
 - restaurants/route.ts
 - bulk/route.ts
 - update/route.ts
-- categories/route.ts
+- index.ts
+- menu-import-analysis.md
 - deliver/route.ts
-- checkout/route.ts
-- error-context.md
 - lucide-react
 - @types/react-dom
 
 ## God Nodes (most connected - your core abstractions)
-1. `isAuthorizationFailure()` - 81 edges
-2. `requireRole()` - 73 edges
-3. `query()` - 67 edges
-4. `getPoolClient()` - 37 edges
+1. `isAuthorizationFailure()` - 83 edges
+2. `requireRole()` - 75 edges
+3. `query()` - 68 edges
+4. `getPoolClient()` - 40 edges
 5. `staffFetch()` - 25 edges
-6. `jsonSuccess()` - 20 edges
-7. `jsonError()` - 19 edges
-8. `jsonAuthorizationError()` - 16 edges
+6. `jsonSuccess()` - 24 edges
+7. `jsonError()` - 23 edges
+8. `jsonAuthorizationError()` - 18 edges
 9. `compilerOptions` - 16 edges
 10. `requireGuestSession()` - 15 edges
 
@@ -127,15 +137,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (95 total, 31 thin omitted)
+## Communities (105 total, 32 thin omitted)
 
 ### Community 0 - "isLocalDemo"
-Cohesion: 0.17
-Nodes (16): accessDestination(), AdminLogin(), AuthStep, emptyForm, PlatformPage(), Restaurant, CartItem, TableMenu() (+8 more)
+Cohesion: 0.20
+Nodes (13): accessDestination(), AdminLogin(), AuthStep, CartItem, TableMenu(), TableLogin(), DemoBar(), links (+5 more)
 
-### Community 1 - "isAuthorizationFailure"
-Cohesion: 0.19
-Nodes (25): DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query }, GET(), PATCH() (+17 more)
+### Community 1 - "ADDED Requirements"
+Cohesion: 0.08
+Nodes (24): ADDED Requirements, Purpose, Requirement: Admin status polling reflects terminal outcomes, Requirement: Analysis failures are observable and safe, Requirement: Finalized imports are eventually processed, Requirement: Internal processing is authenticated and bounded, Requirement: Job claims are exclusive and recoverable, Requirement: Retries terminate deterministically (+16 more)
 
 ### Community 2 - "dependencies"
 Cohesion: 0.12
@@ -143,7 +153,7 @@ Nodes (17): html2canvas, next, dependencies, html2canvas, next, pdfjs-dist, pg, 
 
 ### Community 3 - "compilerOptions"
 Cohesion: 0.07
-Nodes (27): dom, dom.iterable, esnext, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts, node_modules, **/*.ts (+19 more)
+Nodes (28): dom, dom.iterable, esnext, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts, node_modules, supabase/functions (+20 more)
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.12
@@ -153,9 +163,9 @@ Nodes (17): eslint, eslint-config-next, devDependencies, eslint, eslint-config-n
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 6 - "db.ts"
-Cohesion: 0.13
-Nodes (17): POST(), GET(), POST(), ImportedItem, POST(), messages, POST(), { requireRole, getPoolClient, activateTables, client } (+9 more)
+### Community 6 - "getPoolClient"
+Cohesion: 0.16
+Nodes (14): POST(), POST(), ImportedItem, POST(), messages, POST(), { requireRole, getPoolClient, activateTables, client }, POST() (+6 more)
 
 ### Community 7 - "schema.sql"
 Cohesion: 0.50
@@ -177,9 +187,9 @@ Nodes (3): guest_access_tokens, session_users, sessions
 Cohesion: 0.22
 Nodes (8): BillSplit, BillSplitParticipant, BillSplitStatus, Database, Json, Restaurant, RestaurantMembership, RestaurantStatus
 
-### Community 25 - "images/route.ts"
-Cohesion: 0.38
-Nodes (4): extensions, POST(), storageAdmin(), { requireRole, createClient, getBucket, createBucket, updateBucket, upload, getPublicUrl }
+### Community 25 - "ADDED Requirements"
+Cohesion: 0.09
+Nodes (21): ADDED Requirements, Purpose, Requirement: Analysis completion is atomic and reviewable, Requirement: Analysis executions are identifiable and idempotent, Requirement: Every detected menu element has execution lineage, Requirement: Execution ownership and retries are durable, Requirement: Finalized PDF insertion starts one analysis execution, Requirement: Processing is independent of Vercel hosting (+13 more)
 
 ### Community 26 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
@@ -218,8 +228,8 @@ Cohesion: 0.13
 Nodes (22): snapshot_order_item_stations, menu_categories, menu_items, order_items, orders, restaurant_settings, session_users, sessions (+14 more)
 
 ### Community 41 - "worker.ts"
-Cohesion: 0.12
-Nodes (21): analyzePdf(), confidence(), configuredOcr(), createPdfAnalysisProvider(), parseMenuText(), AnalysisResult, Confidence, ExtractedImage (+13 more)
+Cohesion: 0.07
+Nodes (35): analyzePdf(), confidence(), configuredOcr(), createPdfAnalysisProvider(), parseMenuText(), AnalysisResult, Confidence, ExtractedImage (+27 more)
 
 ### Community 42 - "Operación de Teburu"
 Cohesion: 0.29
@@ -230,8 +240,8 @@ Cohesion: 0.10
 Nodes (19): ADDED Requirements, Purpose, Requirement: Controlled publication to the restaurant menu, Requirement: Menu structure extraction, Requirement: Restaurant-scoped PDF import submission, Requirement: Review before live-menu publication, Requirement: Source visual preservation and image suggestions, Scenario: Administrator appends an approved draft (+11 more)
 
 ### Community 49 - "finalize/route.ts"
-Cohesion: 0.11
-Nodes (41): Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE(), PATCH(), POST() (+33 more)
+Cohesion: 0.10
+Nodes (49): Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE(), PATCH(), POST() (+41 more)
 
 ### Community 52 - "openspec-explore/SKILL.md"
 Cohesion: 0.18
@@ -249,25 +259,25 @@ Nodes (3): session_tables, sessions, tables
 Cohesion: 0.29
 Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
 
-### Community 57 - "restaurants"
-Cohesion: 0.24
-Nodes (13): bill_split_participants, bill_splits, platform_admins, restaurants, session_users, sessions, menu_import_draft_categories, menu_import_draft_items (+5 more)
+### Community 57 - "menu_import_jobs"
+Cohesion: 0.19
+Nodes (14): bill_split_participants, bill_splits, platform_admins, restaurants, session_users, sessions, menu_import_draft_categories, menu_import_draft_items (+6 more)
 
 ### Community 63 - "tasks.md"
 Cohesion: 0.40
 Nodes (4): 1. Import foundation and storage, 2. Document analysis pipeline, 3. Draft review experience, 4. Publication and verification
 
 ### Community 64 - "admin/page.tsx"
-Cohesion: 0.15
-Nodes (17): jspdf, jspdf, AdminDashboard(), HistoryPanel(), MenuPanel(), OverviewPanel(), SettingsPanel(), StaffPanel() (+9 more)
+Cohesion: 0.14
+Nodes (18): jspdf, jspdf, AdminDashboard(), PlatformPage(), HistoryPanel(), MenuPanel(), OverviewPanel(), SettingsPanel() (+10 more)
 
 ### Community 70 - "KitchenPanel.tsx"
 Cohesion: 0.18
 Nodes (10): ConnectionState, KitchenItem, KitchenPanel(), KitchenStatus, lanes, nextPriority, Priority, priorityLabels (+2 more)
 
 ### Community 71 - "MenuImportPanel.tsx"
-Cohesion: 0.14
-Nodes (15): CompletedUpload, DraftCategory, DraftItem, DraftItemCard(), Evidence, fieldProblems(), ImportJob, ImportReadiness (+7 more)
+Cohesion: 0.13
+Nodes (17): AnalysisRun, CompletedUpload, DraftCategory, DraftItem, DraftItemCard(), Evidence, fieldProblems(), ImportJob (+9 more)
 
 ### Community 72 - "ADDED Requirements"
 Cohesion: 0.17
@@ -317,49 +327,85 @@ Nodes (3): 1. Finalize contract, 2. UI recovery, 3. Verification
 Cohesion: 0.26
 Nodes (9): AccessRow, GET(), { requireAuthenticatedUser, query }, GET(), authClient(), requireAuthenticatedUser(), requireStaff(), StaffRole (+1 more)
 
-### Community 84 - "staff/route.ts"
-Cohesion: 0.31
-Nodes (6): adminClient(), DELETE(), GET(), POST(), { query, requireRole, createUser, deleteUser }, staffRoles
+### Community 84 - "Decisions"
+Cohesion: 0.17
+Nodes (11): 1. Supabase Database Webhook is the start signal, 2. Separate import identity from attempt identity, 3. Use source fingerprinting for safe re-analysis detection, 4. Enforce lineage in the database, not only in application code, 5. Keep the worker portable and bounded, 6. Recovery is explicit and observable, Context, Decisions (+3 more)
 
-### Community 85 - "supabase.ts"
-Cohesion: 0.36
-Nodes (4): MenuRow, OnboardingPage(), parseMenu(), supabase
+### Community 85 - "platform/page.tsx"
+Cohesion: 0.25
+Nodes (6): MenuRow, OnboardingPage(), parseMenu(), emptyForm, Restaurant, supabase
 
-### Community 86 - "restaurants/route.ts"
-Cohesion: 0.43
-Nodes (6): PATCH(), authAdmin(), GET(), POST(), slugify(), requirePlatformAdmin()
+### Community 86 - "Decisions"
+Cohesion: 0.18
+Nodes (10): 1. Use a protected internal route invoked by Vercel Cron, 2. Extend the existing job row with lease and retry metadata, 3. Separate source reading, analysis, and persistence, 4. Keep the API envelope and admin polling contract stable, 5. Test the worker as a state machine, Context, Decisions, Goals / Non-Goals (+2 more)
 
-### Community 87 - "bulk/route.ts"
+### Community 87 - "event-driven-menu-import-analysis/proposal.md"
+Cohesion: 0.29
+Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
+
+### Community 88 - "orchestrate-menu-import-analysis/proposal.md"
+Cohesion: 0.29
+Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
+
+### Community 89 - "orchestrate-menu-import-analysis/tasks.md"
+Cohesion: 0.29
+Nodes (6): 1. Queue schema and storage boundaries, 2. Durable worker state machine, 3. Internal trigger and deployment configuration, 4. Admin status experience, 5. Automated verification, 6. Migration and operational validation
+
+### Community 90 - "event-driven-menu-import-analysis/tasks.md"
 Cohesion: 0.33
-Nodes (4): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions
+Nodes (5): 1. Execution identity and lineage schema, 2. Supabase event trigger and secure consumer, 3. Analysis, reuse, and durable state machine, 4. Retry and operator controls, 5. Verification and lineage proof
 
-### Community 88 - "update/route.ts"
-Cohesion: 0.33
-Nodes (4): nextStatuses, POST(), priorities, { getPoolClient, requireRole, client }
+### Community 91 - "images/route.ts"
+Cohesion: 0.38
+Nodes (4): extensions, POST(), storageAdmin(), { requireRole, createClient, getBucket, createBucket, updateBucket, upload, getPublicUrl }
 
 ### Community 92 - "error-context.md"
 Cohesion: 0.40
 Nodes (4): Error details, Instructions, Test info, Test source
 
+### Community 93 - "isAuthorizationFailure"
+Cohesion: 0.18
+Nodes (26): DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query }, GET(), PATCH() (+18 more)
+
+### Community 95 - "db.ts"
+Cohesion: 0.17
+Nodes (7): dynamic, GET(), GET(), POST(), { getPoolClient, requireRole, client }, isSupabase, pool
+
+### Community 96 - "staff/route.ts"
+Cohesion: 0.36
+Nodes (5): adminClient(), DELETE(), POST(), { query, requireRole, createUser, deleteUser }, staffRoles
+
+### Community 97 - "restaurants/route.ts"
+Cohesion: 0.43
+Nodes (6): PATCH(), authAdmin(), GET(), POST(), slugify(), requirePlatformAdmin()
+
+### Community 98 - "bulk/route.ts"
+Cohesion: 0.33
+Nodes (4): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions
+
+### Community 99 - "update/route.ts"
+Cohesion: 0.33
+Nodes (4): nextStatuses, POST(), priorities, { getPoolClient, requireRole, client }
+
 ## Knowledge Gaps
-- **298 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+293 more)
+- **383 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+378 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **32 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `getPoolClient()` connect `getPoolClient` to `staff/route.ts`, `restaurants/route.ts`, `bulk/route.ts`, `update/route.ts`, `guest-session.ts`, `deliver/route.ts`, `worker.ts`, `finalize/route.ts`, `db.ts`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `admin/page.tsx`, `lucide-react`, `package.json`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `jspdf` connect `admin/page.tsx` to `dependencies`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **What connects `required`, `missing`, `eslintConfig` to the rest of the system?**
-  _298 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _383 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `ADDED Requirements` be split into smaller, more focused modules?**
+  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
-  _Cohesion score 0.07142857142857142 - nodes in this community are weakly interconnected._
-- **Should `devDependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
-- **Should `What You Must Do When Invoked` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06896551724137931 - nodes in this community are weakly interconnected._

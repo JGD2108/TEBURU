@@ -65,7 +65,7 @@ type ImportReadiness = { available?: boolean; message?: string; maxPdfBytes?: nu
 
 const menuImportBucket = 'menu-imports';
 const panelStyle = { background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' } as const;
-const inputStyle = { width: '100%', padding: '9px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' } as const;
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '7px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.7)' } as const;
 
 function jobDraft(job: ImportJob | null) {
   return { categories: job?.draft?.categories ?? job?.categories ?? [], items: job?.draft?.items ?? job?.items ?? [], evidence: job?.draft?.evidence ?? [] };
@@ -138,6 +138,7 @@ export default function MenuImportPanel() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [readiness, setReadiness] = useState<ImportReadiness | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [publishErrors, setPublishErrors] = useState<string[]>([]);
   const uploadAbort = useRef<AbortController | null>(null);
@@ -156,10 +157,10 @@ export default function MenuImportPanel() {
     return jobs;
   }, []);
 
-  const loadSelected = useCallback(async (id: string) => {
+  const loadSelected = useCallback(async (id: string, preserveSelection = false) => {
     const payload = await staffJson<{ import?: ImportJob; data?: ImportJob; draft?: ImportJob['draft'] }>(`/api/admin/menu-import/${encodeURIComponent(id)}`, undefined, 'No se pudo cargar el borrador. Inténtalo de nuevo.');
     const job = { ...(payload.import ?? payload.data ?? payload), draft: payload.draft } as ImportJob;
-    setSelected(job);
+    setSelected((current) => preserveSelection && current?.id !== id ? current : job);
     setImports((current) => current.map((entry) => entry.id === job.id ? { ...entry, ...job } : entry));
     return job;
   }, []);
@@ -179,7 +180,7 @@ export default function MenuImportPanel() {
 
   useEffect(() => {
     if (!selected || !['pending', 'processing'].includes(selected.status)) return;
-    const interval = window.setInterval(() => loadSelected(selected.id).catch(() => undefined), 3000);
+    const interval = window.setInterval(() => loadSelected(selected.id, true).catch(() => undefined), 3000);
     return () => window.clearInterval(interval);
   }, [loadSelected, selected]);
 
@@ -240,6 +241,23 @@ export default function MenuImportPanel() {
     finally { setSubmitting(false); }
   }
 
+  async function deleteImport() {
+    if (!selected || ['processing', 'published'].includes(selected.status)) return;
+    const name = selected.file_name || selected.source_filename || 'este borrador';
+    if (!window.confirm(`¿Eliminar “${name}”? Esta acción no se puede deshacer.`)) return;
+    const deletedId = selected.id;
+    setDeleting(true); setMessage(null);
+    try {
+      await staffJson(`/api/admin/menu-import/${encodeURIComponent(deletedId)}`, { method: 'DELETE' }, 'No se pudo eliminar la importación.');
+      setSelected(null);
+      setImports((current) => current.filter((job) => job.id !== deletedId));
+      await loadImports(false);
+      setMessage('La importación fue eliminada.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'No se pudo eliminar la importación.');
+    } finally { setDeleting(false); }
+  }
+
   async function saveItem(item: DraftItem, patch: Partial<DraftItem>) {
     if (!selected) return;
     setSavingId(item.id); setMessage(null);
@@ -286,6 +304,8 @@ export default function MenuImportPanel() {
   const { categories, items, evidence } = jobDraft(selected);
   const visibleItems = items.filter((item) => item.review_status !== 'excluded');
   const lineage = selected ? lineageFor(selected) : null;
+  const canReplay = selected ? ['pending', 'failed'].includes(selected.status) : false;
+  const canDelete = selected ? !['processing', 'published'].includes(selected.status) : false;
   return <section aria-label="Importar menú PDF" style={{ display: 'grid', gap: '20px' }}>
     <div style={panelStyle}>
       <h3 style={{ marginTop: 0 }}>Importar menú desde PDF</h3>
@@ -309,7 +329,11 @@ export default function MenuImportPanel() {
     {selected && <div style={{ ...panelStyle, display: 'grid', gap: '16px' }}>
       <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
         <div><h3 style={{ margin: 0 }}>{selected.file_name || selected.source_filename || 'Borrador de menú'}</h3><p style={{ color: 'var(--text-muted)', marginBottom: 0 }}>Estado: <strong>{selected.status}</strong>{selected.error_message || selected.failure_reason ? ` — ${selected.error_message || selected.failure_reason}` : ''}</p></div>
-        <button className="btn-secondary" onClick={openSource}><FileText size={16} /> Ver PDF original</button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn-secondary" type="button" onClick={openSource}><FileText size={16} /> Ver PDF original</button>
+          {canReplay && <button className="btn-secondary" type="button" disabled={submitting || deleting} onClick={retryImport}>Iniciar o reintentar análisis</button>}
+          {canDelete && <button className="btn-secondary" type="button" disabled={submitting || deleting} onClick={deleteImport} aria-label="Eliminar importación"><Trash2 size={16} /> {deleting ? 'Eliminando...' : 'Eliminar importación'}</button>}
+        </div>
       </div>
       {lineage && (lineage.executionId || lineage.sourceHash || lineage.analyzerVersion) && <div aria-label="Linaje del análisis" style={{ padding: 12, borderRadius: 6, background: 'var(--bg-base)', display: 'grid', gap: 4 }}>
         <strong>Linaje del análisis</strong>
@@ -321,7 +345,7 @@ export default function MenuImportPanel() {
         {lineage.sourceHash && <small style={{ overflowWrap: 'anywhere' }}>Huella SHA-256: {lineage.sourceHash}</small>}
       </div>}
       {['pending', 'processing'].includes(selected.status) && <p role="status"><Loader2 size={16} className="spin" /> Analizando el documento; esta vista se actualiza automáticamente.</p>}
-      {selected.status === 'failed' && <div role="alert" style={{ color: 'var(--primary)', display: 'grid', gap: 8 }}><span>No fue posible analizar este archivo. {selected.error_message || selected.failure_reason}</span><button className="btn-secondary" type="button" disabled={submitting} onClick={retryImport}>Reintentar análisis</button></div>}
+      {selected.status === 'failed' && <div role="alert" style={{ color: 'var(--primary)' }}>No fue posible analizar este archivo. {selected.error_message || selected.failure_reason}</div>}
       {selected.status === 'needs_review' && <>
         {(validationCount > 0 || publishErrors.length > 0) && <div role="alert" style={{ padding: 12, borderRadius: 6, background: 'rgba(255,71,87,.12)', color: 'var(--primary)' }}><AlertTriangle size={16} /> {validationCount ? `${validationCount} platillo(s) requieren corrección.` : null}{publishErrors.map((error) => <div key={error}>{error}</div>)}</div>}
         {visibleItems.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : visibleItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.find((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}
@@ -337,9 +361,9 @@ function DraftItemCard({ item, categories, evidence, saving, onSave, onRemove }:
   useEffect(() => setValues({ name: item.name ?? '', description: item.description ?? '', price: item.price?.toString() ?? '', category_id: item.draft_category_id ?? item.category_id ?? '' }), [item]);
   const problems = fieldProblems(item);
   const suggestedImage = item.image_suggestion?.url ?? item.image_url;
-  return <article style={{ padding: 16, border: '1px solid var(--border-color)', borderRadius: 8 }}>
+  return <article style={{ padding: 16, background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', borderRadius: 10 }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'start' }}>
-      <div><strong>{item.name || 'Platillo sin nombre'}</strong><p style={{ margin: '4px 0', color: 'var(--text-muted)' }}>{item.category_name || categories.find((category) => category.id === (item.draft_category_id ?? item.category_id))?.name || 'Sin categoría'} · ${Number(item.price || 0).toFixed(2)} · Página {evidence?.page_number ?? item.source_page ?? 'sin referencia'}</p></div>
+      <div><strong style={{ color: 'var(--text-main)', fontSize: '1.05rem' }}>{item.name || 'Platillo sin nombre'}</strong><p style={{ margin: '5px 0', color: 'var(--text-muted)', fontWeight: 600, lineHeight: 1.45 }}>{item.category_name || categories.find((category) => category.id === (item.draft_category_id ?? item.category_id))?.name || 'Sin categoría'} · ${Number(item.price || 0).toFixed(2)} · Página {evidence?.page_number ?? item.source_page ?? 'sin referencia'}</p></div>
       <div style={{ display: 'flex', gap: 8 }}><button aria-label={`Aprobar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving || item.review_status === 'approved'} onClick={() => onSave(item, { approved: true })}><Check size={15} /></button><button aria-label={`Editar ${item.name || 'platillo'}`} className="btn-secondary" onClick={() => setEditing((value) => !value)}><Pencil size={15} /></button><button aria-label={`Eliminar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => onRemove(item)}><Trash2 size={15} /></button></div>
     </div>
     {suggestedImage && <div style={{ marginTop: 10, display: 'flex', gap: 10, alignItems: 'center' }}><img src={suggestedImage} alt={`Imagen sugerida para ${item.name || 'platillo'}`} style={{ width: 72, height: 54, objectFit: 'cover', borderRadius: 5 }} /><small style={{ color: 'var(--text-muted)' }}><ImageIcon size={13} /> Imagen sugerida{item.image_suggestion?.confidence ? ` (${Math.round(item.image_suggestion.confidence * 100)}% confianza)` : ''}</small></div>}

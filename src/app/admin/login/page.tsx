@@ -8,15 +8,23 @@ import { Lock, Mail, Key, ShieldCheck } from 'lucide-react';
 import styles from './login.module.css';
 import DemoBar from '@/components/DemoBar';
 import { isLocalDemo } from '@/lib/demo';
+import { readApiResponse, requireApiSuccess } from '@/lib/api-client';
 
 type AuthStep = 'login' | 'setup_2fa' | 'verify_2fa' | 'forgot_password';
 
 async function accessDestination(accessToken: string) {
   window.localStorage.removeItem('teburu_restaurant_id');
   const response = await fetch('/api/auth/destination', { headers: { Authorization: `Bearer ${accessToken}` } });
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error ?? 'No se pudo determinar el acceso de esta cuenta.');
-  return payload.data.destination as '/platform' | '/admin';
+  const fallback = 'No se pudo determinar el acceso de esta cuenta. Inténtalo de nuevo.';
+  const payload = await readApiResponse<{
+    data?: { destination?: '/platform' | '/admin' };
+    error?: string | { code?: string; message?: string; requestId?: string };
+  }>(response, fallback);
+  requireApiSuccess(response, payload, fallback);
+  if (payload.data?.destination !== '/platform' && payload.data?.destination !== '/admin') {
+    throw new Error(fallback);
+  }
+  return payload.data.destination;
 }
 
 export default function AdminLogin() {

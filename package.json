@@ -10,10 +10,12 @@
     "test": "vitest run",
     "test:integration": "node scripts/verify-migrations.mjs",
     "test:menu-import-migration": "node scripts/verify-menu-import-pgcrypto-migration.mjs",
+    "test:menu-import-pg-net-migration": "node scripts/verify-menu-import-pg-net-migration.mjs",
     "verify:remote-security": "node scripts/verify-remote-security.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@napi-rs/canvas": "0.1.100",
     "@supabase/supabase-js": "^2.110.3",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
@@ -23,7 +25,8 @@
     "pg": "^8.22.0",
     "qrcode.react": "^4.2.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

@@ -283,8 +283,9 @@
 }
 
 .featuredDesc {
-  font-size: 0.9rem;
-  color: rgba(255, 250, 241, .78);
+  font-size: 0.95rem;
+  color: rgba(255, 250, 241, .94);
+  line-height: 1.45;
   margin-bottom: 8px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -343,7 +344,8 @@
 
 .itemName {
   font-size: 1.05rem;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--text-main);
   margin-bottom: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -352,8 +354,10 @@
 }
 
 .itemDesc {
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.4;
   flex: 1;
   display: -webkit-box;
   -webkit-line-clamp: 2;

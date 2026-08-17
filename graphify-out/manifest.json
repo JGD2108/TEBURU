@@ -10,13 +10,13 @@
     "semantic_hash": ""
   },
   "next.config.ts": {
-    "mtime": 1786135740.4582417,
-    "ast_hash": "527aa96ffa10cced0bc9942ca305c7b2",
+    "mtime": 1786943475.2626421,
+    "ast_hash": "397d41b20faf7b2f3ac3d43060d32a4a",
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1786938066.5649855,
-    "ast_hash": "6cf3248babc7c8b20390140d23131e63",
+    "mtime": 1786983862.6505158,
+    "ast_hash": "73cbd05edaf011823512b989113eb4f0",
     "semantic_hash": ""
   },
   "scripts/add_access_code.js": {
@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "src/app/admin/login/page.tsx": {
-    "mtime": 1786501183.889853,
-    "ast_hash": "9cd9b9ac169a4384c94f53fc8b958a99",
+    "mtime": 1786944447.94483,
+    "ast_hash": "c00f7b936c60787059bf59bb551130be",
     "semantic_hash": ""
   },
   "src/app/admin/page.tsx": {
@@ -180,8 +180,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuPanel.tsx": {
-    "mtime": 1786897666.7759683,
-    "ast_hash": "f02fdb644428ece6ee2b24fc5f60a8bc",
+    "mtime": 1786944748.0978339,
+    "ast_hash": "b6256439b7e20298d9ed0a059496a909",
     "semantic_hash": ""
   },
   "src/components/admin/OverviewPanel.tsx": {
@@ -300,8 +300,8 @@
     "semantic_hash": ""
   },
   "vitest.config.mts": {
-    "mtime": 1786057076.834134,
-    "ast_hash": "18763bea1eacd66a2d2d3fe524aa39f1",
+    "mtime": 1786984240.3234322,
+    "ast_hash": "3c1fe3486590b551c6523c84cf727733",
     "semantic_hash": ""
   },
   "scripts/verify-migrations.mjs": {
@@ -600,13 +600,13 @@
     "semantic_hash": ""
   },
   "src/app/api/auth/destination/route.test.ts": {
-    "mtime": 1786472680.457435,
-    "ast_hash": "69a2714b52202aea4ade2c43fddfcdf2",
+    "mtime": 1786944468.9847999,
+    "ast_hash": "79e8d209ab159c389c747c0fe84d4e92",
     "semantic_hash": ""
   },
   "src/app/api/auth/destination/route.ts": {
-    "mtime": 1786472634.4430583,
-    "ast_hash": "9338bf767943a86dfd58edf3a01cd71e",
+    "mtime": 1786944458.3794916,
+    "ast_hash": "c985263c34e7f683e991b8fd2a5eae82",
     "semantic_hash": ""
   },
   "src/lib/features.ts": {
@@ -640,8 +640,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/route.ts": {
-    "mtime": 1786912139.892622,
-    "ast_hash": "d794393102de24deed88a3bff715ef2a",
+    "mtime": 1786983727.4189982,
+    "ast_hash": "0caa29c781bb61b37f20301e5db8f481",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/source/route.ts": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1786912836.4775417,
-    "ast_hash": "84d5dea2ad9f21d6b82478f8706dfd81",
+    "mtime": 1786944737.6301608,
+    "ast_hash": "4034d6ca9f95292ed32640cbb3c3ea9b",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -675,23 +675,23 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/provider.test.ts": {
-    "mtime": 1786897749.7457902,
-    "ast_hash": "c988221f12afc6b2c8d44010b9fc4930",
+    "mtime": 1786984129.365548,
+    "ast_hash": "2742d0cfc1a160d0c1dd87d875b010ca",
     "semantic_hash": ""
   },
   "src/lib/menu-import/provider.ts": {
-    "mtime": 1786899266.963701,
-    "ast_hash": "e2dfe7bc78f0e4eed99ed9307841a00e",
+    "mtime": 1786984089.8269494,
+    "ast_hash": "f6675e2a4c6b9f2b5ca170ce4f9daafa",
     "semantic_hash": ""
   },
   "src/lib/menu-import/types.ts": {
-    "mtime": 1786897648.3538165,
-    "ast_hash": "02ea7eb0a2f191ff636dd51ba965c183",
+    "mtime": 1786983831.1955907,
+    "ast_hash": "3a7bee7195e25222418a65f84a6acb6a",
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.ts": {
-    "mtime": 1786913423.0137527,
-    "ast_hash": "f260e1b8b1e0a843a68492d720e726ee",
+    "mtime": 1786983837.0796666,
+    "ast_hash": "d2f4cce75f1ae2ba156331a8807bab4e",
     "semantic_hash": ""
   },
   "supabase/migrations/20260816120000_pdf_menu_imports.sql": {
@@ -760,8 +760,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/routes.test.ts": {
-    "mtime": 1786909411.3244848,
-    "ast_hash": "75ee4d2833b7f51a5539fdfe4aa5fe54",
+    "mtime": 1786942187.3709257,
+    "ast_hash": "6aba58b7c2e9bdd9f5f7399d45890d15",
     "semantic_hash": ""
   },
   "openspec/changes/harden-menu-import-deployment/.openspec.yaml": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/finalize/route.ts": {
-    "mtime": 1786909401.3668907,
-    "ast_hash": "ff662279fad5f11a37c7cc5c57adc5eb",
+    "mtime": 1786941796.2708676,
+    "ast_hash": "9b95d79f7247cbd0cd7b6bf4dd447443",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/upload-authorizations/route.ts": {
@@ -920,23 +920,23 @@
     "semantic_hash": ""
   },
   "src/app/api/internal/menu-import-analysis/route.test.ts": {
-    "mtime": 1786913053.7669606,
-    "ast_hash": "6b2a189ff0739faab9b9b460a0e7763f",
+    "mtime": 1786941806.264458,
+    "ast_hash": "316595936d826f72aaa8785c19666b04",
     "semantic_hash": ""
   },
   "src/app/api/internal/menu-import-analysis/route.ts": {
-    "mtime": 1786912879.3658626,
-    "ast_hash": "54079103d2244b5f9bc31afb86751222",
+    "mtime": 1786941610.5751786,
+    "ast_hash": "3a8e0f2da2ba31989bed8f7687aa36ca",
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.test.ts": {
-    "mtime": 1786913358.7485733,
-    "ast_hash": "d151c55d020b4600a7413534c13b6f6d",
+    "mtime": 1786983955.8324437,
+    "ast_hash": "c13100197de5136f5d8e1f80644a2ee5",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/retry/route.ts": {
-    "mtime": 1786913191.3112538,
-    "ast_hash": "b81af376849897728537295dc51ad5f2",
+    "mtime": 1786941700.3014898,
+    "ast_hash": "c873b5ce7c76a103ffd9f37c4d91ecaf",
     "semantic_hash": ""
   },
   "supabase/functions/menu-import-analysis/index.ts": {
@@ -945,13 +945,13 @@
     "semantic_hash": ""
   },
   "docs/menu-import-analysis.md": {
-    "mtime": 1786913623.9439752,
-    "ast_hash": "d6bed14c670db6220cae4c153962c52a",
+    "mtime": 1786983687.5711956,
+    "ast_hash": "d7909c1f9b026172189a22c57a11dcbe",
     "semantic_hash": ""
   },
   "scripts/verify-menu-import-pgcrypto-migration.mjs": {
-    "mtime": 1786938818.0196128,
-    "ast_hash": "20400b84d57df089164111414a2370c1",
+    "mtime": 1786942509.470102,
+    "ast_hash": "fca326a17b0caa3cb065ae458b0b710f",
     "semantic_hash": ""
   },
   "docs/menu-import-migration-recovery.md": {
@@ -980,8 +980,68 @@
     "semantic_hash": ""
   },
   "openspec/changes/fix-menu-import-pgcrypto-migration/tasks.md": {
-    "mtime": 1786938278.4342377,
-    "ast_hash": "c45ef5ddff680378cedd7d74c6511afd",
+    "mtime": 1786938917.7541206,
+    "ast_hash": "84b2592074807e8c31629c1037fff8da",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/dispatcher.ts": {
+    "mtime": 1786941568.7008781,
+    "ast_hash": "80204a964b35011004a0df44208484d4",
+    "semantic_hash": ""
+  },
+  "scripts/verify-menu-import-pg-net-migration.mjs": {
+    "mtime": 1786942966.4016683,
+    "ast_hash": "b628e2132de91d038e27996f10278965",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260817050142_enable_pg_net_menu_import_dispatch.sql": {
+    "mtime": 1786942956.0905547,
+    "ast_hash": "734f832aabc11d99317590a27dc7f4af",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/pdfjs-worker.d.ts": {
+    "mtime": 1786943513.482318,
+    "ast_hash": "b47eefb403c55bfb02061317d02bd19f",
+    "semantic_hash": ""
+  },
+  "src/test/server-only.ts": {
+    "mtime": 1786984031.150259,
+    "ast_hash": "802ae95946389a342792327d7458f6ea",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260817162017_add_menu_import_structure_lineage.sql": {
+    "mtime": 1786983664.9543626,
+    "ast_hash": "eb9be31f7c4a38e4f507f9b944bf89b5",
+    "semantic_hash": ""
+  },
+  "openspec/changes/improve-menu-import-with-gemini/.openspec.yaml": {
+    "mtime": 1786983333.2483668,
+    "ast_hash": "0793a70fad8c756b2474de339bf494b9",
+    "semantic_hash": ""
+  },
+  "openspec/changes/improve-menu-import-with-gemini/design.md": {
+    "mtime": 1786983469.0184753,
+    "ast_hash": "34821b573c3fc3d99b74402fedbdbafa",
+    "semantic_hash": ""
+  },
+  "openspec/changes/improve-menu-import-with-gemini/proposal.md": {
+    "mtime": 1786983373.9344769,
+    "ast_hash": "995e8329da326622bfa9b0d02822f000",
+    "semantic_hash": ""
+  },
+  "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md": {
+    "mtime": 1786983458.2240074,
+    "ast_hash": "510a4f595d8ae42141988939399c8a58",
+    "semantic_hash": ""
+  },
+  "openspec/changes/improve-menu-import-with-gemini/tasks.md": {
+    "mtime": 1786984277.8181877,
+    "ast_hash": "b4fe6659420425b9875a3e2635255f07",
+    "semantic_hash": ""
+  },
+  "docs/pdf_menu_examples/Menu Subarashii.pdf": {
+    "mtime": 1786899457.0996523,
+    "ast_hash": "8d2c798e3a7284f4f4fdb3a64e97d4fc",
     "semantic_hash": ""
   }
 }

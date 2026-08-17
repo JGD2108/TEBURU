@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { requireRole, query, getPoolClient, ensureMenuImportBucket, menuImportStorage } = vi.hoisted(() => ({
-  requireRole: vi.fn(), query: vi.fn(), getPoolClient: vi.fn(), ensureMenuImportBucket: vi.fn(), menuImportStorage: vi.fn(),
+const { requireRole, query, getPoolClient, ensureMenuImportBucket, menuImportStorage, dispatchMenuImportAnalysis } = vi.hoisted(() => ({
+  requireRole: vi.fn(), query: vi.fn(), getPoolClient: vi.fn(), ensureMenuImportBucket: vi.fn(), menuImportStorage: vi.fn(), dispatchMenuImportAnalysis: vi.fn(),
 }));
 
 vi.mock('@/lib/auth', () => ({ requireRole, isAuthorizationFailure: (value: unknown) => value instanceof Response }));
@@ -10,12 +10,14 @@ vi.mock('@/lib/db', () => ({ query, getPoolClient }));
 vi.mock('@/lib/menu-import-storage', () => ({
   menuImportBucket: 'menu-imports', ensureMenuImportBucket, menuImportStorage,
 }));
+vi.mock('@/lib/menu-import/dispatcher', () => ({ dispatchMenuImportAnalysis }));
 
 import { GET as listImports, POST as createImport } from './route';
-import { GET as getImport } from './[id]/route';
+import { DELETE as deleteImport, GET as getImport } from './[id]/route';
 import { GET as getSource } from './[id]/source/route';
 import { PATCH as updateDraft } from './[id]/draft-items/[itemId]/route';
 import { POST as publish } from './[id]/publish/route';
+import { POST as retryImport } from './[id]/retry/route';
 import { POST as authorizeUpload } from './upload-authorizations/route';
 import { POST as finalizeUpload } from './finalize/route';
 import { GET as publicSettings } from '@/app/api/public/settings/route';
@@ -140,6 +142,69 @@ describe('PDF menu import APIs', () => {
     const response = await publish(new Request('http://localhost', { method: 'POST', body: JSON.stringify({ mode: 'replace' }) }), context());
     expect(response.status).toBe(400);
     expect(getPoolClient).not.toHaveBeenCalled();
+  });
+
+  it('deletes an unpublished scoped import and performs best-effort cleanup only for owned paths', async () => {
+    const client = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValue(client);
+    client.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ status: 'needs_review', source_storage_path: 'restaurants/restaurant-a/pending/menu.pdf' }] })
+      .mockResolvedValueOnce({ rows: [{ storage_path: 'restaurants/restaurant-a/assets/item.webp' }, { storage_path: 'restaurants/other/assets/ignored.webp' }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rowCount: 1, rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+    const remove = vi.fn().mockResolvedValue({ error: null });
+    menuImportStorage.mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ remove }) } });
+
+    const response = await deleteImport(new Request('http://localhost', { method: 'DELETE' }), context());
+    expect(response.status).toBe(200);
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('DELETE FROM menu_import_upload_authorizations'))).toBe(true);
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('DELETE FROM menu_import_jobs'))).toBe(true);
+    expect(remove).toHaveBeenCalledWith(['restaurants/restaurant-a/pending/menu.pdf', 'restaurants/restaurant-a/assets/item.webp']);
+  });
+
+  it('rejects deletion while an import is processing', async () => {
+    const client = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValue(client);
+    client.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ status: 'processing', source_storage_path: 'restaurants/restaurant-a/pending/menu.pdf' }] })
+      .mockResolvedValueOnce({ rows: [] });
+    const response = await deleteImport(new Request('http://localhost', { method: 'DELETE' }), context());
+    expect(response.status).toBe(409);
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('DELETE FROM menu_import_jobs'))).toBe(false);
+  });
+
+  it('replays a pending scoped import through the server dispatcher', async () => {
+    query.mockResolvedValueOnce({ rows: [{ id: 'import-a' }] });
+    dispatchMenuImportAnalysis.mockResolvedValueOnce({ accepted: true, claimed: true, importId: 'import-a', analysisExecutionId: 'execution-a', outcome: 'needs_review' });
+
+    const response = await retryImport(new Request('http://localhost', { method: 'POST' }), context());
+
+    expect(response.status).toBe(200);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining("status = 'pending' OR"), ['import-a', 'restaurant-a']);
+    expect(dispatchMenuImportAnalysis).toHaveBeenCalledWith('import-a');
+    expect(await response.json()).toEqual(expect.objectContaining({ data: { queued: true, id: 'import-a' } }));
+  });
+
+  it('does not dispatch an import outside the administrator restaurant', async () => {
+    query.mockResolvedValueOnce({ rows: [] });
+
+    const response = await retryImport(new Request('http://localhost', { method: 'POST' }), context());
+
+    expect(response.status).toBe(409);
+    expect(dispatchMenuImportAnalysis).not.toHaveBeenCalled();
+  });
+
+  it('returns an actionable error when replayed source validation fails', async () => {
+    query.mockResolvedValueOnce({ rows: [{ id: 'import-a' }] });
+    dispatchMenuImportAnalysis.mockResolvedValueOnce({ accepted: false, reason: 'invalid_source' });
+
+    const response = await retryImport(new Request('http://localhost', { method: 'POST' }), context());
+
+    expect(response.status).toBe(422);
+    expect(await response.json()).toEqual(expect.objectContaining({ error: expect.objectContaining({ code: 'IMPORT_UPLOAD_INCOMPLETE' }) }));
   });
 });
 

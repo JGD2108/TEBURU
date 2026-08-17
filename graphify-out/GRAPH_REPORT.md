@@ -1,16 +1,16 @@
-# Graph Report - teburuapp  (2026-08-16)
+# Graph Report - teburuapp  (2026-08-17)
 
 ## Corpus Check
-- 190 files · ~86,187 words
+- 200 files · ~91,442 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 962 nodes · 1645 edges · 109 communities (76 shown, 33 thin omitted)
+- 1047 nodes · 1773 edges · 117 communities (78 shown, 39 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a00dfda8`
+- Built from commit: `dc58ce10`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,7 +21,7 @@
 - compilerOptions
 - devDependencies
 - What You Must Do When Invoked
-- activate/route.ts
+- ADDED Requirements
 - schema.sql
 - orders
 - eslint.config.mjs
@@ -87,9 +87,9 @@
 - fix-menu-import-upload-finalize/proposal.md
 - fix-menu-import-upload-finalize/design.md
 - fix-menu-import-upload-finalize/tasks.md
-- auth.ts
 - Decisions
-- supabase.ts
+- Decisions
+- login/page.tsx
 - Decisions
 - event-driven-menu-import-analysis/proposal.md
 - orchestrate-menu-import-analysis/proposal.md
@@ -99,53 +99,58 @@
 - error-context.md
 - verify-menu-import-pgcrypto-migration.mjs
 - fix-menu-import-pgcrypto-migration/design.md
-- db.ts
-- staff/route.ts
-- restaurants/route.ts
-- bulk/route.ts
-- update/route.ts
+- verify-menu-import-pg-net-migration.mjs
+- improve-menu-import-with-gemini/proposal.md
+- getPoolClient
+- improve-menu-import-with-gemini/tasks.md
+- menu-import-analysis/route.test.ts
 - index.ts
-- menu-import-analysis.md
-- deliver/route.ts
+- Event-driven menu analysis
+- categories/route.test.ts
 - Requirement: Lineage backfills resolve cryptographic functions deterministically
 - fix-menu-import-pgcrypto-migration/proposal.md
-- menu-import-analysis/route.test.ts
+- staff/route.test.ts
 - fix-menu-import-pgcrypto-migration/tasks.md
 - menu-import-migration-recovery.md
+- jspdf
+- server-only
+- public.menu_import_jobs
+- public.menu_import_analysis_runs
 - @supabase/supabase-js
+- pdfjs-worker.d.ts
 
 ## God Nodes (most connected - your core abstractions)
-1. `isAuthorizationFailure()` - 83 edges
-2. `requireRole()` - 75 edges
+1. `isAuthorizationFailure()` - 84 edges
+2. `requireRole()` - 76 edges
 3. `query()` - 68 edges
-4. `getPoolClient()` - 40 edges
-5. `staffFetch()` - 25 edges
-6. `jsonSuccess()` - 24 edges
-7. `jsonError()` - 23 edges
-8. `jsonAuthorizationError()` - 18 edges
-9. `compilerOptions` - 16 edges
-10. `requireGuestSession()` - 15 edges
+4. `getPoolClient()` - 42 edges
+5. `jsonSuccess()` - 27 edges
+6. `jsonError()` - 26 edges
+7. `staffFetch()` - 25 edges
+8. `jsonAuthorizationError()` - 19 edges
+9. `menuImportStorage()` - 17 edges
+10. `compilerOptions` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `TablesManagerPanel()` --references--> `jspdf`  [EXTRACTED]
   src/components/admin/TablesManagerPanel.tsx → package.json
+- `AdminLogin()` --calls--> `isLocalDemo()`  [EXTRACTED]
+  src/app/admin/login/page.tsx → src/lib/demo.ts
 - `AdminDashboard()` --calls--> `isLocalDemo()`  [EXTRACTED]
   src/app/admin/page.tsx → src/lib/demo.ts
 - `POST()` --calls--> `getPoolClient()`  [EXTRACTED]
   src/app/api/admin/menu-import/[id]/publish/route.ts → src/lib/db.ts
-- `POST()` --calls--> `getPoolClient()`  [EXTRACTED]
-  src/app/api/admin/menu-import/finalize/route.ts → src/lib/db.ts
-- `POST()` --calls--> `isAuthorizationFailure()`  [EXTRACTED]
-  src/app/api/admin/menu/images/route.ts → src/lib/auth.ts
+- `DELETE()` --calls--> `getPoolClient()`  [EXTRACTED]
+  src/app/api/admin/menu-import/[id]/route.ts → src/lib/db.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (109 total, 33 thin omitted)
+## Communities (117 total, 39 thin omitted)
 
 ### Community 0 - "isLocalDemo"
-Cohesion: 0.17
-Nodes (15): accessDestination(), AdminLogin(), AuthStep, AdminDashboard(), emptyForm, PlatformPage(), Restaurant, CartItem (+7 more)
+Cohesion: 0.20
+Nodes (12): AdminDashboard(), emptyForm, PlatformPage(), Restaurant, CartItem, TableMenu(), TableLogin(), DemoBar() (+4 more)
 
 ### Community 1 - "ADDED Requirements"
 Cohesion: 0.08
@@ -153,7 +158,7 @@ Nodes (24): ADDED Requirements, Purpose, Requirement: Admin status polling refle
 
 ### Community 2 - "dependencies"
 Cohesion: 0.11
-Nodes (19): html2canvas, jspdf, lucide-react, next, dependencies, html2canvas, jspdf, lucide-react (+11 more)
+Nodes (19): html2canvas, lucide-react, @napi-rs/canvas, next, dependencies, html2canvas, lucide-react, @napi-rs/canvas (+11 more)
 
 ### Community 3 - "compilerOptions"
 Cohesion: 0.07
@@ -167,9 +172,9 @@ Nodes (19): eslint, eslint-config-next, devDependencies, eslint, eslint-config-n
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 6 - "activate/route.ts"
-Cohesion: 0.25
-Nodes (9): messages, POST(), { requireRole, getPoolClient, activateTables, client }, POST(), activateTables(), newAccessCode(), normalizeTableIds(), TableActivationError (+1 more)
+### Community 6 - "ADDED Requirements"
+Cohesion: 0.11
+Nodes (17): ADDED Requirements, Purpose, Requirement: Provider lineage, Requirement: Safe fallback and bounded provider use, Requirement: Server-only credentials and text privacy, Requirement: Structured and validated menu output, Requirement: Text-only Gemini structuring, Scenario: Browser accesses the admin import UI (+9 more)
 
 ### Community 7 - "schema.sql"
 Cohesion: 0.50
@@ -232,8 +237,8 @@ Cohesion: 0.13
 Nodes (22): snapshot_order_item_stations, menu_categories, menu_items, order_items, orders, restaurant_settings, session_users, sessions (+14 more)
 
 ### Community 41 - "worker.ts"
-Cohesion: 0.07
-Nodes (35): analyzePdf(), confidence(), configuredOcr(), createPdfAnalysisProvider(), parseMenuText(), AnalysisResult, Confidence, ExtractedImage (+27 more)
+Cohesion: 0.05
+Nodes (56): analyzePdf(), buildGeminiRequestBody(), chunkGeminiPages(), confidence(), CONFIDENCE_VALUES, configuredOcr(), createGeminiTextStructurer(), createPdfAnalysisProvider() (+48 more)
 
 ### Community 42 - "Operación de Teburu"
 Cohesion: 0.29
@@ -244,8 +249,8 @@ Cohesion: 0.10
 Nodes (19): ADDED Requirements, Purpose, Requirement: Controlled publication to the restaurant menu, Requirement: Menu structure extraction, Requirement: Restaurant-scoped PDF import submission, Requirement: Review before live-menu publication, Requirement: Source visual preservation and image suggestions, Scenario: Administrator appends an approved draft (+11 more)
 
 ### Community 49 - "isAuthorizationFailure"
-Cohesion: 0.07
-Nodes (78): POST(), { requireRole, query }, Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE() (+70 more)
+Cohesion: 0.06
+Nodes (96): POST(), Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE(), PATCH() (+88 more)
 
 ### Community 52 - "openspec-explore/SKILL.md"
 Cohesion: 0.18
@@ -280,8 +285,8 @@ Cohesion: 0.18
 Nodes (10): ConnectionState, KitchenItem, KitchenPanel(), KitchenStatus, lanes, nextPriority, Priority, priorityLabels (+2 more)
 
 ### Community 71 - "MenuImportPanel.tsx"
-Cohesion: 0.13
-Nodes (17): AnalysisRun, CompletedUpload, DraftCategory, DraftItem, DraftItemCard(), Evidence, fieldProblems(), ImportJob (+9 more)
+Cohesion: 0.14
+Nodes (15): AnalysisRun, CompletedUpload, DraftCategory, DraftItem, DraftItemCard(), Evidence, fieldProblems(), ImportJob (+7 more)
 
 ### Community 72 - "ADDED Requirements"
 Cohesion: 0.17
@@ -292,8 +297,8 @@ Cohesion: 0.20
 Nodes (9): Context, Decisions, Goals / Non-Goals, Instrument the upload-to-job handoff, Make public settings a readiness contract, Migration Plan, Risks / Trade-offs, Standardize application errors and defensively consume intermediary responses (+1 more)
 
 ### Community 74 - "scripts"
-Cohesion: 0.20
-Nodes (10): scripts, build, dev, lint, start, test, test:e2e, test:integration (+2 more)
+Cohesion: 0.18
+Nodes (11): scripts, build, dev, lint, start, test, test:e2e, test:integration (+3 more)
 
 ### Community 75 - "api-client.ts"
 Cohesion: 0.26
@@ -327,17 +332,17 @@ Nodes (5): Context, Decisions, Goals / Non-Goals, Migration Plan, Risks / Trade-
 Cohesion: 0.50
 Nodes (3): 1. Finalize contract, 2. UI recovery, 3. Verification
 
-### Community 83 - "auth.ts"
-Cohesion: 0.26
-Nodes (9): AccessRow, GET(), { requireAuthenticatedUser, query }, GET(), authClient(), requireAuthenticatedUser(), requireStaff(), StaffRole (+1 more)
+### Community 83 - "Decisions"
+Cohesion: 0.18
+Nodes (10): Context, Decisions, Goals / Non-Goals, Keep local parsing as the first safety net, Migration Plan, Record lineage without changing publication semantics, Risks / Trade-offs, Treat configuration and quota as operational concerns (+2 more)
 
 ### Community 84 - "Decisions"
 Cohesion: 0.17
 Nodes (11): 1. Supabase Database Webhook is the start signal, 2. Separate import identity from attempt identity, 3. Use source fingerprinting for safe re-analysis detection, 4. Enforce lineage in the database, not only in application code, 5. Keep the worker portable and bounded, 6. Recovery is explicit and observable, Context, Decisions (+3 more)
 
-### Community 85 - "supabase.ts"
-Cohesion: 0.36
-Nodes (4): MenuRow, OnboardingPage(), parseMenu(), supabase
+### Community 85 - "login/page.tsx"
+Cohesion: 0.21
+Nodes (9): accessDestination(), AdminLogin(), AuthStep, MenuRow, OnboardingPage(), parseMenu(), staffJson(), requireApiSuccess() (+1 more)
 
 ### Community 86 - "Decisions"
 Cohesion: 0.18
@@ -375,25 +380,21 @@ Nodes (7): applyAndAssertBackfill(), assertFailureRollsBack(), client, migration
 Cohesion: 0.20
 Nodes (9): 1. Repair the failing migration in place, 2. Resolve the installed extension schema from catalog metadata, 3. Guard the backfill before constraints, 4. Verify on a transactionally clean database state, Context, Decisions, Goals / Non-Goals, Migration Plan (+1 more)
 
-### Community 95 - "db.ts"
-Cohesion: 0.21
-Nodes (9): POST(), POST(), ImportedItem, POST(), POST(), { getPoolClient, requireRole, client }, getPoolClient(), isSupabase (+1 more)
+### Community 95 - "verify-menu-import-pg-net-migration.mjs"
+Cohesion: 0.40
+Nodes (4): disabledAt, enabledAt, required, root
 
-### Community 96 - "staff/route.ts"
-Cohesion: 0.36
-Nodes (5): adminClient(), DELETE(), POST(), { query, requireRole, createUser, deleteUser }, staffRoles
+### Community 96 - "improve-menu-import-with-gemini/proposal.md"
+Cohesion: 0.29
+Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
 
-### Community 97 - "restaurants/route.ts"
-Cohesion: 0.43
-Nodes (6): PATCH(), authAdmin(), GET(), POST(), slugify(), requirePlatformAdmin()
+### Community 97 - "getPoolClient"
+Cohesion: 0.06
+Nodes (31): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions, nextStatuses, POST(), priorities, { getPoolClient, requireRole, client } (+23 more)
 
-### Community 98 - "bulk/route.ts"
-Cohesion: 0.33
-Nodes (4): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions
-
-### Community 99 - "update/route.ts"
-Cohesion: 0.33
-Nodes (4): nextStatuses, POST(), priorities, { getPoolClient, requireRole, client }
+### Community 98 - "improve-menu-import-with-gemini/tasks.md"
+Cohesion: 0.40
+Nodes (4): 1. Configuration and provider boundary, 2. Validation and fallback, 3. Lineage and persistence, 4. Verification and rollout
 
 ### Community 103 - "Requirement: Lineage backfills resolve cryptographic functions deterministically"
 Cohesion: 0.20
@@ -404,21 +405,21 @@ Cohesion: 0.29
 Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
 
 ## Knowledge Gaps
-- **409 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+404 more)
+- **455 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+450 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getPoolClient()` connect `db.ts` to `staff/route.ts`, `restaurants/route.ts`, `bulk/route.ts`, `update/route.ts`, `guest-session.ts`, `deliver/route.ts`, `activate/route.ts`, `worker.ts`, `isAuthorizationFailure`?**
+- **Why does `query()` connect `isAuthorizationFailure` to `getPoolClient`, `guest-session.ts`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `getPoolClient()` connect `getPoolClient` to `isAuthorizationFailure`, `guest-session.ts`, `worker.ts`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `@supabase/supabase-js`, `jspdf`, `server-only`, `package.json`?**
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `@supabase/supabase-js`, `package.json`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `jspdf` connect `dependencies` to `admin/page.tsx`?**
-  _High betweenness centrality (0.012) - this node is a cross-community bridge._
 - **What connects `required`, `missing`, `eslintConfig` to the rest of the system?**
-  _409 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _455 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `ADDED Requirements` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**

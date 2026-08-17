@@ -13,7 +13,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const migrationsDir = path.join(root, 'supabase', 'migrations');
 const targetMigration = '20260816200000_event_driven_menu_import_analysis.sql';
 const restaurantId = '00000000-0000-0000-0000-000000000001';
-const client = new Client({ connectionString });
+const client = new Client({
+  connectionString,
+  ssl: connectionString.includes('supabase.co') ? { rejectUnauthorized: false } : false,
+});
 
 const sha256 = (input) => createHash('sha256').update(input).digest('hex');
 

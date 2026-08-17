@@ -14,12 +14,29 @@ const ALLOWED_ASSET_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 type Job = { id: string; restaurant_id: string; source_storage_path: string; source_size_bytes?: number | string };
 type Execution = Job & { analysis_execution_id: string; attempt: number };
+type StructureLineage = {
+  provider: 'gemini' | 'local-fallback';
+  model?: string;
+  fallbackReason?: string;
+};
+type AnalysisResultWithStructureLineage = AnalysisResult & { structureMetadata?: StructureLineage };
 export type SourceReader = (path: string) => Promise<Uint8Array>;
 export type ImportAssetWriter = (job: { id: string; restaurantId: string; executionId?: string }, asset: ExtractedImage) => Promise<string>;
 
 function confidenceScore(value: Confidence) { return value === 'high' ? 0.95 : value === 'medium' ? 0.65 : 0.25; }
 
 function sha256(value: Uint8Array) { return createHash('sha256').update(value).digest('hex'); }
+
+function structureLineage(result: AnalysisResultWithStructureLineage): Required<Pick<StructureLineage, 'provider'>> & Omit<StructureLineage, 'provider'> {
+  const metadata = result.structureMetadata;
+  if (metadata?.provider === 'gemini' && metadata.model?.trim()) {
+    return { provider: 'gemini', model: metadata.model.trim().slice(0, 100) };
+  }
+  return {
+    provider: 'local-fallback',
+    fallbackReason: metadata?.fallbackReason?.trim().slice(0, 200) || undefined,
+  };
+}
 
 async function withTimeout<T>(work: Promise<T>, timeoutMs = ANALYSIS_TIMEOUT_MS): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -175,8 +192,12 @@ export async function processMenuImportExecution(executionId: string, reader: So
     if (!stillOwner.rows[0]) { await client.query('ROLLBACK'); return 'stale'; }
     const reused = await reusePriorDraft(client, job, sourceHash);
     if (!reused) {
-      const result = await withTimeout(analyzePdf(pdf, provider));
+      const result = await withTimeout(analyzePdf(pdf, provider)) as AnalysisResultWithStructureLineage;
       await persistDraft(client, job, result, writeAsset);
+      const lineage = structureLineage(result);
+      await client.query(`UPDATE menu_import_analysis_runs
+        SET structure_provider = $2, structure_model = $3, structure_fallback_reason = $4, updated_at = now()
+        WHERE analysis_execution_id = $1`, [executionId, lineage.provider, lineage.model ?? null, lineage.fallbackReason ?? null]);
     }
     await client.query(`UPDATE menu_import_analysis_runs SET status = $2, completed_at = now(), updated_at = now() WHERE analysis_execution_id = $1`, [executionId, reused ? 'reused' : 'completed']);
     await client.query(`UPDATE menu_import_jobs SET status = 'needs_review', analysis_lease_expires_at = NULL, updated_at = now() WHERE id = $1 AND status = 'processing' AND analysis_execution_id = $2`, [job.id, executionId]);

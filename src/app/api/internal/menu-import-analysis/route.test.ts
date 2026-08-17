@@ -6,7 +6,7 @@ const { getPoolClient, menuImportStorage, processMenuImportExecution } = vi.hois
 
 vi.mock('@/lib/db', () => ({ getPoolClient }));
 vi.mock('@/lib/menu-import-storage', () => ({ menuImportBucket: 'menu-imports', menuImportStorage }));
-vi.mock('@/lib/menu-import/worker', () => ({ processMenuImportExecution }));
+vi.mock('@/lib/menu-import/worker', () => ({ ANALYZER_VERSION: 'menu-import-v1', processMenuImportExecution }));
 
 import { POST } from './route';
 

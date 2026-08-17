@@ -149,7 +149,7 @@ export default function MenuPanel() {
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
             placeholder="Ej: Bebidas, Entradas o Postres"
-            style={{ flex: 1, padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }}
+            style={{ flex: 1, padding: '10px', borderRadius: '4px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
           />
           <button type="submit" className="btn-secondary" disabled={savingCategory} style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
             <Plus size={17} /> {savingCategory ? 'Creando...' : 'Crear categoría'}
@@ -174,36 +174,36 @@ export default function MenuPanel() {
         <form onSubmit={handleSave} style={{ background: 'var(--bg-surface)', padding: '24px', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--border-color)', display: 'grid', gap: '16px', gridTemplateColumns: '1fr 1fr' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Nombre</label>
-            <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+            <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }} />
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Precio ($)</label>
-            <input required type="number" step="0.01" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+            <input required type="number" step="0.01" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }} />
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Categoría</label>
-            <select required value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }}>
+            <select required value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}>
               <option value="">Selecciona...</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>URL de la imagen (opcional)</label>
-            <input type="url" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} placeholder="https://..." style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+            <input type="url" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} placeholder="https://..." style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }} />
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>O subir una foto (opcional)</label>
-            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => handleImageFile(e.target.files?.[0] || null)} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => handleImageFile(e.target.files?.[0] || null)} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }} />
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '6px' }}>JPG, PNG o WEBP. Máximo 4 MB. Si eliges una foto, tendrá prioridad sobre la URL.</p>
             {(imagePreview || formData.image_url) && <img src={imagePreview || formData.image_url} alt="Vista previa del platillo" style={{ marginTop: '10px', width: '120px', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }} />}
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Descripción</label>
-            <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white', minHeight: '80px' }} />
+            <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)', minHeight: '80px' }} />
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem' }}>Ingredientes Modificables (separados por coma)</label>
-            <input type="text" placeholder="ej: sin huevo,sin cebolla" value={formData.modifiable_ingredients} onChange={e => setFormData({...formData, modifiable_ingredients: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-base)', border: '1px solid var(--border-color)', color: 'white' }} />
+            <input type="text" placeholder="ej: sin huevo,sin cebolla" value={formData.modifiable_ingredients} onChange={e => setFormData({...formData, modifiable_ingredients: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '4px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }} />
           </div>
           <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
             <button type="submit" className="btn-primary" disabled={savingItem}>{savingItem ? 'Guardando...' : 'Guardar Platillo'}</button>
@@ -214,7 +214,7 @@ export default function MenuPanel() {
       <div style={{ background: 'var(--bg-surface)', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ background: 'rgba(0,0,0,0.2)', color: 'var(--text-muted)' }}>
+            <tr style={{ background: 'var(--paper-deep)', color: 'var(--text-main)' }}>
               <th style={{ padding: '16px' }}>Platillo</th>
               <th style={{ padding: '16px' }}>Categoría</th>
               <th style={{ padding: '16px' }}>Precio</th>
@@ -232,7 +232,7 @@ export default function MenuPanel() {
                   )}
                   <div>
                     <p style={{ fontWeight: 600 }}>{item.name}</p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.description?.slice(0,40)}...</p>
+                    <p style={{ fontSize: '0.86rem', lineHeight: 1.4, color: 'var(--text-muted)', fontWeight: 500 }}>{item.description?.slice(0,40)}...</p>
                   </div>
                 </td>
                 <td style={{ padding: '16px' }}>

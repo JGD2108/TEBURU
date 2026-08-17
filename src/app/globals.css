@@ -1,10 +1,10 @@
 :root {
   --ink: #24201c;
-  --ink-soft: #655d54;
+  --ink-soft: #514940;
   --paper: #f6f1e7;
   --paper-deep: #ebe2d3;
   --surface: #fffaf1;
-  --line: #dacdbc;
+  --line: #cdbda9;
   --brand: #c94e35;
   --brand-deep: #942f22;
   --sage: #416556;
@@ -35,6 +35,7 @@
 html { background: var(--paper); }
 body { min-height: 100vh; margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, 'Times New Roman', serif; -webkit-font-smoothing: antialiased; }
 button, input, select, textarea { font: inherit; }
+input::placeholder, textarea::placeholder { color: #756a5f; opacity: 1; }
 button { cursor: pointer; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(201, 78, 53, .45); outline-offset: 3px; }
 

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { after } from 'next/server';
 import type { PoolClient } from 'pg';
 import { isAuthorizationFailure, requireRole } from '@/lib/auth';
 import { jsonError, jsonSuccess, readJsonObject, requestId } from '@/lib/api-response';
@@ -7,6 +8,7 @@ import { logger } from '@/lib/logger';
 import { menuImportDatabaseFailure } from '@/lib/menu-import-errors';
 import { PDF_MENU_MAX_BYTES } from '@/lib/menu-import';
 import { menuImportBucket, menuImportStorage } from '@/lib/menu-import-storage';
+import { dispatchMenuImportAnalysis } from '@/lib/menu-import/dispatcher';
 
 type Authorization = { id: string; storage_path: string; source_filename: string; expected_size_bytes: number | string; expires_at: string; token_hash: string; import_job_id: string | null };
 
@@ -75,6 +77,16 @@ export async function POST(request: Request) {
   const token = typeof body?.token === 'string' ? body.token : '';
   if (!authorizationId || !token) return jsonError(request, 'INVALID_REQUEST', 'La autorización de carga no es válida. Vuelve a seleccionar el PDF.', 400);
   let client: PoolClient | undefined;
+  const scheduleAnalysis = (importId: string) => {
+    try {
+      after(() => dispatchMenuImportAnalysis(importId, correlationId).catch((error) => {
+        logger.error('menu_import.analysis_post_finalize_failed', error, { requestId: correlationId, importId, restaurantId: staff.restaurantId });
+      }));
+    } catch (error) {
+      // The import is already committed; scheduling failure must not undo it.
+      logger.error('menu_import.analysis_post_finalize_schedule_failed', error, { requestId: correlationId, importId, restaurantId: staff.restaurantId });
+    }
+  };
   try {
     client = await getPoolClient();
     await client.query('BEGIN');
@@ -88,6 +100,7 @@ export async function POST(request: Request) {
     if (record.import_job_id) {
       const existing = await client.query('SELECT id, status, source_filename, source_size_bytes, created_at FROM menu_import_jobs WHERE id = $1 AND restaurant_id = $2', [record.import_job_id, staff.restaurantId]);
       await client.query('COMMIT');
+      if (existing.rows[0]?.status === 'pending') scheduleAnalysis(existing.rows[0].id);
       return jsonSuccess(request, { import: existing.rows[0] });
     }
     if (new Date(record.expires_at).getTime() <= Date.now()) {
@@ -122,9 +135,10 @@ export async function POST(request: Request) {
     await client.query('UPDATE menu_import_upload_authorizations SET import_job_id = $1, finalized_at = now() WHERE id = $2', [inserted.rows[0].id, record.id]);
     await client.query('COMMIT');
     logger.info('menu_import.job_created', { requestId: correlationId, authorizationId: record.id, importId: inserted.rows[0].id, restaurantId: staff.restaurantId });
+    scheduleAnalysis(inserted.rows[0].id);
     return jsonSuccess(request, { import: inserted.rows[0] }, { status: 201 });
   } catch (error) {
-    await client?.query('ROLLBACK').catch(() => undefined);
+    await client?.query('ROLLBACK')?.catch(() => undefined);
     const databaseFailure = menuImportDatabaseFailure(error);
     logger.error('menu_import.finalization_failed', error, { requestId: correlationId, authorizationId, restaurantId: staff.restaurantId, databaseCode: databaseFailure?.databaseCode });
     if (databaseFailure) return jsonError(request, databaseFailure.code, databaseFailure.message, databaseFailure.status);

@@ -12,6 +12,7 @@ const provider = {
   extractNative: vi.fn().mockResolvedValue({ pages: [{ page: 1, source: 'native' as const, text: 'ENTRADAS\nArepa 10' }], images: [] }),
   ocr: vi.fn().mockResolvedValue([]),
   structure: vi.fn().mockResolvedValue([{ category: 'ENTRADAS', name: 'Arepa', price: 10, page: 1, confidence: { category: 'high' as const, name: 'high' as const, description: 'low' as const, price: 'high' as const } }]),
+  getStructureMetadata: vi.fn().mockReturnValue({ provider: 'gemini' as const, model: 'gemini-test' }),
   associateImages: vi.fn().mockResolvedValue([]),
 };
 
@@ -37,6 +38,8 @@ describe('menu import execution ownership', () => {
     expect(category[1]).toEqual(expect.arrayContaining([importId, 'restaurant-a']));
     expect(item[1]).toEqual(expect.arrayContaining([importId, 'restaurant-a', 'category-a']));
     expect(evidence[1]).toEqual(expect.arrayContaining([importId, 'restaurant-a', 'item-a']));
+    const structureLineage = client.query.mock.calls.find(([sql]) => String(sql).includes('SET structure_provider'))!;
+    expect(structureLineage[1]).toEqual([executionId, 'gemini', 'gemini-test', null]);
     expect(client.query.mock.calls.some(([sql]) => String(sql).includes("status = 'needs_review'") && String(sql).includes('analysis_execution_id = $2'))).toBe(true);
   });
 

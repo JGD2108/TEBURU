@@ -144,6 +144,27 @@ describe('PDF menu import APIs', () => {
     expect(getPoolClient).not.toHaveBeenCalled();
   });
 
+  it('rolls back the complete publication when a downstream insert fails', async () => {
+    const client = { query: vi.fn(), release: vi.fn() };
+    getPoolClient.mockResolvedValue(client);
+    client.query
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ status: 'needs_review' }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'item-a', name: 'Arepa', description: null, price: '9.5', category_name: 'Entradas', image_id: null, storage_path: null, mime_type: null }] })
+      .mockResolvedValueOnce({ rows: [{ id: 'category-a' }] })
+      .mockRejectedValueOnce(new Error('menu item insert failed'))
+      .mockResolvedValueOnce({ rows: [] });
+
+    const response = await publish(new Request('http://localhost', { method: 'POST', body: JSON.stringify({ mode: 'append' }) }), context());
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual(expect.objectContaining({ error: expect.objectContaining({ code: 'INTERNAL_ERROR' }) }));
+    expect(client.query).toHaveBeenCalledWith('ROLLBACK');
+    expect(client.query).not.toHaveBeenCalledWith('COMMIT');
+    expect(client.release).toHaveBeenCalledOnce();
+  });
+
   it('deletes an unpublished scoped import and performs best-effort cleanup only for owned paths', async () => {
     const client = { query: vi.fn(), release: vi.fn() };
     getPoolClient.mockResolvedValue(client);

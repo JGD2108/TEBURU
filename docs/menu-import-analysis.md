@@ -16,7 +16,7 @@ Configure these values as server-side secrets:
   `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, and
   `MENU_IMPORT_OCR_ENDPOINT` when OCR is required.
 
-## Optional Gemini text structuring
+## Visual Gemini extraction and operational controls
 
 Gemini is disabled unless a server-only key is configured. Set
 `MENU_IMPORT_GEMINI_API_KEY` in Vercel/Node environments; `GEMINI_KEY` is a
@@ -24,11 +24,41 @@ local compatibility alias. Never use a `NEXT_PUBLIC_` prefix or commit either
 key. `MENU_IMPORT_GEMINI_MODEL` defaults to `gemini-2.5-flash`, and
 `MENU_IMPORT_GEMINI_TIMEOUT_MS` defaults to `8000` milliseconds.
 
-Only page-numbered text extracted from the PDF is sent to Gemini. Source PDF
-bytes, rendered pages, extracted image assets, credentials, and raw provider
-errors are never sent or exposed. Each analysis run records its structure
-provider, Gemini model when applicable, and a bounded sanitized fallback
-reason so the review endpoint can distinguish Gemini output from local parsing.
+The visual analyzer sends bounded rendered page images and page-scoped auxiliary
+text only. It never sends unrelated tenant data, database credentials, or the
+source PDF as an opaque upload. Configure limits with
+`MENU_IMPORT_RENDER_MAX_PAGES`, `MENU_IMPORT_RENDER_MAX_WIDTH`,
+`MENU_IMPORT_RENDER_MAX_HEIGHT`, `MENU_IMPORT_RENDER_MAX_BYTES`,
+`MENU_IMPORT_MAX_PROVIDER_CALLS`, and `MENU_IMPORT_MAX_RETRIES_PER_PAGE`.
+Defaults and deployment values must be selected for the host timeout and Gemini
+quota; do not increase them merely for a single menu fixture.
+
+Version analyzer behavior independently with `MENU_IMPORT_ANALYZER_VERSION`
+(default `menu-import-v3-visual`) and prompt behavior with
+`MENU_IMPORT_GEMINI_PROMPT_VERSION` (default `visual-v1`). Roll back by setting
+the earlier analyzer version/fallback control; schema migrations are additive
+and must remain in place. Each completed run records analyzer/prompt version,
+model, source hash, page/call/retry counts, duration, token counts when the
+provider reports them, suspicious pages, item/review counts, fallback reasons,
+and safe error codes. Use these fields for cost and quality monitoring; do not
+log provider request bodies or raw provider errors.
+
+The `menu-imports` bucket is private. PDFs and generated import assets must use
+the `restaurants/<restaurant-id>/...` prefix. Browser access is only through an
+authenticated restaurant-scoped admin endpoint that issues a short-lived signed
+URL. The service-role key is server-only and may bypass Storage RLS, so it must
+never be included in responses, client bundles, logs, or `NEXT_PUBLIC_*` values.
+Storage object cleanup is best effort after the database record is deleted;
+periodically inspect orphaned prefixes and apply the retention policy in the
+storage provider without deleting active import records.
+
+Before deployment, verify that the Node/Vercel environment has
+`DATABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_URL`,
+`MENU_IMPORT_AUTOMATION_SECRET`, and the selected Gemini variables only as
+server-side secrets. Verify that the bucket is non-public, allows only PDFs and
+approved image MIME types, and that a staff member cannot obtain a signed URL
+for a different restaurant's import. Do not print secret values during this
+check.
 
 The worker uses `menu_import_jobs.id` as the import execution root and records a
 unique `analysis_execution_id` for each attempt. Categories, items, evidence,

@@ -1,7 +1,7 @@
 name = "qa"
 description = "Use for cross-cutting unit/integration/E2E tests, lint, migration verification, and end-to-end admin upload/review/publish flow validation."
-model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
 nickname_candidates = ["QA Engineer"]
 
 developer_instructions = """

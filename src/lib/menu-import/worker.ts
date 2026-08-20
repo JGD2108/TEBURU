@@ -3,9 +3,9 @@ import type { PoolClient } from 'pg';
 import { getPoolClient } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { analyzePdf, createPdfAnalysisProvider } from './provider';
-import type { AnalysisResult, Confidence, ExtractedImage, PdfAnalysisProvider } from './types';
+import type { AnalysisMetrics, AnalysisResult, Confidence, ExtractedImage, ExtractedSection, PdfAnalysisProvider } from './types';
 
-export const ANALYZER_VERSION = process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v1';
+export const ANALYZER_VERSION = process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v3-visual';
 export const MAX_ATTEMPTS = 3;
 const LEASE_MS = 10 * 60 * 1000;
 const ANALYSIS_TIMEOUT_MS = 120 * 1000;
@@ -35,6 +35,19 @@ function structureLineage(result: AnalysisResultWithStructureLineage): Required<
   return {
     provider: 'local-fallback',
     fallbackReason: metadata?.fallbackReason?.trim().slice(0, 200) || undefined,
+  };
+}
+
+function analysisMetrics(result: AnalysisResultWithStructureLineage, durationMs: number) {
+  const metrics: AnalysisMetrics = result.metrics ?? {};
+  const reviewItemCount = result.items.filter((item) => (item.reviewReasons?.length ?? 0) > 0 || (item.validationSignals?.some((signal) => signal.severity !== 'info') ?? false)).length;
+  return {
+    promptVersion: metrics.promptVersion?.slice(0, 100) ?? null,
+    pageCount: metrics.pageCount ?? result.documentMetadata?.pageCount ?? null,
+    providerCallCount: Math.max(0, metrics.providerCalls ?? 0), retryCount: Math.max(0, metrics.retryCount ?? 0),
+    durationMs: Math.max(0, metrics.durationMs ?? durationMs), inputTokens: metrics.inputTokens ?? null, outputTokens: metrics.outputTokens ?? null,
+    suspiciousPages: metrics.suspiciousPages ?? [], extractedItemCount: result.items.length, reviewItemCount,
+    fallbackReasons: metrics.fallbackReasons ?? (result.structureMetadata?.fallbackReason ? [result.structureMetadata.fallbackReason] : []),
   };
 }
 
@@ -81,31 +94,77 @@ async function loadExecution(client: PoolClient, executionId: string): Promise<E
   return result.rows[0];
 }
 
+function json(value: unknown) { return JSON.stringify(value ?? []); }
+function bbox(value: { x: number; y: number; width: number; height: number } | undefined) { return value ? json(value) : null; }
+function safeFailureCode(error: unknown) {
+  const message = error instanceof Error ? error.message : '';
+  if (message.includes('TIMEOUT')) return 'ANALYSIS_TIMEOUT';
+  if (message.includes('RATE_LIMIT')) return 'ANALYSIS_RATE_LIMITED';
+  if (message.includes('MALFORMED')) return 'ANALYSIS_MALFORMED_OUTPUT';
+  return 'ANALYSIS_FAILED';
+}
+
+async function persistSections(client: PoolClient, job: Execution, sections: ExtractedSection[] = []) {
+  const ids = new Map<string, string>();
+  for (const section of [...sections].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))) {
+    const name = section.name?.trim() || null;
+    const parentId = section.parentKey ? ids.get(section.parentKey) ?? null : null;
+    const created = await client.query<{ id: string }>(`INSERT INTO menu_import_draft_categories
+      (import_job_id, restaurant_id, name, raw_name, extraction_key, parent_draft_category_id, sort_order, confidence, source_page, source_bbox, extraction_attributes, review_reasons)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11::jsonb,$12::jsonb)
+      ON CONFLICT (import_job_id, extraction_key) WHERE extraction_key IS NOT NULL
+      DO UPDATE SET name = EXCLUDED.name, raw_name = EXCLUDED.raw_name, parent_draft_category_id = EXCLUDED.parent_draft_category_id,
+        source_bbox = EXCLUDED.source_bbox, extraction_attributes = EXCLUDED.extraction_attributes, review_reasons = EXCLUDED.review_reasons
+      RETURNING id`, [job.id, job.restaurant_id, name, section.name ?? null, section.key, parentId, section.sortOrder ?? 0,
+      confidenceScore(section.confidence ?? 'low'), section.source?.page ?? null, bbox(section.source?.bbox), json(section.attributes ?? {}), json(section.reviewReasons)]);
+    ids.set(section.key, created.rows[0].id);
+  }
+  return ids;
+}
+
 async function persistDraft(client: PoolClient, job: Execution, result: AnalysisResult, writeAsset?: ImportAssetWriter) {
+  const sectionIds = await persistSections(client, job, result.sections);
   const categories = new Map<string, string>();
   for (const item of result.items) {
-    const categoryName = item.category.trim() || 'Uncategorized';
-    let categoryId = categories.get(categoryName.toLowerCase());
-    if (!categoryId) {
+    const categoryName = item.category?.trim();
+    let categoryId = item.sectionKey ? sectionIds.get(item.sectionKey) : undefined;
+    if (!categoryId && categoryName) categoryId = categories.get(categoryName.toLowerCase());
+    if (!categoryId && categoryName) {
       const created = await client.query<{ id: string }>(`INSERT INTO menu_import_draft_categories
         (import_job_id, restaurant_id, name, source_page, confidence)
         VALUES ($1,$2,$3,$4,$5)
         ON CONFLICT (import_job_id, lower(name)) DO UPDATE SET name = EXCLUDED.name
-        RETURNING id`, [job.id, job.restaurant_id, categoryName, item.page, confidenceScore(item.confidence.category)]);
+        RETURNING id`, [job.id, job.restaurant_id, categoryName, item.source?.page ?? item.page, confidenceScore(item.confidence.category)]);
       categoryId = created.rows[0].id; categories.set(categoryName.toLowerCase(), categoryId);
     }
-    const itemKey = sha256(new TextEncoder().encode(`${job.id}|${categoryId}|${item.name}|${item.description ?? ''}|${item.price ?? ''}`));
+    const itemKey = sha256(new TextEncoder().encode(`${job.id}|${categoryId ?? ''}|${item.rawName ?? item.name ?? ''}|${item.description ?? ''}|${item.rawPrice ?? item.price ?? ''}`));
     const draft = await client.query<{ id: string }>(`INSERT INTO menu_import_draft_items
-      (import_job_id, restaurant_id, draft_category_id, name, description, price, field_confidence, idempotency_key)
-      VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8)
-      ON CONFLICT (import_job_id, idempotency_key) DO UPDATE SET name = EXCLUDED.name RETURNING id`,
-      [job.id, job.restaurant_id, categoryId, item.name, item.description ?? null, item.price ?? null, JSON.stringify(item.confidence), itemKey]);
-    const evidenceKey = sha256(new TextEncoder().encode(`${job.id}|${draft.rows[0].id}|${item.page}|${item.name}`));
+      (import_job_id, restaurant_id, draft_category_id, name, raw_name, description, raw_description, price, raw_price, normalized_currency, source_page, source_bbox, field_confidence, extraction_attributes, modifiers, options, validation_signals, review_reasons, idempotency_key)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13::jsonb,$14::jsonb,$15::jsonb,$16::jsonb,$17::jsonb,$18::jsonb,$19)
+      ON CONFLICT (import_job_id, idempotency_key) DO UPDATE SET name = EXCLUDED.name, raw_name = EXCLUDED.raw_name, description = EXCLUDED.description, raw_description = EXCLUDED.raw_description, price = EXCLUDED.price, raw_price = EXCLUDED.raw_price, normalized_currency = EXCLUDED.normalized_currency, source_page = EXCLUDED.source_page, source_bbox = EXCLUDED.source_bbox, field_confidence = EXCLUDED.field_confidence, extraction_attributes = EXCLUDED.extraction_attributes, modifiers = EXCLUDED.modifiers, options = EXCLUDED.options, validation_signals = EXCLUDED.validation_signals, review_reasons = EXCLUDED.review_reasons RETURNING id`,
+      [job.id, job.restaurant_id, categoryId ?? null, item.name?.trim() || null, item.rawName ?? item.name ?? null,
+        item.description ?? (item.ingredients?.length ? item.ingredients.join(', ') : null), item.description ?? null, item.price ?? null, item.rawPrice ?? null, item.currency ?? null,
+        item.source?.page ?? item.page, bbox(item.source?.bbox), json(item.confidence), json(item.attributes ?? {}), json(item.modifiers), json(item.options), json(item.validationSignals), json(item.reviewReasons), itemKey]);
+    const sourcePage = item.source?.page ?? item.page;
+    const evidenceKey = sha256(new TextEncoder().encode(`${job.id}|${draft.rows[0].id}|${sourcePage}|${item.rawName ?? item.name ?? ''}`));
     await client.query(`INSERT INTO menu_import_source_evidence
-      (id, import_job_id, restaurant_id, draft_item_id, page_number, excerpt, idempotency_key)
-      VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (import_job_id, idempotency_key) DO NOTHING`,
-      [randomUUID(), job.id, job.restaurant_id, draft.rows[0].id, item.page, item.name, evidenceKey]);
+      (id, import_job_id, restaurant_id, draft_item_id, page_number, excerpt, source_bbox, evidence_type, region_label, idempotency_key)
+      VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10) ON CONFLICT (import_job_id, idempotency_key) DO NOTHING`,
+      [randomUUID(), job.id, job.restaurant_id, draft.rows[0].id, sourcePage, item.rawName ?? item.name ?? null, bbox(item.source?.bbox), 'item', item.source?.region ?? null, evidenceKey]);
+    for (const [sortOrder, variant] of (item.priceVariants ?? []).entries()) {
+      const key = sha256(new TextEncoder().encode(`${job.id}|${draft.rows[0].id}|${variant.label ?? ''}|${variant.raw}|${sortOrder}`));
+      await client.query(`INSERT INTO menu_import_draft_price_variants
+        (import_job_id, restaurant_id, draft_item_id, label, raw_price, normalized_amount, normalized_currency, is_shared, source_page, source_bbox, confidence, review_reasons, sort_order, idempotency_key)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12::jsonb,$13,$14)
+        ON CONFLICT (import_job_id, idempotency_key) DO UPDATE SET raw_price = EXCLUDED.raw_price, normalized_amount = EXCLUDED.normalized_amount, normalized_currency = EXCLUDED.normalized_currency, review_reasons = EXCLUDED.review_reasons`,
+        [job.id, job.restaurant_id, draft.rows[0].id, variant.label ?? null, variant.raw, variant.amount ?? null, variant.currency ?? null, variant.shared ?? false, variant.source?.page ?? sourcePage, bbox(variant.source?.bbox), confidenceScore(variant.confidence ?? 'low'), json(item.reviewReasons), sortOrder, key]);
+    }
   }
+  if (result.documentMetadata) await client.query(`INSERT INTO menu_import_document_metadata
+    (import_job_id, restaurant_id, document_title, document_language, document_currency, page_count, price_notes, attributes)
+    VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb)
+    ON CONFLICT (import_job_id) DO UPDATE SET document_title = EXCLUDED.document_title, document_language = EXCLUDED.document_language, document_currency = EXCLUDED.document_currency, page_count = EXCLUDED.page_count, price_notes = EXCLUDED.price_notes, attributes = EXCLUDED.attributes, updated_at = now()`,
+    [job.id, job.restaurant_id, result.documentMetadata.title ?? null, result.documentMetadata.language ?? null, result.documentMetadata.currency ?? null, result.documentMetadata.pageCount ?? null, json(result.documentMetadata.priceNotes), json(result.documentMetadata.attributes ?? {})]);
   for (const suggestion of result.suggestions) {
     const asset = result.images[suggestion.assetIndex];
     if (!asset || !writeAsset || !ALLOWED_ASSET_TYPES.has(asset.mimeType)) continue;
@@ -187,17 +246,28 @@ export async function processMenuImportExecution(executionId: string, reader: So
     await client.query('UPDATE menu_import_jobs SET source_sha256 = $2, updated_at = now() WHERE id = $1 AND analysis_execution_id = $3', [job.id, sourceHash, executionId]);
     await client.query('UPDATE menu_import_analysis_runs SET source_sha256 = $2, updated_at = now() WHERE analysis_execution_id = $1', [executionId, sourceHash]);
 
+    // Provider/rendering work is intentionally outside a database transaction:
+    // only reconciled observations are committed while the lease is still ours.
+    const analysisStartedAt = Date.now();
+    const analyzed = await withTimeout(analyzePdf(pdf, provider)) as AnalysisResultWithStructureLineage;
     await client.query('BEGIN');
     const stillOwner = await client.query('SELECT 1 FROM menu_import_jobs WHERE id = $1 AND status = \'processing\' AND analysis_execution_id = $2 AND analysis_lease_expires_at > now()', [job.id, executionId]);
     if (!stillOwner.rows[0]) { await client.query('ROLLBACK'); return 'stale'; }
     const reused = await reusePriorDraft(client, job, sourceHash);
     if (!reused) {
-      const result = await withTimeout(analyzePdf(pdf, provider)) as AnalysisResultWithStructureLineage;
-      await persistDraft(client, job, result, writeAsset);
-      const lineage = structureLineage(result);
+      await persistDraft(client, job, analyzed, writeAsset);
+      const lineage = structureLineage(analyzed);
+      const metrics = analysisMetrics(analyzed, Date.now() - analysisStartedAt);
+      logger.info('menu_import.structure_provider', { importId: job.id, restaurantId: job.restaurant_id, analysisExecutionId: executionId, provider: lineage.provider, model: lineage.model, fallbackReason: lineage.fallbackReason });
       await client.query(`UPDATE menu_import_analysis_runs
-        SET structure_provider = $2, structure_model = $3, structure_fallback_reason = $4, updated_at = now()
-        WHERE analysis_execution_id = $1`, [executionId, lineage.provider, lineage.model ?? null, lineage.fallbackReason ?? null]);
+        SET structure_provider = $2, structure_model = $3, structure_fallback_reason = $4,
+          prompt_version = $5, page_count = $6, provider_call_count = $7, retry_count = $8, duration_ms = $9,
+          input_tokens = $10, output_tokens = $11, suspicious_pages = $12::jsonb, extracted_item_count = $13,
+          review_item_count = $14, fallback_reasons = $15::jsonb, updated_at = now()
+        WHERE analysis_execution_id = $1`, [executionId, lineage.provider, lineage.model ?? null, lineage.fallbackReason ?? null,
+        metrics.promptVersion, metrics.pageCount, metrics.providerCallCount, metrics.retryCount, metrics.durationMs,
+        metrics.inputTokens, metrics.outputTokens, json(metrics.suspiciousPages), metrics.extractedItemCount,
+        metrics.reviewItemCount, json(metrics.fallbackReasons)]);
     }
     await client.query(`UPDATE menu_import_analysis_runs SET status = $2, completed_at = now(), updated_at = now() WHERE analysis_execution_id = $1`, [executionId, reused ? 'reused' : 'completed']);
     await client.query(`UPDATE menu_import_jobs SET status = 'needs_review', analysis_lease_expires_at = NULL, updated_at = now() WHERE id = $1 AND status = 'processing' AND analysis_execution_id = $2`, [job.id, executionId]);
@@ -207,14 +277,14 @@ export async function processMenuImportExecution(executionId: string, reader: So
   } catch (error) {
     await client.query('ROLLBACK').catch(() => undefined);
     if (job) {
-      const reason = error instanceof Error ? error.message.slice(0, 1000) : 'Unknown analysis failure';
+      const failureCode = safeFailureCode(error);
       const terminal = job.attempt >= MAX_ATTEMPTS;
       const next = terminal ? 'failed' : 'pending';
-      await client.query(`UPDATE menu_import_analysis_runs SET status = 'failed', error_code = 'ANALYSIS_FAILED', error_reason = $3, completed_at = now(), updated_at = now()
-        WHERE import_job_id = $2 AND analysis_execution_id = $1`, [executionId, job.id, reason]);
-      await client.query(`UPDATE menu_import_jobs SET status = $2, failure_reason = 'ANALYSIS_FAILED', analysis_available_at = CASE WHEN $2 = 'pending' THEN now() + (($3)::int * interval '10 seconds') ELSE now() END, analysis_lease_expires_at = NULL, updated_at = now()
-        WHERE id = $1 AND status = 'processing' AND analysis_execution_id = $4`, [job.id, next, Math.min(job.attempt, 3), executionId]);
-      logger.error(terminal ? 'menu_import.analysis_failed' : 'menu_import.analysis_retry_scheduled', error, { importId: job.id, restaurantId: job.restaurant_id, analysisExecutionId: executionId, attempt: job.attempt });
+      await client.query(`UPDATE menu_import_analysis_runs SET status = 'failed', error_code = $3, error_reason = $3, completed_at = now(), updated_at = now()
+        WHERE import_job_id = $2 AND analysis_execution_id = $1`, [executionId, job.id, failureCode]);
+      await client.query(`UPDATE menu_import_jobs SET status = $2, failure_reason = $3, analysis_available_at = CASE WHEN $2 = 'pending' THEN now() + (($4)::int * interval '10 seconds') ELSE now() END, analysis_lease_expires_at = NULL, updated_at = now()
+        WHERE id = $1 AND status = 'processing' AND analysis_execution_id = $5`, [job.id, next, failureCode, Math.min(job.attempt, 3), executionId]);
+      logger.error(terminal ? 'menu_import.analysis_failed' : 'menu_import.analysis_retry_scheduled', new Error(failureCode), { importId: job.id, restaurantId: job.restaurant_id, analysisExecutionId: executionId, attempt: job.attempt, failureCode });
     }
     throw error;
   } finally { client.release(); }

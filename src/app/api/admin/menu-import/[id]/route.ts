@@ -11,16 +11,22 @@ export async function GET(request: Request, context: RouteContext<'/api/admin/me
     const { id } = await context.params;
     const imported = await query(`SELECT id, status, source_filename, source_size_bytes, failure_reason, source_sha256, analyzer_version, analysis_execution_id, analysis_attempt_count, analysis_lease_expires_at, created_at, updated_at, published_at FROM menu_import_jobs WHERE id = $1 AND restaurant_id = $2`, [id, staff.restaurantId]);
     if (!imported.rows[0]) return jsonError(request, 'IMPORT_UPLOAD_NOT_FOUND', 'Importación no encontrada.', 404);
-    const [categories, items, evidence, images] = await Promise.all([
+    const [categories, items, evidence, images, priceVariants, metadata] = await Promise.all([
       query(`SELECT * FROM menu_import_draft_categories WHERE import_job_id = $1 AND restaurant_id = $2 ORDER BY sort_order, name`, [id, staff.restaurantId]),
       query(`SELECT * FROM menu_import_draft_items WHERE import_job_id = $1 AND restaurant_id = $2 ORDER BY created_at`, [id, staff.restaurantId]),
       query(`SELECT e.* FROM menu_import_source_evidence e JOIN menu_import_draft_items i ON i.id = e.draft_item_id WHERE e.import_job_id = $1 AND i.restaurant_id = $2`, [id, staff.restaurantId]),
       query(`SELECT * FROM menu_import_image_suggestions WHERE import_job_id = $1 AND restaurant_id = $2`, [id, staff.restaurantId]),
+      query(`SELECT v.* FROM menu_import_draft_price_variants v WHERE v.import_job_id = $1 AND v.restaurant_id = $2 ORDER BY v.draft_item_id, v.sort_order`, [id, staff.restaurantId]),
+      query(`SELECT * FROM menu_import_document_metadata WHERE import_job_id = $1 AND restaurant_id = $2`, [id, staff.restaurantId]),
     ]);
     const lineage = await query(`SELECT analysis_execution_id, attempt, status, source_sha256, analyzer_version,
-      structure_provider, structure_model, structure_fallback_reason, started_at, completed_at, error_code
+      structure_provider, structure_model, structure_fallback_reason, prompt_version, page_count, provider_call_count,
+      retry_count, duration_ms, input_tokens, output_tokens, suspicious_pages, extracted_item_count, review_item_count,
+      fallback_reasons, started_at, completed_at, error_code
       FROM menu_import_analysis_runs WHERE import_job_id = $1 AND restaurant_id = $2 ORDER BY attempt DESC`, [id, staff.restaurantId]);
-    const draft = { categories: categories.rows, items: items.rows, evidence: evidence.rows, imageSuggestions: images.rows };
+    // Deliberately return nullable draft fields and raw evidence: review must not
+    // manufacture a category, currency, or zero price for an incomplete item.
+    const draft = { categories: categories.rows, items: items.rows, evidence: evidence.rows, priceVariants: priceVariants.rows, metadata: metadata.rows[0] ?? null, imageSuggestions: images.rows };
     return jsonSuccess(request, { import: imported.rows[0], draft, lineage: lineage.rows }, {}, { import: imported.rows[0], draft, lineage: lineage.rows });
   } catch (error) { logger.error('menu_import.get_failed', error); return jsonError(request, 'INTERNAL_ERROR', 'No se pudo cargar la importación.', 500); }
 }

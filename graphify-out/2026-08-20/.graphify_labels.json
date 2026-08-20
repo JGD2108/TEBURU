@@ -82,7 +82,7 @@
   "80": "fix-menu-import-upload-finalize/proposal.md",
   "81": "fix-menu-import-upload-finalize/design.md",
   "82": "fix-menu-import-upload-finalize/tasks.md",
-  "83": "getPoolClient",
+  "83": "db.ts",
   "84": "Decisions",
   "85": "provider.ts",
   "86": "Decisions",
@@ -133,8 +133,5 @@
   "131": "public.menu_import_source_evidence",
   "132": "public.menu_import_jobs",
   "133": "public.menu_import_analysis_runs",
-  "134": "public.menu_import_analysis_runs",
-  "135": "db.ts",
-  "136": "categories/route.test.ts",
-  "137": "deliver/route.test.ts"
+  "134": "public.menu_import_analysis_runs"
 }

@@ -6,7 +6,28 @@ import { readApiResponse, requireApiSuccess, staffFetch } from '@/lib/api-client
 import { uploadRecoveryMessage } from '@/lib/menu-import-upload-recovery';
 import { supabase } from '@/lib/supabase';
 
-type DraftCategory = { id: string; name: string };
+type SourceBox = { x: number; y: number; width: number; height: number };
+type DraftCategory = {
+  id: string;
+  name: string;
+  parent_id?: string | null;
+  parent_section_id?: string | null;
+  source_page?: number | null;
+  source_bbox?: SourceBox | null;
+  review_reasons?: string[] | null;
+};
+type DraftPrice = {
+  raw?: string | null;
+  amount?: number | string | null;
+  normalized_amount?: number | string | null;
+  currency?: string | null;
+  label?: string | null;
+  variant_label?: string | null;
+  shared?: boolean | null;
+  provenance?: string | null;
+  source_page?: number | null;
+  source_bbox?: SourceBox | null;
+};
 type DraftItem = {
   id: string;
   name: string | null;
@@ -22,9 +43,30 @@ type DraftItem = {
   image_suggestion?: { url?: string | null; confidence?: number | null; approved?: boolean } | null;
   approved?: boolean;
   validation_errors?: string[] | null;
+  review_reasons?: string[] | null;
+  raw_price?: string | null;
+  normalized_price?: number | string | null;
+  price_currency?: string | null;
+  price_variants?: DraftPrice[] | null;
+  variants?: DraftPrice[] | null;
+  shared_price?: DraftPrice | null;
+  shared_price_provenance?: string | null;
+  section_path?: string[] | null;
+  hierarchy?: string[] | null;
+  parent_section_name?: string | null;
+  source_bbox?: SourceBox | null;
+  source_bboxes?: SourceBox[] | null;
   review_status?: 'pending' | 'approved' | 'excluded' | 'published';
 };
-type Evidence = { draft_item_id: string; page_number: number };
+type DraftItemPatch = Partial<Pick<DraftItem, 'name' | 'description' | 'price' | 'raw_price' | 'normalized_price' | 'price_currency' | 'price_variants' | 'shared_price_provenance' | 'draft_category_id'>> & { category_id?: string | null; approved?: boolean };
+type Evidence = {
+  draft_item_id: string;
+  page_number: number;
+  excerpt?: string | null;
+  source_bbox?: SourceBox | null;
+  bounding_box?: SourceBox | null;
+  review_reasons?: string[] | null;
+};
 type ImportJob = {
   id: string;
   file_name?: string | null;
@@ -59,6 +101,9 @@ type AnalysisRun = {
   analyzer_version?: string | null;
   analyzerVersion?: string | null;
   status?: string | null;
+  structure_provider?: 'gemini' | 'local-fallback' | null;
+  structure_model?: string | null;
+  structure_fallback_reason?: string | null;
 };
 type UploadAuthorization = { id: string; objectPath: string; uploadToken: string; uploadUrl: string; token: string; expiresAt: string; maxBytes: number; contentType: string };
 type ImportReadiness = { available?: boolean; message?: string; maxPdfBytes?: number };
@@ -71,11 +116,56 @@ function jobDraft(job: ImportJob | null) {
   return { categories: job?.draft?.categories ?? job?.categories ?? [], items: job?.draft?.items ?? job?.items ?? [], evidence: job?.draft?.evidence ?? [] };
 }
 
+function asFinitePrice(value: unknown) {
+  if (value === null || value === undefined || value === '') return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
+}
+
+function priceVariants(item: DraftItem) {
+  return item.price_variants ?? item.variants ?? [];
+}
+
+function formatPrice(price: DraftPrice | Pick<DraftItem, 'price' | 'normalized_price' | 'raw_price' | 'price_currency'>) {
+  const legacy = 'price' in price;
+  const raw = legacy ? price.raw_price : price.raw;
+  const amount = asFinitePrice(legacy ? price.normalized_price ?? price.price : price.normalized_amount ?? price.amount);
+  const currency = legacy ? price.price_currency : price.currency;
+  if (amount === null) return raw?.trim() ? `Sin normalizar: ${raw}` : 'Precio ausente';
+  if (!currency) return raw?.trim() ? `${amount.toFixed(2)} · observado: ${raw}` : amount.toFixed(2);
+  try {
+    const normalized = new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount);
+    return raw?.trim() && raw !== normalized ? `${normalized} · observado: ${raw}` : normalized;
+  } catch {
+    return raw?.trim() ? `${currency} ${amount.toFixed(2)} · observado: ${raw}` : `${currency} ${amount.toFixed(2)}`;
+  }
+}
+
+function formatBox(box?: SourceBox | null) {
+  return box ? `x ${Math.round(box.x * 100)}%, y ${Math.round(box.y * 100)}%, ${Math.round(box.width * 100)} × ${Math.round(box.height * 100)}%` : null;
+}
+
+function categoryPath(item: DraftItem, categories: DraftCategory[]) {
+  if (item.section_path?.length) return item.section_path.join(' / ');
+  if (item.hierarchy?.length) return item.hierarchy.join(' / ');
+  const category = categories.find((entry) => entry.id === (item.draft_category_id ?? item.category_id));
+  if (!category) return item.category_name || 'Sin categoría';
+  const names = [category.name];
+  let parentId = category.parent_id ?? category.parent_section_id;
+  while (parentId) {
+    const parent = categories.find((entry) => entry.id === parentId);
+    if (!parent || names.includes(parent.name)) break;
+    names.unshift(parent.name);
+    parentId = parent.parent_id ?? parent.parent_section_id;
+  }
+  return names.join(' / ');
+}
+
 function fieldProblems(item: DraftItem) {
-  const problems = [...(item.confidence_flags ?? []), ...(item.validation_errors ?? [])];
+  const problems = [...(item.confidence_flags ?? []), ...(item.validation_errors ?? []), ...(item.review_reasons ?? [])];
   if (!item.name?.trim()) problems.push('Falta el nombre');
-  if (item.price === null || item.price === '' || !Number.isFinite(Number(item.price)) || Number(item.price) < 0) problems.push('El precio no es válido');
-  if (!item.category_id && !item.category_name) problems.push('Falta la categoría');
+  if (asFinitePrice(item.normalized_price ?? item.price) === null) problems.push(priceVariants(item).length ? 'Elige un precio base para publicar' : item.raw_price?.trim() ? 'El precio requiere normalización' : 'Falta el precio');
+  if (!item.draft_category_id && !item.category_id && !item.category_name) problems.push('Falta la categoría');
   return [...new Set(problems)];
 }
 
@@ -87,6 +177,9 @@ function lineageFor(job: ImportJob) {
     sourceHash: run?.source_sha256 ?? run?.sourceSha256 ?? job.source_sha256 ?? job.sourceSha256,
     analyzerVersion: run?.analyzer_version ?? run?.analyzerVersion ?? job.analyzer_version ?? job.analyzerVersion,
     status: run?.status ?? job.analysis_status ?? job.analysisStatus,
+    structureProvider: run?.structure_provider,
+    structureModel: run?.structure_model,
+    structureFallbackReason: run?.structure_fallback_reason,
   };
 }
 
@@ -258,7 +351,7 @@ export default function MenuImportPanel() {
     } finally { setDeleting(false); }
   }
 
-  async function saveItem(item: DraftItem, patch: Partial<DraftItem>) {
+  async function saveItem(item: DraftItem, patch: DraftItemPatch) {
     if (!selected) return;
     setSavingId(item.id); setMessage(null);
     try {
@@ -342,36 +435,55 @@ export default function MenuImportPanel() {
         {lineage.attempt !== null && lineage.attempt !== undefined && <small>Intento: {lineage.attempt}</small>}
         {lineage.status && <small>Resultado: {lineage.status}</small>}
         {lineage.analyzerVersion && <small>Analizador: {lineage.analyzerVersion}</small>}
+        {lineage.structureProvider && <small>Estructurador: {lineage.structureProvider}{lineage.structureModel ? ` (${lineage.structureModel})` : ''}</small>}
+        {lineage.structureFallbackReason && <small>Motivo del fallback: {lineage.structureFallbackReason}</small>}
         {lineage.sourceHash && <small style={{ overflowWrap: 'anywhere' }}>Huella SHA-256: {lineage.sourceHash}</small>}
       </div>}
       {['pending', 'processing'].includes(selected.status) && <p role="status"><Loader2 size={16} className="spin" /> Analizando el documento; esta vista se actualiza automáticamente.</p>}
       {selected.status === 'failed' && <div role="alert" style={{ color: 'var(--primary)' }}>No fue posible analizar este archivo. {selected.error_message || selected.failure_reason}</div>}
       {selected.status === 'needs_review' && <>
         {(validationCount > 0 || publishErrors.length > 0) && <div role="alert" style={{ padding: 12, borderRadius: 6, background: 'rgba(255,71,87,.12)', color: 'var(--primary)' }}><AlertTriangle size={16} /> {validationCount ? `${validationCount} platillo(s) requieren corrección.` : null}{publishErrors.map((error) => <div key={error}>{error}</div>)}</div>}
-        {visibleItems.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : visibleItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.find((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}
+        {visibleItems.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : visibleItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}><button className="btn-primary" disabled={submitting || validationCount > 0} onClick={publish}><Check size={16} /> Publicar aprobados</button></div>
       </>}
     </div>}
   </section>;
 }
 
-function DraftItemCard({ item, categories, evidence, saving, onSave, onRemove }: { item: DraftItem; categories: DraftCategory[]; evidence?: Evidence; saving: boolean; onSave: (item: DraftItem, patch: Partial<DraftItem>) => Promise<void>; onRemove: (item: DraftItem) => Promise<void> }) {
+function DraftItemCard({ item, categories, evidence, saving, onSave, onRemove }: { item: DraftItem; categories: DraftCategory[]; evidence: Evidence[]; saving: boolean; onSave: (item: DraftItem, patch: DraftItemPatch) => Promise<void>; onRemove: (item: DraftItem) => Promise<void> }) {
   const [editing, setEditing] = useState(false);
-  const [values, setValues] = useState({ name: item.name ?? '', description: item.description ?? '', price: item.price?.toString() ?? '', category_id: item.draft_category_id ?? item.category_id ?? '' });
-  useEffect(() => setValues({ name: item.name ?? '', description: item.description ?? '', price: item.price?.toString() ?? '', category_id: item.draft_category_id ?? item.category_id ?? '' }), [item]);
+  const [values, setValues] = useState({ name: item.name ?? '', description: item.description ?? '', rawPrice: item.raw_price ?? '', price: (item.normalized_price ?? item.price)?.toString() ?? '', currency: item.price_currency ?? '', categoryId: item.draft_category_id ?? item.category_id ?? '', sharedProvenance: item.shared_price_provenance ?? item.shared_price?.provenance ?? '', variants: priceVariants(item).map((variant) => ({ label: variant.label ?? variant.variant_label ?? '', raw: variant.raw ?? '', amount: (variant.normalized_amount ?? variant.amount)?.toString() ?? '', currency: variant.currency ?? '' })) });
+  useEffect(() => setValues({ name: item.name ?? '', description: item.description ?? '', rawPrice: item.raw_price ?? '', price: (item.normalized_price ?? item.price)?.toString() ?? '', currency: item.price_currency ?? '', categoryId: item.draft_category_id ?? item.category_id ?? '', sharedProvenance: item.shared_price_provenance ?? item.shared_price?.provenance ?? '', variants: priceVariants(item).map((variant) => ({ label: variant.label ?? variant.variant_label ?? '', raw: variant.raw ?? '', amount: (variant.normalized_amount ?? variant.amount)?.toString() ?? '', currency: variant.currency ?? '' })) }), [item]);
   const problems = fieldProblems(item);
+  const variants = priceVariants(item);
   const suggestedImage = item.image_suggestion?.url ?? item.image_url;
+  const reviewReasons = [...new Set([...problems, ...evidence.flatMap((entry) => entry.review_reasons ?? [])])];
+  const sourceBoxes = [...(item.source_bboxes ?? []), ...(item.source_bbox ? [item.source_bbox] : []), ...evidence.map((entry) => entry.source_bbox ?? entry.bounding_box).filter((box): box is SourceBox => Boolean(box))];
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const normalizedVariants = values.variants.map((variant) => ({ label: variant.label.trim() || null, raw: variant.raw.trim() || null, amount: variant.amount === '' ? null : Number(variant.amount), normalized_amount: variant.amount === '' ? null : Number(variant.amount), currency: variant.currency.trim().toUpperCase() || null })).filter((variant) => variant.label || variant.raw || variant.amount !== null);
+    await onSave(item, { name: values.name, description: values.description, raw_price: values.rawPrice || null, price: values.price === '' ? null : Number(values.price), normalized_price: values.price === '' ? null : Number(values.price), price_currency: values.currency.trim().toUpperCase() || null, price_variants: normalizedVariants, shared_price_provenance: values.sharedProvenance.trim() || null, category_id: values.categoryId || null });
+    setEditing(false);
+  }
+
   return <article style={{ padding: 16, background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', borderRadius: 10 }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'start' }}>
-      <div><strong style={{ color: 'var(--text-main)', fontSize: '1.05rem' }}>{item.name || 'Platillo sin nombre'}</strong><p style={{ margin: '5px 0', color: 'var(--text-muted)', fontWeight: 600, lineHeight: 1.45 }}>{item.category_name || categories.find((category) => category.id === (item.draft_category_id ?? item.category_id))?.name || 'Sin categoría'} · ${Number(item.price || 0).toFixed(2)} · Página {evidence?.page_number ?? item.source_page ?? 'sin referencia'}</p></div>
-      <div style={{ display: 'flex', gap: 8 }}><button aria-label={`Aprobar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving || item.review_status === 'approved'} onClick={() => onSave(item, { approved: true })}><Check size={15} /></button><button aria-label={`Editar ${item.name || 'platillo'}`} className="btn-secondary" onClick={() => setEditing((value) => !value)}><Pencil size={15} /></button><button aria-label={`Eliminar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => onRemove(item)}><Trash2 size={15} /></button></div>
+      <div><strong style={{ color: 'var(--text-main)', fontSize: '1.05rem' }}>{item.name || 'Platillo sin nombre'}</strong><p style={{ margin: '5px 0', color: 'var(--text-muted)', fontWeight: 600, lineHeight: 1.45 }}>{categoryPath(item, categories)} · {formatPrice(item)} · Página {evidence[0]?.page_number ?? item.source_page ?? 'sin referencia'}</p>{item.parent_section_name && <small style={{ color: 'var(--text-muted)' }}>Sección padre: {item.parent_section_name}</small>}</div>
+      <div style={{ display: 'flex', gap: 8 }}><button aria-label={`Aprobar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving || item.review_status === 'approved'} onClick={() => onSave(item, { approved: true })}><Check size={15} /></button><button aria-label={`Editar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => setEditing((value) => !value)}><Pencil size={15} /></button><button aria-label={`Eliminar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => onRemove(item)}><Trash2 size={15} /></button></div>
     </div>
+    {variants.length > 0 && <div aria-label="Variantes de precio" style={{ display: 'grid', gap: 6, marginTop: 12, padding: 10, borderRadius: 6, background: 'var(--bg-base)' }}><strong>Variantes observadas</strong>{variants.map((variant, index) => <small key={`${variant.label ?? 'variante'}-${index}`} style={{ color: 'var(--text-muted)' }}>{variant.label ?? variant.variant_label ?? 'Sin etiqueta'}: {formatPrice(variant)}{variant.shared ? ' · precio compartido' : ''}</small>)}</div>}
+    {(item.shared_price || item.shared_price_provenance) && <small style={{ display: 'block', marginTop: 10, color: 'var(--text-muted)' }}>Precio compartido{item.shared_price ? `: ${formatPrice(item.shared_price)}` : ''}{item.shared_price_provenance ? ` · Evidencia: ${item.shared_price_provenance}` : ''}</small>}
     {suggestedImage && <div style={{ marginTop: 10, display: 'flex', gap: 10, alignItems: 'center' }}><img src={suggestedImage} alt={`Imagen sugerida para ${item.name || 'platillo'}`} style={{ width: 72, height: 54, objectFit: 'cover', borderRadius: 5 }} /><small style={{ color: 'var(--text-muted)' }}><ImageIcon size={13} /> Imagen sugerida{item.image_suggestion?.confidence ? ` (${Math.round(item.image_suggestion.confidence * 100)}% confianza)` : ''}</small></div>}
-    {problems.length > 0 && <p role="alert" style={{ color: 'var(--primary)', marginBottom: 0 }}><AlertTriangle size={14} /> {problems.join(' · ')}</p>}
-    {editing && <form onSubmit={(event) => { event.preventDefault(); onSave(item, { name: values.name, description: values.description, price: values.price === '' ? null : Number(values.price), category_id: values.category_id || null }); setEditing(false); }} style={{ display: 'grid', gap: 10, marginTop: 14 }}>
+    {(evidence.length > 0 || sourceBoxes.length > 0) && <div aria-label="Evidencia de origen" style={{ marginTop: 10, display: 'grid', gap: 4 }}><strong style={{ fontSize: '.85rem' }}>Evidencia de origen</strong>{evidence.map((entry, index) => <small key={`${entry.page_number}-${index}`} style={{ color: 'var(--text-muted)' }}>Página {entry.page_number}{entry.excerpt ? ` · “${entry.excerpt}”` : ''}{formatBox(entry.source_bbox ?? entry.bounding_box) ? ` · ${formatBox(entry.source_bbox ?? entry.bounding_box)}` : ''}</small>)}{sourceBoxes.map((box, index) => <small key={`box-${index}`} style={{ color: 'var(--text-muted)' }}>Región {index + 1}: {formatBox(box)}</small>)}</div>}
+    {reviewReasons.length > 0 && <div role="alert" style={{ marginTop: 10, color: 'var(--primary)' }}><AlertTriangle size={14} /> {reviewReasons.join(' · ')}</div>}
+    {editing && <form onSubmit={submit} style={{ display: 'grid', gap: 10, marginTop: 14 }}>
       <input aria-label="Nombre" value={values.name} onChange={(event) => setValues({ ...values, name: event.target.value })} style={inputStyle} />
       <textarea aria-label="Descripción" value={values.description} onChange={(event) => setValues({ ...values, description: event.target.value })} style={inputStyle} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}><input aria-label="Precio" type="number" min="0" step="0.01" value={values.price} onChange={(event) => setValues({ ...values, price: event.target.value })} style={inputStyle} /><select aria-label="Categoría" value={values.category_id} onChange={(event) => setValues({ ...values, category_id: event.target.value })} style={inputStyle}><option value="">Selecciona categoría</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}><input aria-label="Precio observado" value={values.rawPrice} onChange={(event) => setValues({ ...values, rawPrice: event.target.value })} placeholder="Precio observado" style={inputStyle} /><input aria-label="Precio normalizado" type="number" min="0" step="0.01" value={values.price} onChange={(event) => setValues({ ...values, price: event.target.value })} placeholder="Precio normalizado" style={inputStyle} /></div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10 }}><input aria-label="Moneda normalizada" value={values.currency} onChange={(event) => setValues({ ...values, currency: event.target.value })} placeholder="COP, USD…" style={inputStyle} /><select aria-label="Categoría" value={values.categoryId} onChange={(event) => setValues({ ...values, categoryId: event.target.value })} style={inputStyle}><option value="">Selecciona categoría</option>{categories.map((category) => <option key={category.id} value={category.id}>{categoryPath({ category_id: category.id } as DraftItem, categories)}</option>)}</select></div>
+      <input aria-label="Procedencia de precio compartido" value={values.sharedProvenance} onChange={(event) => setValues({ ...values, sharedProvenance: event.target.value })} placeholder="Procedencia de precio compartido" style={inputStyle} />
+      <fieldset style={{ margin: 0, padding: 10, border: '1px solid var(--border-color)', borderRadius: 6 }}><legend>Variantes de precio</legend>{values.variants.map((variant, index) => <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 8, marginBottom: 8 }}><input aria-label={`Etiqueta de variante ${index + 1}`} value={variant.label} onChange={(event) => setValues({ ...values, variants: values.variants.map((entry, itemIndex) => itemIndex === index ? { ...entry, label: event.target.value } : entry) })} placeholder="Etiqueta" style={inputStyle} /><input aria-label={`Precio observado de variante ${index + 1}`} value={variant.raw} onChange={(event) => setValues({ ...values, variants: values.variants.map((entry, itemIndex) => itemIndex === index ? { ...entry, raw: event.target.value } : entry) })} placeholder="Observado" style={inputStyle} /><input aria-label={`Precio normalizado de variante ${index + 1}`} type="number" min="0" step="0.01" value={variant.amount} onChange={(event) => setValues({ ...values, variants: values.variants.map((entry, itemIndex) => itemIndex === index ? { ...entry, amount: event.target.value } : entry) })} placeholder="Normalizado" style={inputStyle} /><button className="btn-secondary" type="button" aria-label={`Quitar variante ${index + 1}`} onClick={() => setValues({ ...values, variants: values.variants.filter((_, itemIndex) => itemIndex !== index) })}>Quitar</button></div>)}<button className="btn-secondary" type="button" onClick={() => setValues({ ...values, variants: [...values.variants, { label: '', raw: '', amount: '', currency: values.currency }] })}>Añadir variante</button></fieldset>
       <button className="btn-primary" disabled={saving} type="submit">{saving ? 'Guardando...' : 'Guardar corrección'}</button>
     </form>}
   </article>;

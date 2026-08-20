@@ -630,8 +630,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts": {
-    "mtime": 1786901640.691574,
-    "ast_hash": "31bf9d58e305f7a47645fcc34bd1f846",
+    "mtime": 1787266798.9010055,
+    "ast_hash": "f98e605f7329c121b5481fdf6041c4f4",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/publish/route.ts": {
@@ -640,8 +640,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/route.ts": {
-    "mtime": 1786983727.4189982,
-    "ast_hash": "0caa29c781bb61b37f20301e5db8f481",
+    "mtime": 1787265834.5422416,
+    "ast_hash": "6c4e377f616af8809a7eb1fe7782a152",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/source/route.ts": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1786944737.6301608,
-    "ast_hash": "4034d6ca9f95292ed32640cbb3c3ea9b",
+    "mtime": 1787266211.4297512,
+    "ast_hash": "f7881786153326e0c2daaeaf1e4c1d2e",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -670,28 +670,28 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import.ts": {
-    "mtime": 1786897596.2604165,
-    "ast_hash": "6d610ded9f2fc121eaa92016c1236918",
+    "mtime": 1787265670.5710628,
+    "ast_hash": "cb6495149898ac2a1d7e51663dc89bb9",
     "semantic_hash": ""
   },
   "src/lib/menu-import/provider.test.ts": {
-    "mtime": 1786984129.365548,
-    "ast_hash": "2742d0cfc1a160d0c1dd87d875b010ca",
+    "mtime": 1787266396.7977028,
+    "ast_hash": "ace717ea1645d84d0e04ff5b41deac43",
     "semantic_hash": ""
   },
   "src/lib/menu-import/provider.ts": {
-    "mtime": 1786984089.8269494,
-    "ast_hash": "f6675e2a4c6b9f2b5ca170ce4f9daafa",
+    "mtime": 1787266558.6943846,
+    "ast_hash": "1714efb4f28dfcf70514047c6fc3cc31",
     "semantic_hash": ""
   },
   "src/lib/menu-import/types.ts": {
-    "mtime": 1786983831.1955907,
-    "ast_hash": "3a7bee7195e25222418a65f84a6acb6a",
+    "mtime": 1787266482.0252657,
+    "ast_hash": "4ba1192ff0526bffd0267d5e00069205",
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.ts": {
-    "mtime": 1786983837.0796666,
-    "ast_hash": "d2f4cce75f1ae2ba156331a8807bab4e",
+    "mtime": 1787265881.0401323,
+    "ast_hash": "84a5830982c9f5a1fa4a20fd0ce42b57",
     "semantic_hash": ""
   },
   "supabase/migrations/20260816120000_pdf_menu_imports.sql": {
@@ -760,8 +760,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/routes.test.ts": {
-    "mtime": 1786942187.3709257,
-    "ast_hash": "6aba58b7c2e9bdd9f5f7399d45890d15",
+    "mtime": 1787265579.0280967,
+    "ast_hash": "21ba4b3a69950a91aaa779a5f0f34907",
     "semantic_hash": ""
   },
   "openspec/changes/harden-menu-import-deployment/.openspec.yaml": {
@@ -854,16 +854,6 @@
     "ast_hash": "860dbcde027fb9de64a8833445f51833",
     "semantic_hash": ""
   },
-  "test-results/.last-run.json": {
-    "mtime": 1786907926.7985055,
-    "ast_hash": "66954584d3ce62d9d40f8f564ebb01d8",
-    "semantic_hash": ""
-  },
-  "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md": {
-    "mtime": 1786907926.7534275,
-    "ast_hash": "c70f6f5bcb5729d360879b92b6500f59",
-    "semantic_hash": ""
-  },
   "supabase/migrations/20260816200000_event_driven_menu_import_analysis.sql": {
     "mtime": 1786938689.5241928,
     "ast_hash": "60b1ab94330141c47475246ce359bb90",
@@ -930,8 +920,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.test.ts": {
-    "mtime": 1786983955.8324437,
-    "ast_hash": "c13100197de5136f5d8e1f80644a2ee5",
+    "mtime": 1787266588.1684215,
+    "ast_hash": "0485531c4292c6c10d410b64969ee208",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/retry/route.ts": {
@@ -945,8 +935,8 @@
     "semantic_hash": ""
   },
   "docs/menu-import-analysis.md": {
-    "mtime": 1786983687.5711956,
-    "ast_hash": "d7909c1f9b026172189a22c57a11dcbe",
+    "mtime": 1787265902.5612037,
+    "ast_hash": "21dd82e19094f081a6780c92d29828d4",
     "semantic_hash": ""
   },
   "scripts/verify-menu-import-pgcrypto-migration.mjs": {
@@ -1014,34 +1004,84 @@
     "ast_hash": "eb9be31f7c4a38e4f507f9b944bf89b5",
     "semantic_hash": ""
   },
-  "openspec/changes/improve-menu-import-with-gemini/.openspec.yaml": {
+  "docs/pdf_menu_examples/Menu Subarashii.pdf": {
+    "mtime": 1786899457.0996523,
+    "ast_hash": "8d2c798e3a7284f4f4fdb3a64e97d4fc",
+    "semantic_hash": ""
+  },
+  "openspec/changes/archive/2026-08-17-improve-menu-import-with-gemini/.openspec.yaml": {
     "mtime": 1786983333.2483668,
     "ast_hash": "0793a70fad8c756b2474de339bf494b9",
     "semantic_hash": ""
   },
-  "openspec/changes/improve-menu-import-with-gemini/design.md": {
+  "openspec/changes/archive/2026-08-17-improve-menu-import-with-gemini/design.md": {
     "mtime": 1786983469.0184753,
     "ast_hash": "34821b573c3fc3d99b74402fedbdbafa",
     "semantic_hash": ""
   },
-  "openspec/changes/improve-menu-import-with-gemini/proposal.md": {
+  "openspec/changes/archive/2026-08-17-improve-menu-import-with-gemini/proposal.md": {
     "mtime": 1786983373.9344769,
     "ast_hash": "995e8329da326622bfa9b0d02822f000",
     "semantic_hash": ""
   },
-  "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md": {
+  "openspec/changes/archive/2026-08-17-improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md": {
     "mtime": 1786983458.2240074,
     "ast_hash": "510a4f595d8ae42141988939399c8a58",
     "semantic_hash": ""
   },
-  "openspec/changes/improve-menu-import-with-gemini/tasks.md": {
+  "openspec/changes/archive/2026-08-17-improve-menu-import-with-gemini/tasks.md": {
     "mtime": 1786984277.8181877,
     "ast_hash": "b4fe6659420425b9875a3e2635255f07",
     "semantic_hash": ""
   },
-  "docs/pdf_menu_examples/Menu Subarashii.pdf": {
-    "mtime": 1786899457.0996523,
-    "ast_hash": "8d2c798e3a7284f4f4fdb3a64e97d4fc",
+  "openspec/specs/menu-import-gemini-structure/spec.md": {
+    "mtime": 1786984557.8168552,
+    "ast_hash": "15287356c1e48fdc7a72514825ac875d",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260820223937_add_visual_menu_import_drafts.sql": {
+    "mtime": 1787266788.3902867,
+    "ast_hash": "2d3f8eedd6606956899f1c69bbd5efdf",
+    "semantic_hash": ""
+  },
+  "openspec/changes/rebuild-menu-import-visual-extraction/.openspec.yaml": {
+    "mtime": 1787265068.9154541,
+    "ast_hash": "7b12d49e8be3ef61db53339455ffdade",
+    "semantic_hash": ""
+  },
+  "openspec/changes/rebuild-menu-import-visual-extraction/design.md": {
+    "mtime": 1787265222.1482658,
+    "ast_hash": "f934bc97c6aba1dc690b1ecb6fdeba7e",
+    "semantic_hash": ""
+  },
+  "openspec/changes/rebuild-menu-import-visual-extraction/proposal.md": {
+    "mtime": 1787265109.1986437,
+    "ast_hash": "1f9c6afb8280d301b9b57679d1b4becf",
+    "semantic_hash": ""
+  },
+  "openspec/changes/rebuild-menu-import-visual-extraction/specs/menu-import-gemini-structure/spec.md": {
+    "mtime": 1787265212.238497,
+    "ast_hash": "5537f2952ebee584fad9cdcf3e458726",
+    "semantic_hash": ""
+  },
+  "openspec/changes/rebuild-menu-import-visual-extraction/tasks.md": {
+    "mtime": 1787267014.6096604,
+    "ast_hash": "ba6f8426268b366351cae1829d997948",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/visual-analysis.ts": {
+    "mtime": 1787266221.712025,
+    "ast_hash": "ca916683bdb02bdacb915247baf73428",
+    "semantic_hash": ""
+  },
+  "test-results/.last-run.json": {
+    "mtime": 1787265659.8021402,
+    "ast_hash": "66954584d3ce62d9d40f8f564ebb01d8",
+    "semantic_hash": ""
+  },
+  "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md": {
+    "mtime": 1787265659.7466202,
+    "ast_hash": "c70f6f5bcb5729d360879b92b6500f59",
     "semantic_hash": ""
   }
 }

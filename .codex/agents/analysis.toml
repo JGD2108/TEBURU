@@ -1,7 +1,7 @@
 name = "analysis"
 description = "Use for PDF text/OCR extraction pipeline, structured analysis, confidence logic, and mapping analysis results to draft categories/items with source-page evidence."
 model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 nickname_candidates = ["Analysis Engineer"]
 
 developer_instructions = """

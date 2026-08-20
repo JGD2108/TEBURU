@@ -1,11 +1,11 @@
 # Graph Report - teburuapp  (2026-08-20)
 
 ## Corpus Check
-- 207 files · ~101,590 words
+- 207 files · ~101,128 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1207 nodes · 2004 edges · 138 communities (92 shown, 46 thin omitted)
+- 1198 nodes · 1987 edges · 135 communities (91 shown, 44 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
@@ -87,7 +87,7 @@
 - fix-menu-import-upload-finalize/proposal.md
 - fix-menu-import-upload-finalize/design.md
 - fix-menu-import-upload-finalize/tasks.md
-- getPoolClient
+- db.ts
 - Decisions
 - provider.ts
 - Decisions
@@ -136,9 +136,6 @@
 - public.menu_import_jobs
 - public.menu_import_analysis_runs
 - public.menu_import_analysis_runs
-- db.ts
-- categories/route.test.ts
-- deliver/route.test.ts
 
 ## God Nodes (most connected - your core abstractions)
 1. `isAuthorizationFailure()` - 84 edges
@@ -157,17 +154,17 @@
   src/components/admin/TablesManagerPanel.tsx → package.json
 - `AdminDashboard()` --calls--> `isLocalDemo()`  [EXTRACTED]
   src/app/admin/page.tsx → src/lib/demo.ts
+- `GET()` --calls--> `query()`  [EXTRACTED]
+  src/app/api/health/route.ts → src/lib/db.ts
 - `AdminLogin()` --calls--> `isLocalDemo()`  [EXTRACTED]
   src/app/admin/login/page.tsx → src/lib/demo.ts
 - `PATCH()` --calls--> `isAuthorizationFailure()`  [EXTRACTED]
-  src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
-- `PATCH()` --calls--> `requireRole()`  [EXTRACTED]
   src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (138 total, 46 thin omitted)
+## Communities (135 total, 44 thin omitted)
 
 ### Community 0 - "isLocalDemo"
 Cohesion: 0.22
@@ -194,8 +191,8 @@ Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
 ### Community 6 - "isAuthorizationFailure"
-Cohesion: 0.16
-Nodes (28): POST(), DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query }, GET() (+20 more)
+Cohesion: 0.14
+Nodes (29): POST(), { requireRole, query }, DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query } (+21 more)
 
 ### Community 7 - "schema.sql"
 Cohesion: 0.50
@@ -259,7 +256,7 @@ Nodes (22): snapshot_order_item_stations, menu_categories, menu_items, order_ite
 
 ### Community 41 - "worker.ts"
 Cohesion: 0.11
-Nodes (29): ExtractedSection, ALLOWED_ASSET_TYPES, analysisMetrics(), AnalysisResultWithStructureLineage, ANALYZER_VERSION, bbox(), claimNextExecution(), confidenceScore() (+21 more)
+Nodes (28): ALLOWED_ASSET_TYPES, analysisMetrics(), AnalysisResultWithStructureLineage, ANALYZER_VERSION, bbox(), claimNextExecution(), confidenceScore(), Execution (+20 more)
 
 ### Community 42 - "Operación de Teburu"
 Cohesion: 0.29
@@ -270,8 +267,8 @@ Cohesion: 0.10
 Nodes (19): ADDED Requirements, Purpose, Requirement: Controlled publication to the restaurant menu, Requirement: Menu structure extraction, Requirement: Restaurant-scoped PDF import submission, Requirement: Review before live-menu publication, Requirement: Source visual preservation and image suggestions, Scenario: Administrator appends an approved draft (+11 more)
 
 ### Community 49 - "finalize/route.ts"
-Cohesion: 0.13
-Nodes (41): Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE(), PATCH(), POST() (+33 more)
+Cohesion: 0.09
+Nodes (54): Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE(), PATCH(), POST() (+46 more)
 
 ### Community 52 - "openspec-explore/SKILL.md"
 Cohesion: 0.18
@@ -353,17 +350,17 @@ Nodes (5): Context, Decisions, Goals / Non-Goals, Migration Plan, Risks / Trade-
 Cohesion: 0.50
 Nodes (3): 1. Finalize contract, 2. UI recovery, 3. Verification
 
-### Community 83 - "getPoolClient"
-Cohesion: 0.11
-Nodes (15): BulkItem, POST(), transitions, nextStatuses, POST(), priorities, { getPoolClient, requireRole, client }, POST() (+7 more)
+### Community 83 - "db.ts"
+Cohesion: 0.10
+Nodes (19): dynamic, GET(), BulkItem, POST(), transitions, nextStatuses, POST(), priorities (+11 more)
 
 ### Community 84 - "Decisions"
 Cohesion: 0.17
 Nodes (11): 1. Supabase Database Webhook is the start signal, 2. Separate import identity from attempt identity, 3. Use source fingerprinting for safe re-analysis detection, 4. Enforce lineage in the database, not only in application code, 5. Keep the worker portable and bounded, 6. Recovery is explicit and observable, Context, Decisions (+3 more)
 
 ### Community 85 - "provider.ts"
-Cohesion: 0.09
-Nodes (27): BOX_SCHEMA, buildGeminiRequestBody(), callGemini(), CanvasModule, cropVisualPage(), extractEmbeddedImages(), GeminiConfig, GeminiFetch (+19 more)
+Cohesion: 0.12
+Nodes (24): analyzePdf(), buildGeminiRequestBody(), callGemini(), CanvasModule, cropVisualPage(), extractEmbeddedImages(), GeminiConfig, GeminiFetch (+16 more)
 
 ### Community 86 - "Decisions"
 Cohesion: 0.18
@@ -439,15 +436,15 @@ Nodes (12): 1. Use a page-image-first provider boundary, 2. Separate extraction,
 
 ### Community 110 - "types.ts"
 Cohesion: 0.10
-Nodes (19): AnalysisMetrics, AnalysisResult, Confidence, DocumentMetadata, ExtractedImage, ExtractedModifier, ExtractedOption, ImageSuggestion (+11 more)
+Nodes (19): AnalysisMetrics, AnalysisResult, Confidence, DocumentMetadata, ExtractedImage, ExtractedModifier, ExtractedOption, ExtractedSection (+11 more)
 
 ### Community 112 - "provider.test.ts"
-Cohesion: 0.16
-Nodes (17): analyzePdf(), boundedEnv(), confidence(), configuredOcr(), configuredRenderLimits(), createGeminiTextStructurer(), createPdfAnalysisProvider(), decodeGeminiItems() (+9 more)
+Cohesion: 0.18
+Nodes (14): boundedEnv(), confidence(), configuredOcr(), configuredRenderLimits(), createGeminiTextStructurer(), createPdfAnalysisProvider(), decodeGeminiItems(), installNodeCanvasGlobals() (+6 more)
 
 ### Community 117 - "auth.ts"
-Cohesion: 0.17
-Nodes (16): PATCH(), authAdmin(), GET(), POST(), slugify(), GET(), adminClient(), DELETE() (+8 more)
+Cohesion: 0.18
+Nodes (15): PATCH(), authAdmin(), GET(), POST(), slugify(), GET(), adminClient(), DELETE() (+7 more)
 
 ### Community 118 - "2026-08-17-improve-menu-import-with-gemini/proposal.md"
 Cohesion: 0.29
@@ -477,26 +474,22 @@ Nodes (4): public.menu_import_draft_items, public.menu_import_document_metadata,
 Cohesion: 0.40
 Nodes (4): Error details, Instructions, Test info, Test source
 
-### Community 135 - "db.ts"
-Cohesion: 0.14
-Nodes (15): AccessRow, GET(), { requireAuthenticatedUser, query, logger }, dynamic, authorized(), GET(), POST, isSupabase (+7 more)
-
 ## Knowledge Gaps
-- **538 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+533 more)
+- **531 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+526 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **46 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **44 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getPoolClient()` connect `getPoolClient` to `activate/route.ts`, `guest-session.ts`, `db.ts`, `worker.ts`, `finalize/route.ts`, `auth.ts`?**
+- **Why does `getPoolClient()` connect `db.ts` to `activate/route.ts`, `guest-session.ts`, `worker.ts`, `finalize/route.ts`, `auth.ts`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
-- **Why does `query()` connect `isAuthorizationFailure` to `finalize/route.ts`, `guest-session.ts`, `auth.ts`, `db.ts`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
-- **Why does `isAuthorizationFailure()` connect `isAuthorizationFailure` to `activate/route.ts`, `db.ts`, `finalize/route.ts`, `getPoolClient`, `auth.ts`, `images/route.ts`?**
+- **Why does `query()` connect `isAuthorizationFailure` to `guest-session.ts`, `finalize/route.ts`, `db.ts`, `auth.ts`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+- **Why does `isAuthorizationFailure()` connect `isAuthorizationFailure` to `activate/route.ts`, `finalize/route.ts`, `db.ts`, `auth.ts`, `images/route.ts`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `required`, `missing`, `eslintConfig` to the rest of the system?**
-  _538 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _531 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `ADDED Requirements` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**

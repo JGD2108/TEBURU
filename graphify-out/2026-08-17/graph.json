@@ -329,8 +329,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "package_dependencies_jspdf",
-      "community": 2,
-      "community_name": "dependencies",
+      "community": 108,
+      "community_name": "jspdf",
       "norm_label": "jspdf"
     },
     {
@@ -340,8 +340,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "jspdf",
-      "community": 2,
-      "community_name": "dependencies",
+      "community": 108,
+      "community_name": "jspdf",
       "norm_label": "jspdf"
     },
     {
@@ -483,8 +483,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "package_dependencies_react_dom",
-      "community": 112,
-      "community_name": "react-dom",
+      "community": 2,
+      "community_name": "dependencies",
       "norm_label": "react-dom"
     },
     {
@@ -494,15 +494,37 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "react_dom",
-      "community": 112,
-      "community_name": "react-dom",
+      "community": 2,
+      "community_name": "dependencies",
       "norm_label": "react-dom"
+    },
+    {
+      "label": "server-only",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "package_dependencies_server_only",
+      "community": 109,
+      "community_name": "server-only",
+      "norm_label": "server-only"
+    },
+    {
+      "label": "server-only",
+      "file_type": "concept",
+      "source_file": "package.json",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "server_only",
+      "community": 109,
+      "community_name": "server-only",
+      "norm_label": "server-only"
     },
     {
       "label": "devDependencies",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "package_devdependencies",
       "community": 4,
@@ -513,7 +535,7 @@
       "label": "@playwright/test",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "package_devdependencies_playwright_test",
       "community": 4,
@@ -524,7 +546,7 @@
       "label": "@playwright/test",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "playwright_test",
       "community": 4,
@@ -535,7 +557,7 @@
       "label": "@types/node",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "package_devdependencies_types_node",
       "community": 4,
@@ -546,7 +568,7 @@
       "label": "@types/node",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "types_node",
       "community": 4,
@@ -557,7 +579,7 @@
       "label": "@types/pg",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "package_devdependencies_types_pg",
       "community": 4,
@@ -568,7 +590,7 @@
       "label": "@types/pg",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "types_pg",
       "community": 4,
@@ -579,7 +601,7 @@
       "label": "@types/react",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "package_devdependencies_types_react",
       "community": 4,
@@ -590,7 +612,7 @@
       "label": "@types/react",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "types_react",
       "community": 4,
@@ -601,7 +623,7 @@
       "label": "@types/react-dom",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "package_devdependencies_types_react_dom",
       "community": 4,
@@ -612,7 +634,7 @@
       "label": "@types/react-dom",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "types_react_dom",
       "community": 4,
@@ -623,7 +645,7 @@
       "label": "eslint",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "package_devdependencies_eslint",
       "community": 4,
@@ -634,7 +656,7 @@
       "label": "eslint",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "eslint",
       "community": 4,
@@ -645,7 +667,7 @@
       "label": "eslint-config-next",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_config_next",
       "community": 4,
@@ -656,7 +678,7 @@
       "label": "eslint-config-next",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "eslint_config_next",
       "community": 4,
@@ -667,7 +689,7 @@
       "label": "typescript",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "package_devdependencies_typescript",
       "community": 4,
@@ -678,7 +700,7 @@
       "label": "typescript",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "typescript",
       "community": 4,
@@ -689,7 +711,7 @@
       "label": "vitest",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L39",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "package_devdependencies_vitest",
       "community": 4,
@@ -700,7 +722,7 @@
       "label": "vitest",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L39",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "vitest",
       "community": 4,
@@ -1488,7 +1510,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "[itemid]/route.ts"
     },
     {
@@ -1500,7 +1522,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route_patch",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "patch()"
     },
     {
@@ -1512,7 +1534,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_draft_items_itemid_route_delete",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "delete()"
     },
     {
@@ -1523,7 +1545,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_publish_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "publish/route.ts"
     },
     {
@@ -1535,7 +1557,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_publish_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -1546,7 +1568,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_retry_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "retry/route.ts"
     },
     {
@@ -1558,7 +1580,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_retry_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -1569,7 +1591,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "[id]/route.ts"
     },
     {
@@ -1581,19 +1603,19 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
       "label": "DELETE()",
       "file_type": "code",
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L27",
+      "source_location": "L28",
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_route_delete",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "delete()"
     },
     {
@@ -1604,7 +1626,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_source_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "source/route.ts"
     },
     {
@@ -1616,7 +1638,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_id_source_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -1627,7 +1649,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "finalize/route.ts"
     },
     {
@@ -1640,7 +1662,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_authorization",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "authorization"
     },
     {
@@ -1653,7 +1675,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_storageobjectinfo",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "storageobjectinfo"
     },
     {
@@ -1665,7 +1687,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_validatestoredpdf",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "validatestoredpdf()"
     },
     {
@@ -1677,7 +1699,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_verifyauthorizedupload",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "verifyauthorizedupload()"
     },
     {
@@ -1689,7 +1711,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_finalize_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -1700,7 +1722,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "admin/menu-import/route.ts"
     },
     {
@@ -1712,7 +1734,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -1724,7 +1746,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -1735,7 +1757,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menu-import/routes.test.ts"
     },
     {
@@ -1746,7 +1768,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_requirerole_query_getpoolclient_ensuremenuimportbucket_menuimportstorage_dispatchmenuimportanalysis",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "{ requirerole, query, getpoolclient, ensuremenuimportbucket, menuimportstorage, dispatchmenuimportanalysis }"
     },
     {
@@ -1757,7 +1779,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_staff",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "staff"
     },
     {
@@ -1769,7 +1791,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_context",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "context()"
     },
     {
@@ -1781,7 +1803,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_uploadrequest",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "uploadrequest()"
     },
     {
@@ -1793,7 +1815,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_routes_test_jsonrequest",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "jsonrequest()"
     },
     {
@@ -1804,7 +1826,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_upload_authorizations_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "upload-authorizations/route.ts"
     },
     {
@@ -1816,7 +1838,7 @@
       "_origin": "ast",
       "id": "src_app_api_admin_menu_import_upload_authorizations_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -1826,8 +1848,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test",
-      "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community": 102,
+      "community_name": "categories/route.test.ts",
       "norm_label": "categories/route.test.ts"
     },
     {
@@ -1837,8 +1859,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test_requirerole_query",
-      "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community": 102,
+      "community_name": "categories/route.test.ts",
       "norm_label": "{ requirerole, query }"
     },
     {
@@ -1849,8 +1871,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_test_requestfor",
-      "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community": 102,
+      "community_name": "categories/route.test.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -1860,7 +1882,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "categories/route.ts"
     },
@@ -1872,7 +1894,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_categories_route_post",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
@@ -1963,7 +1985,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_menu_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "menu/route.ts"
     },
@@ -1975,7 +1997,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -1987,7 +2009,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_route_post",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
@@ -1999,7 +2021,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_menu_route_delete",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "delete()"
     },
@@ -2010,7 +2032,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_overview_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "overview/route.ts"
     },
@@ -2022,7 +2044,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_overview_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2034,7 +2056,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_overview_route_patch",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "patch()"
     },
@@ -2045,7 +2067,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_routes_test",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "admin/routes.test.ts"
     },
@@ -2056,7 +2078,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_app_api_admin_routes_test_requirerole_query",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "{ requirerole, query }"
     },
@@ -2067,7 +2089,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_settings_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "admin/settings/route.ts"
     },
@@ -2079,7 +2101,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_settings_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2091,7 +2113,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_settings_route_patch",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "patch()"
     },
@@ -2102,7 +2124,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_admin_tables_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "tables/route.ts"
     },
@@ -2114,7 +2136,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_tables_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2126,7 +2148,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_tables_route_post",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
@@ -2138,7 +2160,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_tables_route_patch",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "patch()"
     },
@@ -2150,7 +2172,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_admin_tables_route_delete",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "delete()"
     },
@@ -2162,7 +2184,7 @@
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_test",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "destination/route.test.ts"
     },
     {
@@ -2173,7 +2195,7 @@
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_test_requireauthenticateduser_query_logger",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "{ requireauthenticateduser, query, logger }"
     },
     {
@@ -2184,7 +2206,7 @@
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "destination/route.ts"
     },
     {
@@ -2197,7 +2219,7 @@
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_accessrow",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "accessrow"
     },
     {
@@ -2209,7 +2231,7 @@
       "_origin": "ast",
       "id": "src_app_api_auth_destination_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -2219,7 +2241,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_bill_splits_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "api/bill-splits/route.ts"
     },
@@ -2231,7 +2253,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_bill_splits_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2243,7 +2265,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_bill_splits_route_patch",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "patch()"
     },
@@ -2254,7 +2276,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_health_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "health/route.ts"
     },
@@ -2265,7 +2287,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_app_api_health_route_dynamic",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "dynamic"
     },
@@ -2277,7 +2299,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_health_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2288,7 +2310,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_history_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "history/route.ts"
     },
@@ -2300,7 +2322,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_history_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2312,7 +2334,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "guest-sessions/route.ts"
     },
     {
@@ -2324,7 +2346,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_authorized",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "authorized()"
     },
     {
@@ -2336,7 +2358,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -2347,7 +2369,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_maintenance_guest_sessions_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post"
     },
     {
@@ -2357,8 +2379,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route_test",
-      "community": 49,
-      "community_name": "finalize/route.ts",
+      "community": 99,
+      "community_name": "menu-import-analysis/route.test.ts",
       "norm_label": "menu-import-analysis/route.test.ts"
     },
     {
@@ -2368,8 +2390,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route_test_getpoolclient_menuimportstorage_processmenuimportexecution",
-      "community": 49,
-      "community_name": "finalize/route.ts",
+      "community": 99,
+      "community_name": "menu-import-analysis/route.test.ts",
       "norm_label": "{ getpoolclient, menuimportstorage, processmenuimportexecution }"
     },
     {
@@ -2379,8 +2401,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route_test_job",
-      "community": 49,
-      "community_name": "finalize/route.ts",
+      "community": 99,
+      "community_name": "menu-import-analysis/route.test.ts",
       "norm_label": "job"
     },
     {
@@ -2391,8 +2413,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route_test_request",
-      "community": 49,
-      "community_name": "finalize/route.ts",
+      "community": 99,
+      "community_name": "menu-import-analysis/route.test.ts",
       "norm_label": "request()"
     },
     {
@@ -2403,7 +2425,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menu-import-analysis/route.ts"
     },
     {
@@ -2416,7 +2438,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route_webhookpayload",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "webhookpayload"
     },
     {
@@ -2428,7 +2450,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route_authorized",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "authorized()"
     },
     {
@@ -2440,7 +2462,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route_validpayload",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "validpayload()"
     },
     {
@@ -2452,7 +2474,7 @@
       "_origin": "ast",
       "id": "src_app_api_internal_menu_import_analysis_route_post",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
     {
@@ -2463,7 +2485,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_test",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "bulk/route.test.ts"
     },
     {
@@ -2474,7 +2496,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_test_getpoolclient_requirerole_client",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2486,7 +2508,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_test_requestfor",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "requestfor()"
     },
     {
@@ -2497,7 +2519,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "bulk/route.ts"
     },
     {
@@ -2510,7 +2532,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_bulkitem",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "bulkitem"
     },
     {
@@ -2521,7 +2543,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_transitions",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "transitions"
     },
     {
@@ -2533,7 +2555,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_bulk_route_post",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "post()"
     },
     {
@@ -2543,7 +2565,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kds_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "kds/route.ts"
     },
@@ -2555,7 +2577,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kds_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2567,7 +2589,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "update/route.test.ts"
     },
     {
@@ -2578,7 +2600,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test_getpoolclient_requirerole_client",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2590,7 +2612,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_test_requestfor",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "requestfor()"
     },
     {
@@ -2601,7 +2623,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_update_route",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "update/route.ts"
     },
     {
@@ -2612,7 +2634,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_nextstatuses",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "nextstatuses"
     },
     {
@@ -2623,7 +2645,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_priorities",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "priorities"
     },
     {
@@ -2635,7 +2657,7 @@
       "_origin": "ast",
       "id": "src_app_api_kds_update_route_post",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "post()"
     },
     {
@@ -2645,7 +2667,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_assign_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "assign/route.ts"
     },
@@ -2657,7 +2679,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_assign_route_post",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
@@ -2668,7 +2690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_route_test",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "stations/route.test.ts"
     },
@@ -2679,7 +2701,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_route_test_query_requirerole",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "{ query, requirerole }"
     },
@@ -2690,7 +2712,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "stations/route.ts"
     },
@@ -2702,7 +2724,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2714,7 +2736,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_route_post",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
@@ -2726,7 +2748,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_route_patch",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "patch()"
     },
@@ -2738,7 +2760,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_kitchen_stations_route_delete",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "delete()"
     },
@@ -2773,7 +2795,7 @@
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "deliver/route.test.ts"
     },
     {
@@ -2784,7 +2806,7 @@
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test_getpoolclient_requirerole_client",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -2796,7 +2818,7 @@
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_test_requestfor",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "requestfor()"
     },
     {
@@ -2807,7 +2829,7 @@
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "deliver/route.ts"
     },
     {
@@ -2819,7 +2841,7 @@
       "_origin": "ast",
       "id": "src_app_api_orders_deliver_route_post",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "post()"
     },
     {
@@ -2829,7 +2851,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_public_catalog_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "catalog/route.ts"
     },
@@ -2841,7 +2863,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_public_catalog_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -2853,7 +2875,7 @@
       "_origin": "ast",
       "id": "src_app_api_public_settings_route",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "public/settings/route.ts"
     },
     {
@@ -2865,7 +2887,7 @@
       "_origin": "ast",
       "id": "src_app_api_public_settings_route_get",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
     {
@@ -2875,7 +2897,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_reset_test_data_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "reset-test-data/route.ts"
     },
@@ -2887,7 +2909,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_reset_test_data_route_post",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
@@ -2898,7 +2920,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_restaurants_id_status_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "status/route.ts"
     },
@@ -2910,7 +2932,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_restaurants_id_status_route_patch",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "patch()"
     },
@@ -2922,7 +2944,7 @@
       "_origin": "ast",
       "id": "src_app_api_restaurants_current_menu_import_route",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "current/menu-import/route.ts"
     },
     {
@@ -2935,7 +2957,7 @@
       "_origin": "ast",
       "id": "src_app_api_restaurants_current_menu_import_route_importeditem",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "importeditem"
     },
     {
@@ -2947,7 +2969,7 @@
       "_origin": "ast",
       "id": "src_app_api_restaurants_current_menu_import_route_post",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "post()"
     },
     {
@@ -2958,7 +2980,7 @@
       "_origin": "ast",
       "id": "src_app_api_restaurants_route",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "restaurants/route.ts"
     },
     {
@@ -2970,7 +2992,7 @@
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_slugify",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "slugify()"
     },
     {
@@ -2982,7 +3004,7 @@
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_authadmin",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "authadmin()"
     },
     {
@@ -2994,7 +3016,7 @@
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_post",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "post()"
     },
     {
@@ -3006,7 +3028,7 @@
       "_origin": "ast",
       "id": "src_app_api_restaurants_route_get",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "get()"
     },
     {
@@ -3016,7 +3038,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_salon_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "salon/route.ts"
     },
@@ -3028,7 +3050,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_salon_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -3039,7 +3061,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_me_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "me/route.ts"
     },
@@ -3051,7 +3073,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_me_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -3062,8 +3084,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_route_test",
-      "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community": 105,
+      "community_name": "staff/route.test.ts",
       "norm_label": "staff/route.test.ts"
     },
     {
@@ -3073,8 +3095,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_app_api_staff_route_test_query_requirerole_createuser_deleteuser",
-      "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community": 105,
+      "community_name": "staff/route.test.ts",
       "norm_label": "{ query, requirerole, createuser, deleteuser }"
     },
     {
@@ -3085,8 +3107,8 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_test_requestfor",
-      "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community": 105,
+      "community_name": "staff/route.test.ts",
       "norm_label": "requestfor()"
     },
     {
@@ -3096,7 +3118,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_app_api_staff_route",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "staff/route.ts"
     },
@@ -3108,7 +3130,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_adminclient",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "adminclient()"
     },
@@ -3120,7 +3142,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_get",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "get()"
     },
@@ -3132,7 +3154,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_post",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "post()"
     },
@@ -3144,7 +3166,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_app_api_staff_route_delete",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "delete()"
     },
@@ -3156,7 +3178,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "activate/route.test.ts"
     },
     {
@@ -3167,7 +3189,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test_requirerole_getpoolclient_activatetables_client",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "{ requirerole, getpoolclient, activatetables, client }"
     },
     {
@@ -3179,7 +3201,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_test_requestfor",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "requestfor()"
     },
     {
@@ -3190,7 +3212,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "activate/route.ts"
     },
     {
@@ -3201,7 +3223,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_messages",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "messages"
     },
     {
@@ -3213,7 +3235,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_activate_route_post",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "post()"
     },
     {
@@ -3305,7 +3327,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "checkout/route.test.ts"
     },
     {
@@ -3316,7 +3338,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test_getpoolclient_requirerole_client",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "{ getpoolclient, requirerole, client }"
     },
     {
@@ -3328,7 +3350,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_test_requestfor",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "requestfor()"
     },
     {
@@ -3339,7 +3361,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "checkout/route.ts"
     },
     {
@@ -3351,7 +3373,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_checkout_route_post",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "post()"
     },
     {
@@ -3362,7 +3384,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_generate_pin_route",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "generate-pin/route.ts"
     },
     {
@@ -3374,7 +3396,7 @@
       "_origin": "ast",
       "id": "src_app_api_table_generate_pin_route_post",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "post()"
     },
     {
@@ -4499,7 +4521,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "api-response.ts"
     },
     {
@@ -4512,7 +4534,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_apierrorcode",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "apierrorcode"
     },
     {
@@ -4524,7 +4546,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_requestid",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "requestid()"
     },
     {
@@ -4536,7 +4558,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonsuccess",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "jsonsuccess()"
     },
     {
@@ -4548,7 +4570,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonerror",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "jsonerror()"
     },
     {
@@ -4560,7 +4582,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_jsonauthorizationerror",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "jsonauthorizationerror()"
     },
     {
@@ -4572,7 +4594,7 @@
       "_origin": "ast",
       "id": "src_lib_api_response_readjsonobject",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "readjsonobject()"
     },
     {
@@ -4582,7 +4604,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_auth",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "auth.ts"
     },
@@ -4593,7 +4615,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_auth_staffroles",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "staffroles"
     },
@@ -4606,7 +4628,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "src_lib_auth_staffrole",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "staffrole"
     },
@@ -4620,7 +4642,7 @@
       "_origin": "ast",
       "id": "src_lib_auth_staffsession",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "staffsession"
     },
     {
@@ -4631,7 +4653,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_authclient",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "authclient()"
     },
@@ -4643,7 +4665,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requireauthenticateduser",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "requireauthenticateduser()"
     },
@@ -4655,7 +4677,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requirestaff",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "requirestaff()"
     },
@@ -4668,7 +4690,7 @@
       "_origin": "ast",
       "id": "src_lib_auth_requireplatformadmin",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "requireplatformadmin()"
     },
     {
@@ -4679,7 +4701,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_requirerole",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "requirerole()"
     },
@@ -4691,7 +4713,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_auth_isauthorizationfailure",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "isauthorizationfailure()"
     },
@@ -4773,7 +4795,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_db",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "db.ts"
     },
@@ -4784,7 +4806,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_lib_db_issupabase",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "issupabase"
     },
@@ -4796,7 +4818,7 @@
       "_origin": "ast",
       "id": "src_lib_db_pool",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "pool"
     },
     {
@@ -4807,7 +4829,7 @@
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_db_query",
-      "community": 97,
+      "community": 49,
       "community_name": "isAuthorizationFailure",
       "norm_label": "query()"
     },
@@ -4820,7 +4842,7 @@
       "_origin": "ast",
       "id": "src_lib_db_getpoolclient",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "getpoolclient()"
     },
     {
@@ -5018,7 +5040,7 @@
       "_origin": "ast",
       "id": "src_lib_logger",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "logger.ts"
     },
     {
@@ -5031,7 +5053,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_logfields",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "logfields"
     },
     {
@@ -5043,7 +5065,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_write",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "write()"
     },
     {
@@ -5054,7 +5076,7 @@
       "_origin": "ast",
       "id": "src_lib_logger_logger",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "logger"
     },
     {
@@ -5065,7 +5087,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menu-import-errors.ts"
     },
     {
@@ -5078,7 +5100,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors_databaseerror",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "databaseerror"
     },
     {
@@ -5090,7 +5112,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_errors_menuimportdatabasefailure",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menuimportdatabasefailure()"
     },
     {
@@ -5101,7 +5123,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menu-import-storage.ts"
     },
     {
@@ -5112,7 +5134,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_menuimportbucket",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menuimportbucket"
     },
     {
@@ -5124,7 +5146,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_menuimportstorage",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menuimportstorage()"
     },
     {
@@ -5136,7 +5158,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_storage_ensuremenuimportbucket",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "ensuremenuimportbucket()"
     },
     {
@@ -5192,7 +5214,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menu-import.ts"
     },
     {
@@ -5203,7 +5225,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdf_menu_max_bytes",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "pdf_menu_max_bytes"
     },
     {
@@ -5214,7 +5236,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdfmenuimportstatuses",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "pdfmenuimportstatuses"
     },
     {
@@ -5227,7 +5249,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_pdfmenuimportstatus",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "pdfmenuimportstatus"
     },
     {
@@ -5238,7 +5260,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_draftreviewstatuses",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "draftreviewstatuses"
     },
     {
@@ -5251,7 +5273,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_draftreviewstatus",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "draftreviewstatus"
     },
     {
@@ -5263,7 +5285,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_validatepdfupload",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "validatepdfupload()"
     },
     {
@@ -5275,7 +5297,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_validatepublicationinput",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "validatepublicationinput()"
     },
     {
@@ -5286,7 +5308,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_dispatcher",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "dispatcher.ts"
     },
     {
@@ -5299,7 +5321,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_dispatcher_job",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "job"
     },
     {
@@ -5312,7 +5334,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_dispatcher_menuimportdispatchresult",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "menuimportdispatchresult"
     },
     {
@@ -5324,7 +5346,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_dispatcher_verifyprivatepdf",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "verifyprivatepdf()"
     },
     {
@@ -5336,7 +5358,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_dispatcher_readprivatepdf",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "readprivatepdf()"
     },
     {
@@ -5348,7 +5370,7 @@
       "_origin": "ast",
       "id": "src_lib_menu_import_dispatcher_dispatchmenuimportanalysis",
       "community": 49,
-      "community_name": "finalize/route.ts",
+      "community_name": "isAuthorizationFailure",
       "norm_label": "dispatchmenuimportanalysis()"
     },
     {
@@ -5399,7 +5421,7 @@
       "label": "ppmFromRgba()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L14",
+      "source_location": "L16",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_ppmfromrgba",
@@ -5411,7 +5433,7 @@
       "label": "confidence()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L28",
+      "source_location": "L30",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_confidence",
@@ -5423,7 +5445,7 @@
       "label": "NodeCanvasGlobals",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L33",
+      "source_location": "L35",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -5436,7 +5458,7 @@
       "label": "installNodeCanvasGlobals()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L40",
+      "source_location": "L42",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_installnodecanvasglobals",
@@ -5448,7 +5470,7 @@
       "label": "installPdfJsWorkerHandler()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L51",
+      "source_location": "L53",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_installpdfjsworkerhandler",
@@ -5460,7 +5482,7 @@
       "label": "loadNodePdfJs()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L58",
+      "source_location": "L60",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_loadnodepdfjs",
@@ -5472,7 +5494,7 @@
       "label": "PdfAnalysisOptions",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L66",
+      "source_location": "L68",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -5482,10 +5504,120 @@
       "norm_label": "pdfanalysisoptions"
     },
     {
+      "label": "CONFIDENCE_VALUES",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L77",
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_confidence_values",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "confidence_values"
+    },
+    {
+      "label": "GeminiTextStructurer",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L79",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_geminitextstructurer",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "geminitextstructurer"
+    },
+    {
+      "label": "GeminiFetch",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L80",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_geminifetch",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "geminifetch"
+    },
+    {
+      "label": "GeminiConfig",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L81",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_geminiconfig",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "geminiconfig"
+    },
+    {
+      "label": "serverGeminiConfig()",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L83",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_servergeminiconfig",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "servergeminiconfig()"
+    },
+    {
+      "label": "chunkGeminiPages()",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L92",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_chunkgeminipages",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "chunkgeminipages()"
+    },
+    {
+      "label": "buildGeminiRequestBody()",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L109",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_buildgeminirequestbody",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "buildgeminirequestbody()"
+    },
+    {
+      "label": "decodeGeminiItems()",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L127",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_decodegeminiitems",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "decodegeminiitems()"
+    },
+    {
+      "label": "createGeminiTextStructurer()",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L150",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_provider_creategeminitextstructurer",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "creategeminitextstructurer()"
+    },
+    {
       "label": "PdfImagePage",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L71",
+      "source_location": "L180",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -5498,7 +5630,7 @@
       "label": "PdfJsOperators",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L76",
+      "source_location": "L185",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -5511,7 +5643,7 @@
       "label": "extractEmbeddedImages()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L82",
+      "source_location": "L191",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_extractembeddedimages",
@@ -5523,7 +5655,7 @@
       "label": "textItemsToPageText()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L118",
+      "source_location": "L227",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_textitemstopagetext",
@@ -5535,7 +5667,7 @@
       "label": "parseMenuText()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L127",
+      "source_location": "L236",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_parsemenutext",
@@ -5547,7 +5679,7 @@
       "label": "configuredOcr()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L164",
+      "source_location": "L273",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_configuredocr",
@@ -5559,7 +5691,7 @@
       "label": "createPdfAnalysisProvider()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L178",
+      "source_location": "L287",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_createpdfanalysisprovider",
@@ -5571,7 +5703,7 @@
       "label": "analyzePdf()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L217",
+      "source_location": "L337",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_provider_analyzepdf",
@@ -5682,10 +5814,23 @@
       "norm_label": "imagesuggestion"
     },
     {
-      "label": "AnalysisResult",
+      "label": "StructureMetadata",
       "file_type": "code",
       "source_file": "src/lib/menu-import/types.ts",
       "source_location": "L18",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_types_structuremetadata",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "structuremetadata"
+    },
+    {
+      "label": "AnalysisResult",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/types.ts",
+      "source_location": "L19",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -5698,7 +5843,7 @@
       "label": "PdfAnalysisProvider",
       "file_type": "code",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -5711,7 +5856,7 @@
       "label": ".extractNative()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_types_pdfanalysisprovider_extractnative",
@@ -5723,7 +5868,7 @@
       "label": ".ocr()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_types_pdfanalysisprovider_ocr",
@@ -5735,7 +5880,7 @@
       "label": ".structure()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L23",
+      "source_location": "L25",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_types_pdfanalysisprovider_structure",
@@ -5744,10 +5889,22 @@
       "norm_label": ".structure()"
     },
     {
+      "label": ".getStructureMetadata()",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/types.ts",
+      "source_location": "L26",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_types_pdfanalysisprovider_getstructuremetadata",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": ".getstructuremetadata()"
+    },
+    {
       "label": ".associateImages()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L24",
+      "source_location": "L27",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_types_pdfanalysisprovider_associateimages",
@@ -5803,7 +5960,7 @@
       "label": "clientWith()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.test.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_test_clientwith",
@@ -5882,10 +6039,36 @@
       "norm_label": "execution"
     },
     {
-      "label": "SourceReader",
+      "label": "StructureLineage",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
       "source_location": "L17",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_worker_structurelineage",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "structurelineage"
+    },
+    {
+      "label": "AnalysisResultWithStructureLineage",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/worker.ts",
+      "source_location": "L22",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "src_lib_menu_import_worker_analysisresultwithstructurelineage",
+      "community": 41,
+      "community_name": "worker.ts",
+      "norm_label": "analysisresultwithstructurelineage"
+    },
+    {
+      "label": "SourceReader",
+      "file_type": "code",
+      "source_file": "src/lib/menu-import/worker.ts",
+      "source_location": "L23",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -5898,7 +6081,7 @@
       "label": "ImportAssetWriter",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L18",
+      "source_location": "L24",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -5911,7 +6094,7 @@
       "label": "confidenceScore()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L20",
+      "source_location": "L26",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_confidencescore",
@@ -5923,7 +6106,7 @@
       "label": "sha256()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L22",
+      "source_location": "L28",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_sha256",
@@ -5935,7 +6118,7 @@
       "label": "withTimeout()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L24",
+      "source_location": "L41",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_withtimeout",
@@ -5947,7 +6130,7 @@
       "label": "claimNextExecution()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L36",
+      "source_location": "L53",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_claimnextexecution",
@@ -5959,7 +6142,7 @@
       "label": "loadExecution()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L58",
+      "source_location": "L75",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_loadexecution",
@@ -5971,7 +6154,7 @@
       "label": "persistDraft()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L67",
+      "source_location": "L84",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_persistdraft",
@@ -5983,7 +6166,7 @@
       "label": "reusePriorDraft()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L105",
+      "source_location": "L122",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_reusepriordraft",
@@ -5995,7 +6178,7 @@
       "label": "MenuImportExecutionOutcome",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L158",
+      "source_location": "L175",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -6008,7 +6191,7 @@
       "label": "processMenuImportExecution()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L160",
+      "source_location": "L177",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_processmenuimportexecution",
@@ -6020,7 +6203,7 @@
       "label": "processClaimedMenuImport()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L203",
+      "source_location": "L224",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_processclaimedmenuimport",
@@ -6032,7 +6215,7 @@
       "label": "processNextMenuImport()",
       "file_type": "code",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L208",
+      "source_location": "L229",
       "_callable": true,
       "_origin": "ast",
       "id": "src_lib_menu_import_worker_processnextmenuimport",
@@ -6158,7 +6341,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "table-activation.ts"
     },
     {
@@ -6171,7 +6354,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_tableforactivation",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "tableforactivation"
     },
     {
@@ -6184,7 +6367,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_tableactivationerror",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "tableactivationerror"
     },
     {
@@ -6196,7 +6379,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_tableactivationerror_constructor",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": ".constructor()"
     },
     {
@@ -6208,7 +6391,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_normalizetableids",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "normalizetableids()"
     },
     {
@@ -6220,7 +6403,7 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_newaccesscode",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "newaccesscode()"
     },
     {
@@ -6232,8 +6415,19 @@
       "_origin": "ast",
       "id": "src_lib_table_activation_activatetables",
       "community": 97,
-      "community_name": "isAuthorizationFailure",
+      "community_name": "getPoolClient",
       "norm_label": "activatetables()"
+    },
+    {
+      "label": "server-only.ts",
+      "file_type": "code",
+      "source_file": "src/test/server-only.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_test_server_only",
+      "community": 115,
+      "community_name": "server-only.ts",
+      "norm_label": "server-only.ts"
     },
     {
       "label": "database.types.ts",
@@ -7145,6 +7339,28 @@
       "community": 110,
       "community_name": "public.menu_import_jobs",
       "norm_label": "public.menu_import_jobs"
+    },
+    {
+      "label": "20260817162017_add_menu_import_structure_lineage.sql",
+      "file_type": "code",
+      "source_file": "supabase/migrations/20260817162017_add_menu_import_structure_lineage.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "supabase_migrations_20260817162017_add_menu_import_structure_lineage",
+      "community": 116,
+      "community_name": "20260817162017_add_menu_import_structure_lineage.sql",
+      "norm_label": "20260817162017_add_menu_import_structure_lineage.sql"
+    },
+    {
+      "label": "public.menu_import_analysis_runs",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "id": "public_menu_import_analysis_runs",
+      "community": 112,
+      "community_name": "public.menu_import_analysis_runs",
+      "norm_label": "public.menu_import_analysis_runs"
     },
     {
       "label": "tsconfig.json",
@@ -8496,7 +8712,7 @@
       "_origin": "ast",
       "id": "docs_menu_import_analysis",
       "community": 101,
-      "community_name": "menu-import-analysis.md",
+      "community_name": "Event-driven menu analysis",
       "norm_label": "menu-import-analysis.md"
     },
     {
@@ -8507,8 +8723,19 @@
       "_origin": "ast",
       "id": "docs_menu_import_analysis_event_driven_menu_analysis",
       "community": 101,
-      "community_name": "menu-import-analysis.md",
+      "community_name": "Event-driven menu analysis",
       "norm_label": "event-driven menu analysis"
+    },
+    {
+      "label": "Optional Gemini text structuring",
+      "file_type": "document",
+      "source_file": "docs/menu-import-analysis.md",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "docs_menu_import_analysis_optional_gemini_text_structuring",
+      "community": 101,
+      "community_name": "Event-driven menu analysis",
+      "norm_label": "optional gemini text structuring"
     },
     {
       "label": "menu-import-migration-recovery.md",
@@ -10601,6 +10828,457 @@
       "norm_label": "3. diagnostics and verification"
     },
     {
+      "label": "improve-menu-import-with-gemini/design.md",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "improve-menu-import-with-gemini/design.md"
+    },
+    {
+      "label": "Context",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_context",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "context"
+    },
+    {
+      "label": "Goals / Non-Goals",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_goals_non_goals",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "goals / non-goals"
+    },
+    {
+      "label": "Decisions",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_decisions",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "decisions"
+    },
+    {
+      "label": "Use a server-side provider adapter with structured JSON",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_use_a_server_side_provider_adapter_with_structured_json",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "use a server-side provider adapter with structured json"
+    },
+    {
+      "label": "Keep local parsing as the first safety net",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_keep_local_parsing_as_the_first_safety_net",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "keep local parsing as the first safety net"
+    },
+    {
+      "label": "Validate at the provider boundary",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_validate_at_the_provider_boundary",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "validate at the provider boundary"
+    },
+    {
+      "label": "Record lineage without changing publication semantics",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_record_lineage_without_changing_publication_semantics",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "record lineage without changing publication semantics"
+    },
+    {
+      "label": "Treat configuration and quota as operational concerns",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_treat_configuration_and_quota_as_operational_concerns",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "treat configuration and quota as operational concerns"
+    },
+    {
+      "label": "Risks / Trade-offs",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_risks_trade_offs",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "risks / trade-offs"
+    },
+    {
+      "label": "Migration Plan",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_design_migration_plan",
+      "community": 83,
+      "community_name": "Decisions",
+      "norm_label": "migration plan"
+    },
+    {
+      "label": "improve-menu-import-with-gemini/proposal.md",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_proposal",
+      "community": 96,
+      "community_name": "improve-menu-import-with-gemini/proposal.md",
+      "norm_label": "improve-menu-import-with-gemini/proposal.md"
+    },
+    {
+      "label": "Why",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_proposal_why",
+      "community": 96,
+      "community_name": "improve-menu-import-with-gemini/proposal.md",
+      "norm_label": "why"
+    },
+    {
+      "label": "What Changes",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_proposal_what_changes",
+      "community": 96,
+      "community_name": "improve-menu-import-with-gemini/proposal.md",
+      "norm_label": "what changes"
+    },
+    {
+      "label": "Capabilities",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_proposal_capabilities",
+      "community": 96,
+      "community_name": "improve-menu-import-with-gemini/proposal.md",
+      "norm_label": "capabilities"
+    },
+    {
+      "label": "New Capabilities",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_proposal_new_capabilities",
+      "community": 96,
+      "community_name": "improve-menu-import-with-gemini/proposal.md",
+      "norm_label": "new capabilities"
+    },
+    {
+      "label": "Modified Capabilities",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_proposal_modified_capabilities",
+      "community": 96,
+      "community_name": "improve-menu-import-with-gemini/proposal.md",
+      "norm_label": "modified capabilities"
+    },
+    {
+      "label": "Impact",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_proposal_impact",
+      "community": 96,
+      "community_name": "improve-menu-import-with-gemini/proposal.md",
+      "norm_label": "impact"
+    },
+    {
+      "label": "menu-import-gemini-structure/spec.md",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "menu-import-gemini-structure/spec.md"
+    },
+    {
+      "label": "Purpose",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_purpose",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "purpose"
+    },
+    {
+      "label": "ADDED Requirements",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_added_requirements",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "added requirements"
+    },
+    {
+      "label": "Requirement: Text-only Gemini structuring",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_text_only_gemini_structuring",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "requirement: text-only gemini structuring"
+    },
+    {
+      "label": "Scenario: Text extraction is available",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_text_extraction_is_available",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: text extraction is available"
+    },
+    {
+      "label": "Scenario: No usable text exists",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_no_usable_text_exists",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: no usable text exists"
+    },
+    {
+      "label": "Requirement: Structured and validated menu output",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_structured_and_validated_menu_output",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "requirement: structured and validated menu output"
+    },
+    {
+      "label": "Scenario: Gemini returns valid menu entries",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_returns_valid_menu_entries",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: gemini returns valid menu entries"
+    },
+    {
+      "label": "Scenario: Gemini returns invalid output",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_returns_invalid_output",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: gemini returns invalid output"
+    },
+    {
+      "label": "Requirement: Safe fallback and bounded provider use",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_safe_fallback_and_bounded_provider_use",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "requirement: safe fallback and bounded provider use"
+    },
+    {
+      "label": "Scenario: Gemini is not configured",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_is_not_configured",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: gemini is not configured"
+    },
+    {
+      "label": "Scenario: Gemini request fails",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_request_fails",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: gemini request fails"
+    },
+    {
+      "label": "Requirement: Server-only credentials and text privacy",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_server_only_credentials_and_text_privacy",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "requirement: server-only credentials and text privacy"
+    },
+    {
+      "label": "Scenario: Browser accesses the admin import UI",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_browser_accesses_the_admin_import_ui",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: browser accesses the admin import ui"
+    },
+    {
+      "label": "Scenario: Provider error is returned",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_provider_error_is_returned",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: provider error is returned"
+    },
+    {
+      "label": "Requirement: Provider lineage",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L63",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_provider_lineage",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "requirement: provider lineage"
+    },
+    {
+      "label": "Scenario: Gemini succeeds",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_succeeds",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: gemini succeeds"
+    },
+    {
+      "label": "Scenario: Local fallback is used",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_local_fallback_is_used",
+      "community": 6,
+      "community_name": "ADDED Requirements",
+      "norm_label": "scenario: local fallback is used"
+    },
+    {
+      "label": "improve-menu-import-with-gemini/tasks.md",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_tasks",
+      "community": 98,
+      "community_name": "improve-menu-import-with-gemini/tasks.md",
+      "norm_label": "improve-menu-import-with-gemini/tasks.md"
+    },
+    {
+      "label": "1. Configuration and provider boundary",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_tasks_1_configuration_and_provider_boundary",
+      "community": 98,
+      "community_name": "improve-menu-import-with-gemini/tasks.md",
+      "norm_label": "1. configuration and provider boundary"
+    },
+    {
+      "label": "2. Validation and fallback",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_tasks_2_validation_and_fallback",
+      "community": 98,
+      "community_name": "improve-menu-import-with-gemini/tasks.md",
+      "norm_label": "2. validation and fallback"
+    },
+    {
+      "label": "3. Lineage and persistence",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_tasks_3_lineage_and_persistence",
+      "community": 98,
+      "community_name": "improve-menu-import-with-gemini/tasks.md",
+      "norm_label": "3. lineage and persistence"
+    },
+    {
+      "label": "4. Verification and rollout",
+      "file_type": "document",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "openspec_changes_improve_menu_import_with_gemini_tasks_4_verification_and_rollout",
+      "community": 98,
+      "community_name": "improve-menu-import-with-gemini/tasks.md",
+      "norm_label": "4. verification and rollout"
+    },
+    {
       "label": "orchestrate-menu-import-analysis/design.md",
       "file_type": "document",
       "source_file": "openspec/changes/orchestrate-menu-import-analysis/design.md",
@@ -11255,7 +11933,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package",
@@ -11530,6 +12208,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_dependencies",
+      "target": "package_dependencies_server_only",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
@@ -11682,14 +12371,15 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L36",
+      "source_location": "L29",
       "weight": 1.0,
+      "context": "import",
       "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint",
+      "source": "package_dependencies_server_only",
+      "target": "server_only",
       "confidence_score": 1.0
     },
     {
@@ -11700,62 +12390,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint_config_next",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L31",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_playwright_test",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_types_node",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L33",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_types_pg",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L34",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_types_react",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L35",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_types_react_dom",
+      "target": "package_devdependencies_eslint",
       "confidence_score": 1.0
     },
     {
@@ -11766,7 +12401,62 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
-      "target": "package_devdependencies_typescript",
+      "target": "package_devdependencies_eslint_config_next",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_playwright_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_types_node",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_types_pg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_types_react",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_types_react_dom",
       "confidence_score": 1.0
     },
     {
@@ -11777,6 +12467,17 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
+      "target": "package_devdependencies_typescript",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
       "target": "package_devdependencies_vitest",
       "confidence_score": 1.0
     },
@@ -11784,7 +12485,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -11796,7 +12497,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -11808,7 +12509,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -11820,7 +12521,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -11832,7 +12533,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -11844,7 +12545,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -11856,7 +12557,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -11868,7 +12569,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -11880,7 +12581,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -13915,7 +14616,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route",
@@ -14155,7 +14856,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route_get",
@@ -14215,7 +14916,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route_delete",
@@ -14227,7 +14928,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route_delete",
@@ -14239,7 +14940,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L63",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route_delete",
@@ -14251,7 +14952,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route_delete",
@@ -14263,7 +14964,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L28",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route_delete",
@@ -14275,7 +14976,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route_delete",
@@ -14287,7 +14988,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/api/admin/menu-import/[id]/route.ts",
-      "source_location": "L58",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app_api_admin_menu_import_id_route_delete",
@@ -24352,7 +25053,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L161",
+      "source_location": "L178",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processmenuimportexecution",
@@ -24364,7 +25065,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L209",
+      "source_location": "L230",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processnextmenuimport",
@@ -25075,6 +25776,54 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider_test",
+      "target": "src_lib_menu_import_provider_buildgeminirequestbody",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.test.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_test",
+      "target": "src_lib_menu_import_provider_creategeminitextstructurer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.test.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_test",
+      "target": "src_lib_menu_import_provider_createpdfanalysisprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.test.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_test",
+      "target": "src_lib_menu_import_provider_decodegeminiitems",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.test.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_test",
       "target": "src_lib_menu_import_provider_extractembeddedimages",
       "confidence_score": 1.0
     },
@@ -25130,7 +25879,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L217",
+      "source_location": "L337",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25141,7 +25890,29 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L28",
+      "source_location": "L109",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_buildgeminirequestbody",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_chunkgeminipages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25152,7 +25923,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L164",
+      "source_location": "L77",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_confidence_values",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L273",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25163,7 +25945,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L178",
+      "source_location": "L150",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_creategeminitextstructurer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L287",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25174,7 +25967,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L82",
+      "source_location": "L127",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_decodegeminiitems",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L191",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25185,7 +25989,40 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L40",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_geminiconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L80",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_geminifetch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_geminitextstructurer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25196,7 +26033,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L51",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25207,7 +26044,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L58",
+      "source_location": "L60",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25218,7 +26055,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L33",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25229,7 +26066,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L127",
+      "source_location": "L236",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25240,7 +26077,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L66",
+      "source_location": "L68",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25251,7 +26088,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L71",
+      "source_location": "L180",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25262,7 +26099,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L76",
+      "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25273,7 +26110,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L14",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25284,7 +26121,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L118",
+      "source_location": "L83",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider",
+      "target": "src_lib_menu_import_provider_servergeminiconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L227",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25296,7 +26144,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25308,7 +26156,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25320,7 +26168,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25332,7 +26180,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25344,7 +26192,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25356,7 +26204,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25368,7 +26216,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider",
@@ -25392,7 +26240,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L106",
+      "source_location": "L215",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider_extractembeddedimages",
@@ -25404,7 +26252,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L154",
+      "source_location": "L263",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider_parsemenutext",
@@ -25416,7 +26264,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L60",
+      "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider_loadnodepdfjs",
@@ -25428,7 +26276,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L62",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider_loadnodepdfjs",
@@ -25441,7 +26289,67 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L91",
+      "source_location": "L143",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_decodegeminiitems",
+      "target": "src_lib_menu_import_provider_confidence_values"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L159",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_creategeminitextstructurer",
+      "target": "src_lib_menu_import_provider_chunkgeminipages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L163",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_creategeminitextstructurer",
+      "target": "src_lib_menu_import_provider_buildgeminirequestbody",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L169",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_creategeminitextstructurer",
+      "target": "src_lib_menu_import_provider_decodegeminiitems",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L291",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_createpdfanalysisprovider",
+      "target": "src_lib_menu_import_provider_creategeminitextstructurer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L200",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider_extractembeddedimages",
@@ -25452,7 +26360,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L203",
+      "source_location": "L321",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider_createpdfanalysisprovider",
@@ -25464,12 +26372,25 @@
       "context": "collection",
       "confidence": "INFERRED",
       "source_file": "src/lib/menu-import/provider.ts",
-      "source_location": "L202",
+      "source_location": "L313",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_provider_createpdfanalysisprovider",
       "target": "src_lib_menu_import_provider_configuredocr",
       "confidence_score": 0.5
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "deferred": true,
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/provider.ts",
+      "source_location": "L292",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_provider_createpdfanalysisprovider",
+      "target": "src_lib_menu_import_types",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -25501,7 +26422,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L178",
+      "source_location": "L195",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processmenuimportexecution",
@@ -25511,7 +26432,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_types",
@@ -25588,7 +26509,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_types",
@@ -25604,6 +26525,17 @@
       "_origin": "ast",
       "source": "src_lib_menu_import_types",
       "target": "src_lib_menu_import_types_pdfdocument",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/types.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_types",
+      "target": "src_lib_menu_import_types_structuremetadata",
       "confidence_score": 1.0
     },
     {
@@ -25658,7 +26590,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L24",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_types_pdfanalysisprovider",
@@ -25669,7 +26601,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_types_pdfanalysisprovider",
@@ -25680,7 +26612,18 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L22",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_types_pdfanalysisprovider",
+      "target": "src_lib_menu_import_types_pdfanalysisprovider_getstructuremetadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/types.ts",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_types_pdfanalysisprovider",
@@ -25691,7 +26634,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/types.ts",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_types_pdfanalysisprovider",
@@ -25738,7 +26681,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.test.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_test",
@@ -25793,6 +26736,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_worker",
+      "target": "src_lib_menu_import_worker_analysisresultwithstructurelineage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/worker.ts",
       "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
@@ -25804,7 +26758,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L36",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25815,7 +26769,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L20",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25837,7 +26791,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L18",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25859,7 +26813,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L58",
+      "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25881,7 +26835,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L158",
+      "source_location": "L175",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25892,7 +26846,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L67",
+      "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25903,7 +26857,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L203",
+      "source_location": "L224",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25914,7 +26868,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L160",
+      "source_location": "L177",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25925,7 +26879,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L208",
+      "source_location": "L229",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25936,7 +26890,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L105",
+      "source_location": "L122",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25947,7 +26901,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L22",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25958,7 +26912,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L17",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25969,7 +26923,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L24",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_menu_import_worker",
+      "target": "src_lib_menu_import_worker_structurelineage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/menu-import/worker.ts",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker",
@@ -25982,7 +26947,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L94",
+      "source_location": "L111",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_persistdraft",
@@ -25993,7 +26958,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L77",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_persistdraft",
@@ -26005,7 +26970,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L80",
+      "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_persistdraft",
@@ -26017,7 +26982,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L169",
+      "source_location": "L186",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processmenuimportexecution",
@@ -26029,7 +26994,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L127",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_reusepriordraft",
@@ -26041,7 +27006,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L168",
+      "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processmenuimportexecution",
@@ -26053,7 +27018,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L212",
+      "source_location": "L233",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processnextmenuimport",
@@ -26065,7 +27030,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L164",
+      "source_location": "L181",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processmenuimportexecution",
@@ -26077,7 +27042,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L179",
+      "source_location": "L196",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processmenuimportexecution",
@@ -26089,7 +27054,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L176",
+      "source_location": "L193",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processmenuimportexecution",
@@ -26101,7 +27066,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L204",
+      "source_location": "L225",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processclaimedmenuimport",
@@ -26113,7 +27078,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/menu-import/worker.ts",
-      "source_location": "L215",
+      "source_location": "L236",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_menu_import_worker_processnextmenuimport",
@@ -28532,6 +29497,17 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/menu-import-analysis.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_menu_import_analysis_event_driven_menu_analysis",
+      "target": "docs_menu_import_analysis_optional_gemini_text_structuring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "docs/menu-import-migration-recovery.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -30375,6 +31351,413 @@
       "_origin": "ast",
       "source": "openspec_changes_harden_menu_import_deployment_tasks",
       "target": "openspec_changes_harden_menu_import_deployment_tasks_3_diagnostics_and_verification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_decisions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_goals_non_goals",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_migration_plan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_risks_trade_offs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design_decisions",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_keep_local_parsing_as_the_first_safety_net",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design_decisions",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_record_lineage_without_changing_publication_semantics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design_decisions",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_treat_configuration_and_quota_as_operational_concerns",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design_decisions",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_use_a_server_side_provider_adapter_with_structured_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/design.md",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_design_decisions",
+      "target": "openspec_changes_improve_menu_import_with_gemini_design_validate_at_the_provider_boundary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_proposal",
+      "target": "openspec_changes_improve_menu_import_with_gemini_proposal_capabilities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_proposal",
+      "target": "openspec_changes_improve_menu_import_with_gemini_proposal_impact",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_proposal",
+      "target": "openspec_changes_improve_menu_import_with_gemini_proposal_what_changes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_proposal",
+      "target": "openspec_changes_improve_menu_import_with_gemini_proposal_why",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_proposal_capabilities",
+      "target": "openspec_changes_improve_menu_import_with_gemini_proposal_modified_capabilities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/proposal.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_proposal_capabilities",
+      "target": "openspec_changes_improve_menu_import_with_gemini_proposal_new_capabilities",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_added_requirements",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_purpose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_added_requirements",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_provider_lineage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_added_requirements",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_safe_fallback_and_bounded_provider_use",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_added_requirements",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_server_only_credentials_and_text_privacy",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_added_requirements",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_structured_and_validated_menu_output",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_added_requirements",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_text_only_gemini_structuring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_text_only_gemini_structuring",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_no_usable_text_exists",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_text_only_gemini_structuring",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_text_extraction_is_available",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_structured_and_validated_menu_output",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_returns_invalid_output",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_structured_and_validated_menu_output",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_returns_valid_menu_entries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_safe_fallback_and_bounded_provider_use",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_is_not_configured",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_safe_fallback_and_bounded_provider_use",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_request_fails",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_server_only_credentials_and_text_privacy",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_browser_accesses_the_admin_import_ui",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_server_only_credentials_and_text_privacy",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_provider_error_is_returned",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L67",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_provider_lineage",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_gemini_succeeds",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/specs/menu-import-gemini-structure/spec.md",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_requirement_provider_lineage",
+      "target": "openspec_changes_improve_menu_import_with_gemini_specs_menu_import_gemini_structure_spec_scenario_local_fallback_is_used",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_tasks",
+      "target": "openspec_changes_improve_menu_import_with_gemini_tasks_1_configuration_and_provider_boundary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_tasks",
+      "target": "openspec_changes_improve_menu_import_with_gemini_tasks_2_validation_and_fallback",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_tasks",
+      "target": "openspec_changes_improve_menu_import_with_gemini_tasks_3_lineage_and_persistence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "openspec/changes/improve-menu-import-with-gemini/tasks.md",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "openspec_changes_improve_menu_import_with_gemini_tasks",
+      "target": "openspec_changes_improve_menu_import_with_gemini_tasks_4_verification_and_rollout",
       "confidence_score": 1.0
     },
     {

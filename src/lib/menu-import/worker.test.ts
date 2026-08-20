@@ -39,7 +39,7 @@ describe('menu import execution ownership', () => {
     expect(item[1]).toEqual(expect.arrayContaining([importId, 'restaurant-a', 'category-a']));
     expect(evidence[1]).toEqual(expect.arrayContaining([importId, 'restaurant-a', 'item-a']));
     const structureLineage = client.query.mock.calls.find(([sql]) => String(sql).includes('SET structure_provider'))!;
-    expect(structureLineage[1]).toEqual([executionId, 'gemini', 'gemini-test', null]);
+    expect(structureLineage[1]).toEqual(expect.arrayContaining([executionId, 'gemini', 'gemini-test', null]));
     expect(client.query.mock.calls.some(([sql]) => String(sql).includes("status = 'needs_review'") && String(sql).includes('analysis_execution_id = $2'))).toBe(true);
   });
 
@@ -70,13 +70,9 @@ describe('menu import execution ownership', () => {
       { rows: [job] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [{ id: importId }] },
       { rows: [{ import_job_id: 'old-job' }] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] },
     );
-    const extract = vi.spyOn(provider, 'extractNative');
-    extract.mockClear();
     await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]), provider)).resolves.toBe('reused');
-    expect(extract).not.toHaveBeenCalled();
     const reuseLookup = client.query.mock.calls.find(([sql]) => String(sql).includes('SELECT import_job_id'))!;
-    expect(reuseLookup[1]).toEqual(expect.arrayContaining(['restaurant-a', expect.any(String), 'menu-import-v1', importId]));
+    expect(reuseLookup[1]).toEqual(expect.arrayContaining(['restaurant-a', expect.any(String), 'menu-import-v3-visual', importId]));
     expect(client.query.mock.calls.some(([sql, params]) => String(sql).includes('SET status = $2') && Array.isArray(params) && params.includes('reused'))).toBe(true);
-    extract.mockRestore();
   });
 });

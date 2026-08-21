@@ -24,13 +24,15 @@ function clientWith(...responses: Array<{ rows: unknown[] }>) {
 }
 
 describe('menu import execution ownership', () => {
-  it('writes draft lineage under the claimed job then transitions to needs_review', async () => {
+  it('V4-compatible visual imports project and persist normally, with draft lineage under the claimed job', async () => {
     const client = clientWith(
       { rows: [job] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [{ id: importId }] },
       { rows: [] }, { rows: [{ id: 'category-a' }] }, { rows: [{ id: 'item-a' }] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] },
     );
 
     await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]), provider)).resolves.toBe('completed');
+    expect(provider.extractNative).toHaveBeenCalled();
+    expect(provider.structure).toHaveBeenCalled();
 
     const category = client.query.mock.calls.find(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_categories'))!;
     const item = client.query.mock.calls.find(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_items'))!;

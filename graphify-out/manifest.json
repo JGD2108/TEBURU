@@ -690,8 +690,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.ts": {
-    "mtime": 1787338696.3299923,
-    "ast_hash": "7581901e189d6824a1a0ca3b3b573241",
+    "mtime": 1787342064.0376043,
+    "ast_hash": "416fbc428b667cf9b3076c2b3ee794ea",
     "semantic_hash": ""
   },
   "supabase/migrations/20260816120000_pdf_menu_imports.sql": {
@@ -795,8 +795,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.test.ts": {
-    "mtime": 1787285278.7610662,
-    "ast_hash": "cbab1d496afc3abd00b14da7b1775709",
+    "mtime": 1787341790.1794734,
+    "ast_hash": "afaf57e279fb8b52a5146daa77012cc6",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/retry/route.ts": {
@@ -1185,8 +1185,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/v5-worker.test.ts": {
-    "mtime": 1787338635.6461537,
-    "ast_hash": "bb3a8d6aa910825ee10958224b5a0b39",
+    "mtime": 1787342064.0426037,
+    "ast_hash": "82bddad4614f4ca851fadbea40d18ada",
     "semantic_hash": ""
   },
   "docs/menu-import-text-fixtures.md": {

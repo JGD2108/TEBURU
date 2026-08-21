@@ -24,12 +24,15 @@ const v5Job = {
 
 function clientForV5() {
   const client = { query: vi.fn(), release: vi.fn() };
-  client.query.mockImplementation(async (sql: string) => {
+  client.query.mockImplementation(async (sql: string, values?: unknown[]) => {
     const statement = String(sql);
     if (statement.includes('FROM menu_import_jobs') && statement.includes("status = 'processing'")) return { rows: [v5Job] };
     if (statement.includes("SELECT 1 FROM menu_import_jobs")) return { rows: [{ '?column?': 1 }] };
     if (statement.includes('SELECT import_job_id FROM menu_import_analysis_runs')) return { rows: [] };
-    if (statement.includes('INSERT INTO menu_import_draft_categories')) return { rows: [{ id: 'category-v5' }] };
+    if (statement.includes('INSERT INTO menu_import_draft_categories')) {
+      const normalized = String(values?.[2] ?? 'v5').trim().toLowerCase();
+      return { rows: [{ id: normalized === 'food' ? 'category-v5' : `category-${normalized}` }] };
+    }
     if (statement.includes('INSERT INTO menu_import_draft_items')) return { rows: [{ id: 'draft-v5' }] };
     return { rows: [] };
   });
@@ -74,6 +77,164 @@ describe('V5 worker routing and persistence gates', () => {
     expect(lineage.some(([, values]) => Array.isArray(values) && values.includes('validation') && JSON.stringify(values).includes('PRICE_ONLY_NAME'))).toBe(true);
     expect(lineage.some(([, values]) => Array.isArray(values) && JSON.stringify(values).includes('native-text'))).toBe(true);
     expect(JSON.stringify(client.query.mock.calls)).not.toContain('imageHash');
+  });
+
+  function projectionOutcome(items: Array<Record<string, unknown>>, sections: Array<Record<string, unknown>>) {
+    const base = successOutcome();
+    const projectedSections = sections.map((section, index) => ({
+      key: `section-${index}`,
+      name: 'SUSHI',
+      sortOrder: index,
+      source: { page: index + 1 },
+      confidence: 'high' as const,
+      ...section,
+    }));
+    return {
+      ...base,
+      invalidCandidates: [],
+      analysis: {
+        ...base.analysis,
+        items: items.map((item, index) => ({
+          itemId: `66666666-6666-4666-8666-6666666666${String(index).padStart(2, '0')}`,
+          candidateId: `55555555-5555-4555-8555-5555555555${String(index).padStart(2, '0')}`,
+          extractionStatus: 'valid' as const,
+          confidence: { category: 'high' as const, name: 'high' as const, description: 'low' as const, price: 'high' as const },
+          ...item,
+        })),
+        sections: projectedSections,
+        lineage: [
+          ...base.analysis.lineage,
+          ...projectedSections.map((section, index) => ({
+            id: `aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa${String(index).padStart(2, '0')}`,
+            attemptId: executionId,
+            sectionId: section.key,
+            page: section.source.page,
+            sourceKind: 'synthetic' as const,
+            stage: 'projection' as const,
+            analyzerVersion: 'menu-import-v5-text',
+          })),
+        ],
+      },
+    };
+  }
+
+  it('persists one SUSHI category for identical sections and all valid items', async () => {
+    const client = clientForV5();
+    const firstSectionId = 'aaaaaaaa-1111-4111-8111-111111111111';
+    const secondSectionId = 'bbbbbbbb-2222-4222-8222-222222222222';
+    const outcome = projectionOutcome([
+      { sectionKey: firstSectionId, category: 'SUSHI', name: 'Salmon roll', page: 1 },
+      { sectionKey: secondSectionId, category: 'SUSHI', name: 'Tuna roll', page: 2 },
+      { sectionKey: secondSectionId, category: 'SUSHI', name: 'Ebi roll', page: 2 },
+    ], [
+      { key: firstSectionId, name: 'SUSHI', source: { page: 1 } },
+      { key: secondSectionId, name: 'SUSHI', source: { page: 2 } },
+    ]);
+    analyzeV5Text.mockResolvedValueOnce(outcome);
+
+    await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]))).resolves.toBe('completed');
+    const categories = client.query.mock.calls.filter(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_categories'));
+    expect(categories).toHaveLength(1);
+    expect(categories[0][1]).toEqual(expect.arrayContaining(['SUSHI', firstSectionId, 1]));
+    expect(client.query.mock.calls.filter(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_items')).map(([, values]) => values[2])).toEqual(['category-sushi', 'category-sushi', 'category-sushi']);
+    expect(client.query.mock.calls.filter(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_items'))).toHaveLength(3);
+    const evidencePages = client.query.mock.calls
+      .filter(([sql]) => String(sql).includes('INSERT INTO menu_import_source_evidence'))
+      .map(([, values]) => values[4]);
+    expect(evidencePages).toEqual([1, 2, 2]);
+    const persistedSectionIds = client.query.mock.calls
+      .filter(([sql]) => String(sql).includes('INSERT INTO menu_import_analysis_lineage_events'))
+      .map(([, values]) => values[11])
+      .filter(Boolean);
+    expect(persistedSectionIds).toEqual(expect.arrayContaining([firstSectionId, secondSectionId]));
+    const metricsUpdate = client.query.mock.calls.find(([sql]) => String(sql).includes('structural_metrics = $16::jsonb'))!;
+    expect(JSON.parse(String(metricsUpdate[1][15]))).toEqual(expect.objectContaining({
+      categorySectionsObserved: 2,
+      draftCategoriesProjected: 1,
+      categoryDeduplications: 1,
+    }));
+  });
+
+  it('normalizes category whitespace and case to one category, while keeping SUSHI and TEMPURA separate', async () => {
+    const client = clientForV5();
+    analyzeV5Text.mockResolvedValueOnce(projectionOutcome([
+      { sectionKey: 'section-0', category: 'SUSHI', name: 'A', page: 1 },
+      { sectionKey: 'section-1', category: ' Sushi ', name: 'B', page: 2 },
+      { sectionKey: 'section-2', category: 'sushi', name: 'C', page: 3 },
+      { sectionKey: 'section-3', category: 'TEMPURA', name: 'D', page: 4 },
+    ], [
+      { key: 'section-0', name: 'SUSHI', source: { page: 1 } },
+      { key: 'section-1', name: ' Sushi ', source: { page: 2 } },
+      { key: 'section-2', name: 'sushi', source: { page: 3 } },
+      { key: 'section-3', name: 'TEMPURA', source: { page: 4 } },
+    ]));
+
+    await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]))).resolves.toBe('completed');
+    const categories = client.query.mock.calls.filter(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_categories'));
+    expect(categories).toHaveLength(2);
+    expect(categories.map(([, values]) => values[4])).toEqual(['section-0', 'section-3']);
+    expect(categories.map(([, values]) => values[2])).toEqual(['SUSHI', 'TEMPURA']);
+    expect(client.query.mock.calls.filter(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_items')).map(([, values]) => values[2])).toEqual(['category-sushi', 'category-sushi', 'category-sushi', 'category-tempura']);
+    const metricsUpdate = client.query.mock.calls.find(([sql]) => String(sql).includes('structural_metrics = $16::jsonb'))!;
+    expect(JSON.parse(String(metricsUpdate[1][15]))).toEqual(expect.objectContaining({
+      categorySectionsObserved: 4,
+      draftCategoriesProjected: 2,
+      categoryDeduplications: 2,
+    }));
+  });
+
+  it('retains page lineage and review status, and excludes invalid candidates from drafts', async () => {
+    const client = clientForV5();
+    const outcome = projectionOutcome([
+      { category: 'SUSHI', name: 'Page one', page: 1, extractionStatus: 'review', reviewReasons: [{ code: 'AMBIGUOUS_PRICE' }] },
+      { category: 'SUSHI', name: '$30', page: 2, extractionStatus: 'invalid' },
+      { category: 'SUSHI', name: 'Page three', page: 3, extractionStatus: 'valid' },
+    ], []);
+    analyzeV5Text.mockResolvedValueOnce(outcome);
+
+    await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]))).resolves.toBe('completed');
+    const items = client.query.mock.calls.filter(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_items'));
+    expect(items).toHaveLength(2);
+    expect(items.map(([, values]) => values[3])).toEqual(['Page one', 'Page three']);
+    expect(items[0][1]).toEqual(expect.arrayContaining([1, 'review']));
+    expect(items[1][1]).toEqual(expect.arrayContaining([3, 'valid']));
+    expect(client.query.mock.calls.some(([sql, values]) => String(sql).includes('INSERT INTO menu_import_source_evidence') && Array.isArray(values) && values.includes(1))).toBe(true);
+    expect(client.query.mock.calls.some(([sql, values]) => String(sql).includes('INSERT INTO menu_import_source_evidence') && Array.isArray(values) && values.includes(3))).toBe(true);
+  });
+
+  it('uses idempotent category and item persistence and keeps V4 routing independent', async () => {
+    const client = clientForV5();
+    const replay = projectionOutcome([{ category: 'SUSHI', name: 'A', page: 1 }], []);
+    analyzeV5Text.mockResolvedValueOnce(replay).mockResolvedValueOnce(replay);
+    await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]))).resolves.toBe('completed');
+    await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]))).resolves.toBe('completed');
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('ON CONFLICT (import_job_id, lower(name))'))).toBe(true);
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('ON CONFLICT (import_job_id, idempotency_key)'))).toBe(true);
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('menu_import_draft_items') && String(sql).includes('extraction_status'))).toBe(true);
+    const replayItems = client.query.mock.calls.filter(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_items'));
+    expect(replayItems).toHaveLength(2);
+    expect(replayItems[0][1][20]).toBe(replayItems[1][1][20]);
+  });
+
+  it('still fails the execution for a genuine category persistence error', async () => {
+    const client = clientForV5();
+    const normalQuery = client.query.getMockImplementation()!;
+    client.query.mockImplementation(async (sql: string, values?: unknown[]) => {
+      if (String(sql).includes('INSERT INTO menu_import_draft_categories')) throw new Error('database unavailable');
+      return normalQuery(sql, values);
+    });
+    analyzeV5Text.mockResolvedValueOnce(projectionOutcome([
+      { category: 'SUSHI', name: 'A', page: 1 },
+    ], []));
+
+    await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]))).rejects.toThrow('database unavailable');
+
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_items'))).toBe(false);
+    const failure = client.query.mock.calls.find(([sql, values]) =>
+      String(sql).includes('UPDATE menu_import_jobs SET status = $2')
+      && Array.isArray(values)
+      && values.includes('ANALYSIS_FAILED'));
+    expect(failure?.[1]).toEqual(expect.arrayContaining([importId, 'failed', 'ANALYSIS_FAILED']));
   });
 
   it('records a V5 provider failure without drafts or an automatic pending retry', async () => {

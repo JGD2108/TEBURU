@@ -25,6 +25,12 @@ type StructureLineage = {
 };
 type AnalysisResultWithStructureLineage = AnalysisResult & { structureMetadata?: StructureLineage };
 type PersistedItemLink = { item: AnalysisResult['items'][number]; draftItemId: string; candidateId: string; itemId: string };
+type CategoryProjectionMetrics = {
+  categorySectionsObserved: number;
+  draftCategoriesProjected: number;
+  categoryDeduplications: number;
+};
+type PersistedDraft = { items: PersistedItemLink[]; categoryProjection: CategoryProjectionMetrics };
 export type SourceReader = (path: string) => Promise<Uint8Array>;
 export type ImportAssetWriter = (job: { id: string; restaurantId: string; executionId?: string }, asset: ExtractedImage) => Promise<string>;
 
@@ -109,6 +115,8 @@ async function loadExecution(client: PoolClient, executionId: string): Promise<E
 
 function json(value: unknown) { return JSON.stringify(value ?? []); }
 function bbox(value: { x: number; y: number; width: number; height: number } | undefined) { return value ? json(value) : null; }
+/** Matches the persisted title representation: worker-trimmed text and the unique index's lower(name). */
+function normalizedCategoryName(name: string) { return name.trim().toLowerCase(); }
 function safeFailureCode(error: unknown) {
   const message = error instanceof Error ? error.message : '';
   const v5 = message.match(/MENU_IMPORT_V5_([A-Z_]+)/);
@@ -121,23 +129,68 @@ function safeFailureCode(error: unknown) {
 
 async function persistSections(client: PoolClient, job: Execution, sections: ExtractedSection[] = []) {
   const ids = new Map<string, string>();
+  const sectionKeyToCategory = new Map<string, string>();
+  const projected = new Map<string, ExtractedSection>();
+
+  // Canonical section keys are useful lineage, but cannot be the persistence
+  // identity: draft categories are uniquely constrained by lower(name).
   for (const section of [...sections].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))) {
-    const name = section.name?.trim() || null;
-    const parentId = section.parentKey ? ids.get(section.parentKey) ?? null : null;
+    const name = section.name?.trim();
+    if (!name) continue;
+    const normalized = normalizedCategoryName(name);
+    sectionKeyToCategory.set(section.key, normalized);
+    if (!projected.has(normalized)) projected.set(normalized, section);
+  }
+
+  const categoryIds = new Map<string, string>();
+  const visiting = new Set<string>();
+  const persistCategory = async (normalized: string): Promise<string | undefined> => {
+    const existing = categoryIds.get(normalized);
+    if (existing) return existing;
+    const section = projected.get(normalized);
+    const name = section?.name?.trim();
+    if (!section || !name || visiting.has(normalized)) return undefined;
+    visiting.add(normalized);
+    const parentCategory = section.parentKey ? sectionKeyToCategory.get(section.parentKey) : undefined;
+    // Continuations may project to the same title/category as their parent.
+    // Never materialize that as a self-referential draft-category row.
+    const parentId = parentCategory && parentCategory !== normalized
+      ? await persistCategory(parentCategory) ?? null
+      : null;
     const created = await client.query<{ id: string }>(`INSERT INTO menu_import_draft_categories
       (import_job_id, restaurant_id, name, raw_name, extraction_key, parent_draft_category_id, sort_order, confidence, source_page, source_bbox, extraction_attributes, review_reasons)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11::jsonb,$12::jsonb)
-      ON CONFLICT (import_job_id, extraction_key) WHERE extraction_key IS NOT NULL
-      DO UPDATE SET name = EXCLUDED.name, raw_name = EXCLUDED.raw_name, parent_draft_category_id = EXCLUDED.parent_draft_category_id,
-        source_bbox = EXCLUDED.source_bbox, extraction_attributes = EXCLUDED.extraction_attributes, review_reasons = EXCLUDED.review_reasons
+      ON CONFLICT (import_job_id, lower(name)) DO UPDATE SET name = EXCLUDED.name, raw_name = EXCLUDED.raw_name,
+        parent_draft_category_id = EXCLUDED.parent_draft_category_id, source_bbox = EXCLUDED.source_bbox,
+        extraction_attributes = EXCLUDED.extraction_attributes, review_reasons = EXCLUDED.review_reasons
       RETURNING id`, [job.id, job.restaurant_id, name, section.name ?? null, section.key, parentId, section.sortOrder ?? 0,
       confidenceScore(section.confidence ?? 'low'), section.source?.page ?? null, bbox(section.source?.bbox), json(section.attributes ?? {}), json(section.reviewReasons)]);
-    ids.set(section.key, created.rows[0].id);
+    visiting.delete(normalized);
+    const id = created.rows[0].id;
+    categoryIds.set(normalized, id);
+    return id;
+  };
+
+  for (const normalized of projected.keys()) await persistCategory(normalized);
+  for (const [sectionKey, normalized] of sectionKeyToCategory) {
+    const id = categoryIds.get(normalized);
+    if (id) ids.set(sectionKey, id);
   }
-  return ids;
+  // The database expression index is the final authority for name identity.
+  // Counting returned IDs also remains accurate if its collation equates a
+  // pair that JavaScript normalization did not collapse locally.
+  const persistedCategoryCount = new Set(categoryIds.values()).size;
+  return {
+    ids,
+    metrics: {
+      categorySectionsObserved: sectionKeyToCategory.size,
+      draftCategoriesProjected: persistedCategoryCount,
+      categoryDeduplications: sectionKeyToCategory.size - persistedCategoryCount,
+    },
+  };
 }
 
-async function persistDraft(client: PoolClient, job: Execution, result: AnalysisResult, writeAsset?: ImportAssetWriter): Promise<PersistedItemLink[]> {
+async function persistDraft(client: PoolClient, job: Execution, result: AnalysisResult, writeAsset?: ImportAssetWriter): Promise<PersistedDraft> {
   // V5 invalid candidates are never draft categories/items. Keeping their
   // section only in lineage prevents an invalid-only page from appearing as a
   // seemingly editable empty category.
@@ -145,7 +198,8 @@ async function persistDraft(client: PoolClient, job: Execution, result: Analysis
   const sections = job.analyzer_version === MENU_IMPORT_ANALYZER_V5
     ? result.sections?.filter((section) => usedSectionKeys.has(section.key))
     : result.sections;
-  const sectionIds = await persistSections(client, job, sections);
+  const sectionProjection = await persistSections(client, job, sections);
+  const sectionIds = sectionProjection.ids;
   const categories = new Map<string, string>();
   const persisted: PersistedItemLink[] = [];
   const ids = createMenuImportIdFactory();
@@ -153,14 +207,14 @@ async function persistDraft(client: PoolClient, job: Execution, result: Analysis
     if (item.extractionStatus === 'invalid') continue;
     const categoryName = item.category?.trim();
     let categoryId = item.sectionKey ? sectionIds.get(item.sectionKey) : undefined;
-    if (!categoryId && categoryName) categoryId = categories.get(categoryName.toLowerCase());
+    if (!categoryId && categoryName) categoryId = categories.get(normalizedCategoryName(categoryName));
     if (!categoryId && categoryName) {
       const created = await client.query<{ id: string }>(`INSERT INTO menu_import_draft_categories
         (import_job_id, restaurant_id, name, source_page, confidence)
         VALUES ($1,$2,$3,$4,$5)
         ON CONFLICT (import_job_id, lower(name)) DO UPDATE SET name = EXCLUDED.name
         RETURNING id`, [job.id, job.restaurant_id, categoryName, item.source?.page ?? item.page, confidenceScore(item.confidence.category)]);
-      categoryId = created.rows[0].id; categories.set(categoryName.toLowerCase(), categoryId);
+      categoryId = created.rows[0].id; categories.set(normalizedCategoryName(categoryName), categoryId);
     }
     const itemKey = sha256(new TextEncoder().encode(`${job.id}|${categoryId ?? ''}|${item.rawName ?? item.name ?? ''}|${item.description ?? ''}|${item.rawPrice ?? item.price ?? ''}`));
     const draft = await client.query<{ id: string }>(`INSERT INTO menu_import_draft_items
@@ -209,7 +263,7 @@ async function persistDraft(client: PoolClient, job: Execution, result: Analysis
       [randomUUID(), job.id, job.restaurant_id, storagePath, asset.mimeType, confidenceScore(suggestion.confidence),
         suggestion.confidence === AUTO_ASSIGN_IMAGE_CONFIDENCE, imageKey]);
   }
-  return persisted;
+  return { items: persisted, categoryProjection: sectionProjection.metrics };
 }
 
 /** Store only server-sanitized events; raw response retention stays private and bounded. */
@@ -353,11 +407,12 @@ export async function processMenuImportExecution(executionId: string, reader: So
     const reused = await reusePriorDraft(client, job, sourceHash);
     if (!reused) {
       const persisted = await persistDraft(client, job, analyzed, writeAsset);
-      await persistLineage(client, job, analyzed, persisted);
+      await persistLineage(client, job, analyzed, persisted.items);
       const lineage = structureLineage(analyzed);
       const metrics = analysisMetrics(analyzed, Date.now() - analysisStartedAt);
       const structuralMetrics = {
         ...computeMenuImportMetrics(analyzed.items, analyzed.lineage ?? [], metrics.pageCount ?? 0),
+        ...persisted.categoryProjection,
         totalTokens: metrics.totalTokens,
         nativeTextCharacters: metrics.nativeTextCharacters,
         nonEmptyPages: metrics.nonEmptyPages,

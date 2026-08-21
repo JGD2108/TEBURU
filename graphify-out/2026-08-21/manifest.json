@@ -640,8 +640,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/route.ts": {
-    "mtime": 1787281616.186036,
-    "ast_hash": "4de56f105b92fbd1c8508fdf6e129303",
+    "mtime": 1787340428.238944,
+    "ast_hash": "cb75fac74f9fb0f2f32b3a132dfd47e9",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/source/route.ts": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1787340304.777816,
-    "ast_hash": "44ac513942f944733446ce2bf3ff19d1",
+    "mtime": 1787340428.2429447,
+    "ast_hash": "3dad9d258dddc9a06bfb629a0ee2c75e",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -690,8 +690,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.ts": {
-    "mtime": 1787338696.3299923,
-    "ast_hash": "7581901e189d6824a1a0ca3b3b573241",
+    "mtime": 1787341892.2583466,
+    "ast_hash": "7e9d872b6fc30334ffb9114c63812c77",
     "semantic_hash": ""
   },
   "supabase/migrations/20260816120000_pdf_menu_imports.sql": {
@@ -735,8 +735,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/routes.test.ts": {
-    "mtime": 1787340386.687333,
-    "ast_hash": "e7870a9c1330ed9f033e9bb289bf8577",
+    "mtime": 1787340435.744343,
+    "ast_hash": "bd81f364d9e702cb2df258b3092534a8",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/finalize/route.ts": {
@@ -795,8 +795,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.test.ts": {
-    "mtime": 1787285278.7610662,
-    "ast_hash": "cbab1d496afc3abd00b14da7b1775709",
+    "mtime": 1787341790.1794734,
+    "ast_hash": "afaf57e279fb8b52a5146daa77012cc6",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/retry/route.ts": {
@@ -1185,8 +1185,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/v5-worker.test.ts": {
-    "mtime": 1787338635.6461537,
-    "ast_hash": "bb3a8d6aa910825ee10958224b5a0b39",
+    "mtime": 1787341921.0301845,
+    "ast_hash": "604b9f74c2b93ac0c54093da8e0042b2",
     "semantic_hash": ""
   },
   "docs/menu-import-text-fixtures.md": {
@@ -1195,8 +1195,8 @@
     "semantic_hash": ""
   },
   "docs/menu-import-v5-rollout.md": {
-    "mtime": 1787339240.5014355,
-    "ast_hash": "b5ec647e311057563391627bc65773c8",
+    "mtime": 1787340428.2479439,
+    "ast_hash": "5195067fbf5f5bf80663cec03594d9fd",
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.test.ts": {

@@ -52,7 +52,7 @@
 
 ## 8. Controlled platform rollout
 
-- [ ] 8.1 Deploy behind server-side assisted-approval and V5 operator-flow flags while keeping privileged V4 rollback available.
+- [x] 8.1 Deploy behind server-side assisted-approval and V5 operator-flow flags while keeping privileged V4 rollback available.
 - [ ] 8.2 Verify in the real platform that one V5 import shows grouped categories with `All`, advisory confidence, valid/review/invalid separation, and no analyzer/model selector for ordinary operators.
 - [ ] 8.3 On the same import, verify atomic approve-all approves only eligible drafts, reports skips, does not publish, and explicit publication refreshes the live menu on the same screen.
 - [ ] 8.4 Verify observability for recommendation, server status, policy version, threshold, actor, counts, reasons, provider request count, and no visual/OCR/fallback activity without exposing secrets.

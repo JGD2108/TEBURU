@@ -2,6 +2,12 @@ import 'server-only';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import type { ObservedPrice } from './types';
+import {
+  PROVIDER_DECISION_REASONS,
+  PROVIDER_DECISION_RECOMMENDATIONS,
+  parseProviderDecisionMetadata,
+  type ProviderDecisionMetadata,
+} from './assisted-approval-policy';
 
 export const TEXT_ONLY_DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 export const TEXT_ONLY_API_VERSION = 'v1beta';
@@ -10,6 +16,8 @@ export const TEXT_ONLY_TIMEOUT_MS = 60_000;
 export const TEXT_DOCUMENT_SERIALIZER_VERSION = 'text-document-v1';
 export const TEXT_ONLY_PROMPT_VERSION = 'menu-import-text-only-v1';
 export const TEXT_ONLY_SCHEMA_VERSION = 'text-menu-document-v1';
+export const TEXT_ONLY_ASSISTED_APPROVAL_PROMPT_VERSION = 'menu-import-text-only-v2-assisted-approval';
+export const TEXT_ONLY_ASSISTED_APPROVAL_SCHEMA_VERSION = 'text-menu-document-v2-assisted-approval';
 export const MAX_GENERATE_CONTENT_REQUESTS = 1;
 
 export type TextSeparator = 'space' | 'line-break' | 'unknown';
@@ -23,7 +31,7 @@ export type TextPreflight = {
 };
 export type PriceAssociation = 'certain' | 'ambiguous' | 'absent';
 export type TextPriceVariant = { raw: string; label?: string };
-export type TextTransportItem = { name: string; description?: string; rawPrice?: string; priceVariants?: TextPriceVariant[]; priceAssociation?: PriceAssociation; descriptionAssociation?: PriceAssociation };
+export type TextTransportItem = { name: string; description?: string; rawPrice?: string; priceVariants?: TextPriceVariant[]; priceAssociation?: PriceAssociation; descriptionAssociation?: PriceAssociation; providerDecision?: ProviderDecisionMetadata };
 export type TextTransportSection = { title?: string; continuesPrevious?: boolean; items: TextTransportItem[] };
 export type TextTransportPage = { pageNumber: number; sections: TextTransportSection[] };
 export type TextMenuDocument = { pages: TextTransportPage[] };
@@ -39,7 +47,7 @@ export type TextItemValidation = { status: 'valid' | 'review' | 'invalid'; reaso
  */
 export type TextCanonicalItem = {
   itemId: string; candidateId: string; name: string; description?: string; rawPrice?: string; price?: ObservedPrice; variants?: ObservedPrice[];
-  priceAssociation?: PriceAssociation; descriptionAssociation?: PriceAssociation; validation?: TextItemValidation;
+  priceAssociation?: PriceAssociation; descriptionAssociation?: PriceAssociation; providerDecision?: ProviderDecisionMetadata; validation?: TextItemValidation;
 };
 export type TextCanonicalSection = { id: string; modelSectionHint?: string; title?: string; parentId?: string; continuationOf?: string; continuesPrevious?: boolean; items: TextCanonicalItem[] };
 export type TextCanonicalPage = { page: number; sections: TextCanonicalSection[] };
@@ -139,33 +147,51 @@ export function preflightTextDocument(document: TextDocument, options: { pdf?: U
   };
 }
 
-export function textOnlyPrompt() {
+export function textOnlyPrompt(options: { requireProviderDecision?: boolean } = {}) {
   return [
     'Extract restaurant menu sections and independent dishes from the provided PDF-extracted text.',
     'Preserve the original language. Extract section/category, dish name, description, price, and price variants.',
     'The source preserves PAGE boundaries and extraction order, but visual layout may have been lost or reordered.',
     'Do not invent missing associations. Do not create dishes from isolated prices, description fragments, headers, footers, page numbers, or decorative text.',
     'Do not merge independent dishes. When the text does not reliably establish which price or description belongs to an item, preserve uncertainty rather than guessing.',
-    'Respect PAGE markers. A clear heading on the current page takes precedence over inherited context. Return JSON matching the supplied schema.',
+    'Respect PAGE markers. A clear heading on the current page takes precedence over inherited context.',
+    ...(options.requireProviderDecision ? [
+      'For every item, include providerDecision with recommendation approve, review, or reject; decisionConfidence from 0 through 1; and one or more supported decisionReasons. This is advisory evidence only: preserve uncertainty rather than approving an ambiguous association.',
+    ] : []),
+    'Return JSON matching the supplied schema.',
   ].join(' ');
 }
 
 const associationSchema = { type: 'string', enum: ['certain', 'ambiguous', 'absent'] };
 const variantSchema = { type: 'object', additionalProperties: false, properties: { raw: { type: 'string' }, label: { type: 'string' } }, required: ['raw'] };
+const providerDecisionSchema = {
+  type: 'object', additionalProperties: false,
+  properties: {
+    recommendation: { type: 'string', enum: PROVIDER_DECISION_RECOMMENDATIONS },
+    decisionConfidence: { type: 'number', minimum: 0, maximum: 1 },
+    decisionReasons: { type: 'array', minItems: 1, uniqueItems: true, items: { type: 'string', enum: PROVIDER_DECISION_REASONS } },
+  },
+  required: ['recommendation', 'decisionConfidence', 'decisionReasons'],
+};
 const itemSchema = { type: 'object', additionalProperties: false, properties: { name: { type: 'string' }, description: { type: 'string' }, rawPrice: { type: 'string' }, priceVariants: { type: 'array', items: variantSchema }, priceAssociation: associationSchema, descriptionAssociation: associationSchema }, required: ['name'] };
+const assistedApprovalItemSchema = { ...itemSchema, properties: { ...itemSchema.properties, providerDecision: providerDecisionSchema }, required: [...itemSchema.required, 'providerDecision'] };
 const sectionSchema = { type: 'object', additionalProperties: false, properties: { title: { type: 'string' }, continuesPrevious: { type: 'boolean' }, items: { type: 'array', items: itemSchema } }, required: ['items'] };
+const assistedApprovalSectionSchema = { ...sectionSchema, properties: { ...sectionSchema.properties, items: { type: 'array', items: assistedApprovalItemSchema } } };
 const pageSchema = { type: 'object', additionalProperties: false, properties: { pageNumber: { type: 'integer' }, sections: { type: 'array', items: sectionSchema } }, required: ['pageNumber', 'sections'] };
+const assistedApprovalPageSchema = { ...pageSchema, properties: { ...pageSchema.properties, sections: { type: 'array', items: assistedApprovalSectionSchema } } };
 export const TEXT_ONLY_RESPONSE_SCHEMA = { type: 'object', additionalProperties: false, properties: { pages: { type: 'array', items: pageSchema } }, required: ['pages'] };
+export const TEXT_ONLY_ASSISTED_APPROVAL_RESPONSE_SCHEMA = { type: 'object', additionalProperties: false, properties: { pages: { type: 'array', items: assistedApprovalPageSchema } }, required: ['pages'] };
 
-export function buildTextOnlyRequest(document: TextDocument) {
+export function buildTextOnlyRequest(document: TextDocument, options: { requireProviderDecision?: boolean } = {}) {
   const serialized = serializeTextDocument(document);
-  const body = { contents: [{ role: 'user', parts: [{ text: `${textOnlyPrompt()}\n\n${serialized}` }] }], generationConfig: { responseMimeType: 'application/json', responseJsonSchema: TEXT_ONLY_RESPONSE_SCHEMA, maxOutputTokens: TEXT_ONLY_MAX_OUTPUT_TOKENS } };
+  const responseJsonSchema = options.requireProviderDecision ? TEXT_ONLY_ASSISTED_APPROVAL_RESPONSE_SCHEMA : TEXT_ONLY_RESPONSE_SCHEMA;
+  const body = { contents: [{ role: 'user', parts: [{ text: `${textOnlyPrompt(options)}\n\n${serialized}` }] }], generationConfig: { responseMimeType: 'application/json', responseJsonSchema, maxOutputTokens: TEXT_ONLY_MAX_OUTPUT_TOKENS } };
   return { body, bodyText: JSON.stringify(body), serialized };
 }
 
 function association(value: unknown): PriceAssociation | undefined { return value === 'certain' || value === 'ambiguous' || value === 'absent' ? value : undefined; }
-function decodeItem(value: unknown): TextTransportItem | undefined {
-  const item = record(value); if (!item || !onlyKeys(item, ['name', 'description', 'rawPrice', 'priceVariants', 'priceAssociation', 'descriptionAssociation']) || !text(item.name)?.trim()) return undefined;
+function decodeItem(value: unknown, options: { requireProviderDecision?: boolean } = {}): TextTransportItem | undefined {
+  const item = record(value); if (!item || !onlyKeys(item, ['name', 'description', 'rawPrice', 'priceVariants', 'priceAssociation', 'descriptionAssociation', 'providerDecision']) || !text(item.name)?.trim()) return undefined;
   if ((item.description !== undefined && typeof item.description !== 'string') || (item.rawPrice !== undefined && typeof item.rawPrice !== 'string')) return undefined;
   if ((item.priceAssociation !== undefined && !association(item.priceAssociation)) || (item.descriptionAssociation !== undefined && !association(item.descriptionAssociation))) return undefined;
   let priceVariants: TextPriceVariant[] | undefined;
@@ -180,28 +206,30 @@ function decodeItem(value: unknown): TextTransportItem | undefined {
   }
   const name = text(item.name)?.trim();
   if (!name) return undefined;
-  return { name, description: text(item.description)?.trim() || undefined, rawPrice: text(item.rawPrice)?.trim() || undefined, priceVariants, priceAssociation: association(item.priceAssociation), descriptionAssociation: association(item.descriptionAssociation) };
+  const decodedProviderDecision = item.providerDecision === undefined ? undefined : parseProviderDecisionMetadata(item.providerDecision);
+  if ((options.requireProviderDecision && !decodedProviderDecision) || (item.providerDecision !== undefined && !decodedProviderDecision)) return undefined;
+  return { name, description: text(item.description)?.trim() || undefined, rawPrice: text(item.rawPrice)?.trim() || undefined, priceVariants, priceAssociation: association(item.priceAssociation), descriptionAssociation: association(item.descriptionAssociation), providerDecision: decodedProviderDecision };
 }
-function decodeSection(value: unknown): TextTransportSection | undefined {
+function decodeSection(value: unknown, options: { requireProviderDecision?: boolean } = {}): TextTransportSection | undefined {
   const section = record(value); if (!section || !onlyKeys(section, ['title', 'continuesPrevious', 'items']) || !Array.isArray(section.items) || (section.title !== undefined && typeof section.title !== 'string') || (section.continuesPrevious !== undefined && typeof section.continuesPrevious !== 'boolean')) return undefined;
-  const items = section.items.map(decodeItem); if (items.some((item) => !item)) return undefined;
+  const items = section.items.map((item) => decodeItem(item, options)); if (items.some((item) => !item)) return undefined;
   return { title: text(section.title)?.trim() || undefined, continuesPrevious: section.continuesPrevious === true, items: items as TextTransportItem[] };
 }
-export function decodeTextMenuDocument(value: unknown): TextMenuDocument | undefined {
+export function decodeTextMenuDocument(value: unknown, options: { requireProviderDecision?: boolean } = {}): TextMenuDocument | undefined {
   const root = record(value); if (!root || !onlyKeys(root, ['pages']) || !Array.isArray(root.pages)) return undefined;
   const pages: TextTransportPage[] = [];
-  for (const raw of root.pages) { const page = record(raw); if (!page || !onlyKeys(page, ['pageNumber', 'sections']) || !Number.isInteger(page.pageNumber) || !Array.isArray(page.sections)) return undefined; const sections = page.sections.map(decodeSection); if (sections.some((section) => !section)) return undefined; pages.push({ pageNumber: page.pageNumber as number, sections: sections as TextTransportSection[] }); }
+  for (const raw of root.pages) { const page = record(raw); if (!page || !onlyKeys(page, ['pageNumber', 'sections']) || !Number.isInteger(page.pageNumber) || !Array.isArray(page.sections)) return undefined; const sections = page.sections.map((section) => decodeSection(section, options)); if (sections.some((section) => !section)) return undefined; pages.push({ pageNumber: page.pageNumber as number, sections: sections as TextTransportSection[] }); }
   return { pages };
 }
 
-export function validateTextStructure(value: unknown, expectedPageCount: number): TextStructuralValidation {
+export function validateTextStructure(value: unknown, expectedPageCount: number, options: { requireProviderDecision?: boolean } = {}): TextStructuralValidation {
   const expectedPages = Array.from({ length: expectedPageCount }, (_, index) => index + 1); const root = record(value); const rawPages = root && onlyKeys(root, ['pages']) && Array.isArray(root.pages) ? root.pages : [];
   const returnedPages: number[] = []; const malformedPages: Array<number | string> = []; const malformedSections: Array<number | string> = []; const malformedItems: Array<number | string> = [];
   rawPages.forEach((rawPage, index) => {
     const page = record(rawPage); const marker = Number.isInteger(page?.pageNumber) ? page!.pageNumber as number : `index:${index}`;
     if (!page || !Number.isInteger(page.pageNumber) || !Array.isArray(page.sections)) { malformedPages.push(marker); return; }
     returnedPages.push(page.pageNumber as number);
-    page.sections.forEach((rawSection, sectionIndex) => { const section = decodeSection(rawSection); if (!section) { malformedSections.push(`${page.pageNumber}:${sectionIndex}`); const candidate = record(rawSection); if (Array.isArray(candidate?.items)) candidate.items.forEach((rawItem, itemIndex) => { if (!decodeItem(rawItem)) malformedItems.push(`${page.pageNumber}:${sectionIndex}:${itemIndex}`); }); } });
+    page.sections.forEach((rawSection, sectionIndex) => { const section = decodeSection(rawSection, options); if (!section) { malformedSections.push(`${page.pageNumber}:${sectionIndex}`); const candidate = record(rawSection); if (Array.isArray(candidate?.items)) candidate.items.forEach((rawItem, itemIndex) => { if (!decodeItem(rawItem, options)) malformedItems.push(`${page.pageNumber}:${sectionIndex}:${itemIndex}`); }); } });
   });
   if (!root || !Array.isArray(root.pages) || !onlyKeys(root, ['pages'])) malformedPages.push('root');
   const counts = new Map<number, number>(); returnedPages.forEach((page) => counts.set(page, (counts.get(page) ?? 0) + 1));
@@ -234,6 +262,7 @@ export function adaptTextMenuDocument(document: TextMenuDocument) {
           variants: item.priceVariants?.map((variant) => ({ ...observedPrice(variant.raw), label: variant.label ?? null })),
           priceAssociation: item.priceAssociation,
           descriptionAssociation: item.descriptionAssociation,
+          providerDecision: item.providerDecision,
         })),
       })),
     })),

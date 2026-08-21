@@ -79,6 +79,26 @@ describe('V5 worker routing and persistence gates', () => {
     expect(JSON.stringify(client.query.mock.calls)).not.toContain('imageHash');
   });
 
+  it('persists advisory V5 evidence without altering the server review gate', async () => {
+    const client = clientForV5();
+    const outcome = successOutcome();
+    (outcome.analysis.items[0] as Record<string, unknown>).providerDecision = {
+      recommendation: 'approve', decisionConfidence: 0.97, decisionReasons: ['COMPLETE_ITEM'],
+    };
+    analyzeV5Text.mockResolvedValueOnce(outcome);
+
+    await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]))).resolves.toBe('completed');
+
+    const draftItem = client.query.mock.calls.find(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_items'))!;
+    expect(JSON.parse(String(draftItem[1][13]))).toEqual(expect.objectContaining({
+      providerDecision: expect.objectContaining({ recommendation: 'approve', decisionConfidence: 0.97 }),
+    }));
+    expect(draftItem[1]).toEqual(expect.arrayContaining(['review']));
+    const persistence = client.query.mock.calls.find(([sql, values]) =>
+      String(sql).includes('INSERT INTO menu_import_analysis_lineage_events') && JSON.stringify(values).includes('providerDecision'))!;
+    expect(JSON.stringify(persistence[1])).toContain('COMPLETE_ITEM');
+  });
+
   function projectionOutcome(items: Array<Record<string, unknown>>, sections: Array<Record<string, unknown>>) {
     const base = successOutcome();
     const projectedSections = sections.map((section, index) => ({

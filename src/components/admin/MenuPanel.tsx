@@ -167,7 +167,7 @@ export default function MenuPanel() {
       </section>
 
       <div style={{ marginBottom: '24px' }}>
-        <MenuImportPanel />
+        <MenuImportPanel onPublished={loadData} />
       </div>
 
       {showForm && (

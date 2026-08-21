@@ -78,7 +78,7 @@
 ## 13. Production-equivalent live evaluation
 
 - [x] 13.1 Create a separately opt-in V5 live runner that checks safe preflight data and authorizes exactly one full-document request only after deterministic checks pass.
-- [ ] 13.2 Run one authorized V5 production-equivalent evaluation when credentials and quota are available; capture structural, semantic, lineage, metrics, and persistence-gate evidence without exposing secrets.
+- [x] 13.2 Run one authorized V5 production-equivalent evaluation when credentials and quota are available; capture structural, semantic, lineage, metrics, and persistence-gate evidence without exposing secrets.
 - [ ] 13.3 Verify the live execution creates only the intended review/draft/issue outcomes and no visual/OCR/fallback calls.
 
 ## 14. Controlled rollout comparison

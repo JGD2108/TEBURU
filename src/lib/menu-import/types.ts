@@ -47,6 +47,10 @@ export type AnalysisMetrics = {
   validItemRate?: number; invalidFragmentRate?: number; pagesRequiringReview?: number;
   averageItemsPerPage?: number; mergedItemDetections?: number; categoryLeakageDetections?: number;
   fallbackUsage?: number; visualSourceRate?: number; textualSourceRate?: number;
+  providerRecommendationCounts?: Partial<Record<'approve' | 'review' | 'reject', number>>;
+  assistedApprovalEligibleCount?: number;
+  assistedApprovalPolicyVersion?: string;
+  assistedApprovalConfidenceThreshold?: number;
 };
 
 export type LineageStage = 'render' | 'provider_request' | 'provider_raw' | 'decode' | 'validation' | 'retry' | 'reconciliation' | 'normalization' | 'projection' | 'persistence';
@@ -143,6 +147,15 @@ export type ExtractedMenuItem = {
   confidence: { category: Confidence; name: Confidence; description: Confidence; price: Confidence };
   validationSignals?: ValidationSignal[];
   reviewReasons?: ReviewReason[];
+  /** Raw provider advice. It is separate from extractionStatus, which remains server-authoritative. */
+  providerDecision?: import('./assisted-approval-policy').ProviderDecisionMetadata;
+  /** Server-derived result of evaluating providerDecision against the active server policy. */
+  assistedApproval?: {
+    eligible: boolean;
+    blockingReasons: import('./assisted-approval-policy').AssistedApprovalBlockingReason[];
+    policyVersion: string;
+    confidenceThreshold: number;
+  };
 };
 
 export type ImageSuggestion = { assetIndex: number; itemIndex?: number; confidence: Confidence; reason: string };

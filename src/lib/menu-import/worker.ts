@@ -115,6 +115,15 @@ async function loadExecution(client: PoolClient, executionId: string): Promise<E
 
 function json(value: unknown) { return JSON.stringify(value ?? []); }
 function bbox(value: { x: number; y: number; width: number; height: number } | undefined) { return value ? json(value) : null; }
+function extractionAttributes(item: AnalysisResult['items'][number]) {
+  // The V5 adapter/policy own these contracts. The worker stores their output
+  // as opaque evidence and never uses it to change semantic status gates.
+  return {
+    ...item.attributes,
+    ...(item.providerDecision === undefined ? {} : { providerDecision: item.providerDecision }),
+    ...(item.assistedApproval === undefined ? {} : { assistedApproval: item.assistedApproval }),
+  };
+}
 /** Matches the persisted title representation: worker-trimmed text and the unique index's lower(name). */
 function normalizedCategoryName(name: string) { return name.trim().toLowerCase(); }
 function safeFailureCode(error: unknown) {
@@ -223,7 +232,7 @@ async function persistDraft(client: PoolClient, job: Execution, result: Analysis
       ON CONFLICT (import_job_id, idempotency_key) DO UPDATE SET name = EXCLUDED.name, raw_name = EXCLUDED.raw_name, description = EXCLUDED.description, raw_description = EXCLUDED.raw_description, price = EXCLUDED.price, raw_price = EXCLUDED.raw_price, normalized_currency = EXCLUDED.normalized_currency, source_page = EXCLUDED.source_page, source_bbox = EXCLUDED.source_bbox, field_confidence = EXCLUDED.field_confidence, extraction_attributes = EXCLUDED.extraction_attributes, modifiers = EXCLUDED.modifiers, options = EXCLUDED.options, validation_signals = EXCLUDED.validation_signals, review_reasons = EXCLUDED.review_reasons, extraction_status = EXCLUDED.extraction_status, retry_exhausted = EXCLUDED.retry_exhausted RETURNING id`,
       [job.id, job.restaurant_id, categoryId ?? null, item.name?.trim() || null, item.rawName ?? item.name ?? null,
         item.description ?? (item.ingredients?.length ? item.ingredients.join(', ') : null), item.description ?? null, item.price ?? null, item.rawPrice ?? null, item.currency ?? null,
-        item.source?.page ?? item.page, bbox(item.source?.bbox), json(item.confidence), json(item.attributes ?? {}), json(item.modifiers), json(item.options), json(item.validationSignals), json(item.reviewReasons), item.extractionStatus ?? 'valid', item.retryExhausted ?? false, itemKey]);
+        item.source?.page ?? item.page, bbox(item.source?.bbox), json(item.confidence), json(extractionAttributes(item)), json(item.modifiers), json(item.options), json(item.validationSignals), json(item.reviewReasons), item.extractionStatus ?? 'valid', item.retryExhausted ?? false, itemKey]);
     // Provider identifiers are hints only. The lineage IDs linking persistence are
     // generated here, after decode, and remain authoritative across retries.
     persisted.push({
@@ -276,7 +285,11 @@ async function persistLineage(client: PoolClient, job: Execution, result: Analys
       page: item.source?.page ?? item.page, candidateId, itemId, sourceKind: 'unknown' as const,
       stage: 'persistence' as const, validationStatus: item.extractionStatus,
       validationReasons: item.reviewReasons?.map((reason) => reason.code),
-      metadata: { draftItemId },
+      metadata: {
+        draftItemId,
+        ...(item.providerDecision === undefined ? {} : { providerDecision: item.providerDecision }),
+        ...(item.assistedApproval === undefined ? {} : { assistedApproval: item.assistedApproval }),
+      },
     })),
   ];
   for (const event of events) {

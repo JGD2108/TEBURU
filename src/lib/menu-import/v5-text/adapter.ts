@@ -2,12 +2,16 @@ import 'server-only';
 
 import { contentHash, createMenuImportIdFactory, sanitizeLineageEvent } from '../lineage';
 import {
+  activeAssistedApprovalPolicy,
+  deriveAssistedApprovalEligibility,
+} from '../assisted-approval-policy';
+import {
+  TEXT_ONLY_ASSISTED_APPROVAL_PROMPT_VERSION,
+  TEXT_ONLY_ASSISTED_APPROVAL_SCHEMA_VERSION,
   TEXT_DOCUMENT_SERIALIZER_VERSION,
   TEXT_ONLY_API_VERSION,
   TEXT_ONLY_DEFAULT_MODEL,
   TEXT_ONLY_MAX_OUTPUT_TOKENS,
-  TEXT_ONLY_PROMPT_VERSION,
-  TEXT_ONLY_SCHEMA_VERSION,
   TEXT_ONLY_TIMEOUT_MS,
   TextOnlyRequestBudget,
   adaptTextMenuDocument,
@@ -41,6 +45,8 @@ export const V5_TEXT_TIMEOUT_MS = TEXT_ONLY_TIMEOUT_MS;
 export const V5_TEXT_MAX_OUTPUT_TOKENS = TEXT_ONLY_MAX_OUTPUT_TOKENS;
 export const V5_TEXT_API_VERSION = TEXT_ONLY_API_VERSION;
 export const V5_TEXT_SERIALIZER_VERSION = TEXT_DOCUMENT_SERIALIZER_VERSION;
+export const V5_TEXT_PROMPT_VERSION = TEXT_ONLY_ASSISTED_APPROVAL_PROMPT_VERSION;
+export const V5_TEXT_SCHEMA_VERSION = TEXT_ONLY_ASSISTED_APPROVAL_SCHEMA_VERSION;
 export type { TextDocument } from '../text-only-evaluation';
 
 type GeminiFetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -153,8 +159,8 @@ function extractionLineage(input: {
       pdfSha256: preflight.pdfSha256,
       textDocumentHash: preflight.textDocumentHash,
       serializerVersion: preflight.serializerVersion,
-      promptVersion: TEXT_ONLY_PROMPT_VERSION,
-      schemaVersion: TEXT_ONLY_SCHEMA_VERSION,
+      promptVersion: V5_TEXT_PROMPT_VERSION,
+      schemaVersion: V5_TEXT_SCHEMA_VERSION,
       pdfPages: preflight.pdfPages,
       textDocumentPages: preflight.textDocumentPages,
       textCharacters: preflight.textCharacters,
@@ -334,7 +340,16 @@ function projectCanonical(document: TextCanonicalDocument): { sections: Extracte
             code,
             severity: status === 'invalid' ? 'error' : 'warning',
           })),
+          providerDecision: item.providerDecision,
         };
+        candidate.assistedApproval = deriveAssistedApprovalEligibility({
+          analyzerVersion: V5_TEXT_ANALYZER_VERSION,
+          serverStatus: status,
+          providerDecision: item.providerDecision,
+          requiredFieldsComplete: Boolean(candidate.category?.trim() && candidate.name?.trim())
+            && (typeof candidate.price === 'number' || (candidate.priceVariants?.some((variant) => typeof variant.amount === 'number') ?? false)),
+          hasValidationReasons: Boolean(reasons?.length),
+        });
         (status === 'invalid' ? invalidCandidates : normalCandidates).push(candidate);
       }
     }
@@ -349,12 +364,13 @@ function projectMetrics(input: {
   providerCalls: number;
   latencyMs: number;
   usage?: JsonRecord;
+  candidates: ExtractedMenuItem[];
 }): AnalysisMetrics {
   const total = input.metrics.totalItems;
   const usage = input.usage;
   return {
     analyzerVersion: V5_TEXT_ANALYZER_VERSION,
-    promptVersion: TEXT_ONLY_PROMPT_VERSION,
+    promptVersion: V5_TEXT_PROMPT_VERSION,
     model: input.model,
     pageCount: input.preflight.pdfPages,
     providerCalls: input.providerCalls,
@@ -372,6 +388,14 @@ function projectMetrics(input: {
     fallbackUsage: 0,
     textualSourceRate: 1,
     visualSourceRate: 0,
+    providerRecommendationCounts: input.candidates.reduce<Partial<Record<'approve' | 'review' | 'reject', number>>>((counts, candidate) => {
+      const recommendation = candidate.providerDecision?.recommendation;
+      if (recommendation) counts[recommendation] = (counts[recommendation] ?? 0) + 1;
+      return counts;
+    }, {}),
+    assistedApprovalEligibleCount: input.candidates.filter((candidate) => candidate.assistedApproval?.eligible).length,
+    assistedApprovalPolicyVersion: activeAssistedApprovalPolicy().version,
+    assistedApprovalConfidenceThreshold: activeAssistedApprovalPolicy().confidenceThreshold,
   };
 }
 
@@ -412,7 +436,7 @@ export async function analyzeV5Text(input: V5TextAnalysisInput): Promise<V5TextA
     return failureOutcome({ restaurantId: input.restaurantId, attemptId, model, lineage, preflight, code: 'PROVIDER_NOT_CONFIGURED', retryable: true });
   }
 
-  const request = buildTextOnlyRequest(document);
+  const request = buildTextOnlyRequest(document, { requireProviderDecision: true });
   const budget = new TextOnlyRequestBudget();
   const controller = new AbortController();
   const startedAt = Date.now();
@@ -468,7 +492,7 @@ export async function analyzeV5Text(input: V5TextAnalysisInput): Promise<V5TextA
     } catch {
       return failureOutcome({ restaurantId: input.restaurantId, attemptId, model, lineage, preflight, code: 'MALFORMED_PROVIDER_RESPONSE', retryable: false, httpStatus: response.status, metadata: { latencyMs, requestCount: budget.count } });
     }
-    const structural = validateTextStructure(raw, preflight.pdfPages);
+    const structural = validateTextStructure(raw, preflight.pdfPages, { requireProviderDecision: true });
     if (!structural.structuralValid) {
       return failureOutcome({
         restaurantId: input.restaurantId,
@@ -490,7 +514,7 @@ export async function analyzeV5Text(input: V5TextAnalysisInput): Promise<V5TextA
         },
       });
     }
-    const decoded = decodeTextMenuDocument(raw);
+    const decoded = decodeTextMenuDocument(raw, { requireProviderDecision: true });
     if (!decoded) {
       return failureOutcome({ restaurantId: input.restaurantId, attemptId, model, lineage, preflight, structural, code: 'DTO_DECODE_FAILED', retryable: false, httpStatus: response.status, metadata: { latencyMs, requestCount: budget.count } });
     }
@@ -498,7 +522,8 @@ export async function analyzeV5Text(input: V5TextAnalysisInput): Promise<V5TextA
     const canonical = applyTextValidation(reconcileTextDocument(adaptTextMenuDocument(decoded)));
     const semanticMetrics = textMetrics(canonical);
     const projected = projectCanonical(canonical);
-    const metrics = projectMetrics({ metrics: semanticMetrics, preflight, model, providerCalls: budget.count, latencyMs, usage });
+    const projectedCandidates = [...projected.normalCandidates, ...projected.invalidCandidates];
+    const metrics = projectMetrics({ metrics: semanticMetrics, preflight, model, providerCalls: budget.count, latencyMs, usage, candidates: projectedCandidates });
     const completedLineage = [
       ...lineage,
       terminalLineage({
@@ -527,7 +552,18 @@ export async function analyzeV5Text(input: V5TextAnalysisInput): Promise<V5TextA
           model,
           validationStatus: item.validation?.status ?? 'review',
           validationReasons: item.validation?.reasons ?? [],
-          metadata: { evidenceAuthority: 'native-text', geometry: 'none' },
+          metadata: {
+            evidenceAuthority: 'native-text',
+            geometry: 'none',
+            providerRecommendation: item.providerDecision?.recommendation,
+            reportedConfidence: item.providerDecision?.decisionConfidence,
+            providerDecisionReasons: item.providerDecision?.decisionReasons,
+            serverStatus: item.validation?.status ?? 'review',
+            assistedApprovalEligible: projectedCandidates.find((candidate) => candidate.itemId === item.itemId)?.assistedApproval?.eligible,
+            assistedApprovalBlockingReasons: projectedCandidates.find((candidate) => candidate.itemId === item.itemId)?.assistedApproval?.blockingReasons,
+            assistedApprovalPolicyVersion: activeAssistedApprovalPolicy().version,
+            assistedApprovalConfidenceThreshold: activeAssistedApprovalPolicy().confidenceThreshold,
+          },
         }),
       ))),
       terminalLineage({
@@ -541,6 +577,10 @@ export async function analyzeV5Text(input: V5TextAnalysisInput): Promise<V5TextA
           requestCount: budget.count,
           structuralValid: true,
           semanticTotals: semanticMetrics,
+          providerRecommendationCounts: metrics.providerRecommendationCounts,
+          assistedApprovalEligibleCount: metrics.assistedApprovalEligibleCount,
+          assistedApprovalPolicyVersion: metrics.assistedApprovalPolicyVersion,
+          assistedApprovalConfidenceThreshold: metrics.assistedApprovalConfidenceThreshold,
           fallbackUsage: 'none',
         },
       }),
@@ -583,6 +623,6 @@ export async function analyzeV5Text(input: V5TextAnalysisInput): Promise<V5TextA
 
 export const V5_TEXT_LINEAGE_VERSIONS = {
   serializer: TEXT_DOCUMENT_SERIALIZER_VERSION,
-  prompt: TEXT_ONLY_PROMPT_VERSION,
-  schema: TEXT_ONLY_SCHEMA_VERSION,
+  prompt: V5_TEXT_PROMPT_VERSION,
+  schema: V5_TEXT_SCHEMA_VERSION,
 } as const;

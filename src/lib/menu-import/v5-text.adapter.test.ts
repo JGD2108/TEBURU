@@ -30,13 +30,21 @@ function nativeDocument(pages = 2): TextDocument {
   };
 }
 
+function providerDecision(
+  recommendation: 'approve' | 'review' | 'reject' = 'approve',
+  decisionConfidence = 0.95,
+  decisionReasons: string[] = ['CLEAR_EXTRACTION', 'COMPLETE_ITEM'],
+) {
+  return { recommendation, decisionConfidence, decisionReasons };
+}
+
 function transportDocument() {
   return {
     pages: [
-      { pageNumber: 1, sections: [{ title: 'FOOD', items: [{ name: 'Clean dish', rawPrice: '$8', priceAssociation: 'certain' }] }] },
+      { pageNumber: 1, sections: [{ title: 'FOOD', items: [{ name: 'Clean dish', rawPrice: '$8', priceAssociation: 'certain', providerDecision: providerDecision() }] }] },
       { pageNumber: 2, sections: [{ continuesPrevious: true, items: [
-        { name: 'Ambiguous dish', rawPrice: '$9', priceAssociation: 'ambiguous' },
-        { name: '$30' },
+        { name: 'Ambiguous dish', rawPrice: '$9', priceAssociation: 'ambiguous', providerDecision: providerDecision('approve', 0.99, ['AMBIGUOUS_SOURCE']) },
+        { name: '$30', providerDecision: providerDecision('reject', 0.99, ['POSSIBLE_NON_MENU_CONTENT']) },
       ] }] },
     ],
   };
@@ -150,6 +158,13 @@ describe('V5 text-only production adapter', () => {
     expect(review).toMatchObject({ extractionStatus: 'review', rawPrice: '$9', price: undefined, category: 'FOOD' });
     expect(review?.reviewReasons).toContainEqual({ code: 'AMBIGUOUS_PRICE' });
     expect(review?.confidence.price).toBe('low');
+    expect(success.analysis.items.find((item) => item.name === 'Clean dish')).toMatchObject({
+      extractionStatus: 'valid',
+      providerDecision: providerDecision(),
+      assistedApproval: { eligible: true, policyVersion: 'assisted-approval-v1', confidenceThreshold: 0.9 },
+    });
+    expect(review?.assistedApproval).toMatchObject({ eligible: false, blockingReasons: expect.arrayContaining(['NOT_VALID', 'HAS_VALIDATION_REASONS']) });
+    expect(success.analysis.metrics).toMatchObject({ providerRecommendationCounts: { approve: 2, reject: 1 }, assistedApprovalEligibleCount: 1 });
     expect(review?.candidateId).toMatch(/^[0-9a-f-]{36}$/i);
     expect(success.analysis.lineage?.every((event) => !('imageHash' in event) && !('imageIncluded' in event))).toBe(true);
     expect(JSON.stringify(success.analysis.lineage)).not.toContain('AIzaNeverPersistThis');
@@ -172,8 +187,8 @@ describe('V5 text-only production adapter', () => {
       ], text: '' }],
     };
     const response = { pages: [{ pageNumber: 1, sections: [{ title: 'LUNCH', items: [
-      { name: 'Soup', priceVariants: [{ label: 'Regular', raw: '10' }, { label: 'Large', raw: '14' }], priceAssociation: 'certain' },
-      { name: 'Salad', rawPrice: '12', priceAssociation: 'ambiguous' },
+      { name: 'Soup', priceVariants: [{ label: 'Regular', raw: '10' }, { label: 'Large', raw: '14' }], priceAssociation: 'certain', providerDecision: providerDecision() },
+      { name: 'Salad', rawPrice: '12', priceAssociation: 'ambiguous', providerDecision: providerDecision('review', 0.8, ['AMBIGUOUS_SOURCE']) },
     ] }] }] };
     const outcome = asSuccess(await analyzeV5Text({ restaurantId: 'restaurant-columns', textDocument: reordered, apiKey: 'test-key', fetcher: async () => responseFor(response) }));
 
@@ -210,6 +225,21 @@ describe('V5 text-only production adapter', () => {
     expect(structuralFailure.structural?.missingPages).toEqual([2]);
     expect(structuralFailure.analysis.items).toEqual([]);
     expect(calls).toBe(1);
+  });
+
+  it('strictly rejects missing, unknown, and out-of-range advisory metadata without a second request', async () => {
+    const malformedDocuments = [
+      { pages: [{ pageNumber: 1, sections: [{ title: 'FOOD', items: [{ name: 'Dish', rawPrice: '$8', providerDecision: providerDecision('approve', 0.9, ['UNKNOWN_REASON']) }] }] }, transportDocument().pages[1]] },
+      { pages: [{ pageNumber: 1, sections: [{ title: 'FOOD', items: [{ name: 'Dish', rawPrice: '$8', providerDecision: providerDecision('approve', 1.01) }] }] }, transportDocument().pages[1]] },
+      { pages: [{ pageNumber: 1, sections: [{ title: 'FOOD', items: [{ name: 'Dish', rawPrice: '$8', providerDecision: { ...providerDecision(), recommendation: 'maybe' } }] }] }, transportDocument().pages[1]] },
+      { pages: [{ pageNumber: 1, sections: [{ title: 'FOOD', items: [{ name: 'Dish', rawPrice: '$8' }] }] }, transportDocument().pages[1]] },
+    ];
+    for (const document of malformedDocuments) {
+      let calls = 0;
+      const outcome = await analyzeV5Text({ restaurantId: 'restaurant-strict-advice', textDocument: nativeDocument(), apiKey: 'test-key', fetcher: async () => { calls += 1; return responseFor(document); } });
+      expect(asFailure(outcome).failure.code).toBe('STRUCTURAL_VALIDATION_FAILED');
+      expect(calls).toBe(1);
+    }
   });
 
   it('maps rate limits, provider outages, and timeouts to sanitized, retryable failures', async () => {

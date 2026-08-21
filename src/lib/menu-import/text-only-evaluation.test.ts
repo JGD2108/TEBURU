@@ -136,6 +136,17 @@ describe('strict DTO, canonical IDs, structural and semantic validation', () => 
     expect(decodeTextMenuDocument({ pages: [{ pageNumber: 1, sections: [{ items: [{ name: 'Dish', priceAssociation: 'guess' }] }] }] })).toBeUndefined();
   });
 
+  it('keeps legacy recordings decodable outside V5 while V5 mode requires bounded advisory metadata', () => {
+    const legacy = transportDocument(1);
+    expect(decodeTextMenuDocument(legacy)).toMatchObject(legacy);
+    expect(decodeTextMenuDocument(legacy, { requireProviderDecision: true })).toBeUndefined();
+    const advised = transportDocument(1);
+    advised.pages[0].sections[0].items[0].providerDecision = {
+      recommendation: 'approve', decisionConfidence: 0.9, decisionReasons: ['CLEAR_EXTRACTION'],
+    };
+    expect(decodeTextMenuDocument(advised, { requireProviderDecision: true })).toMatchObject(advised);
+  });
+
   it('reports missing, duplicate, unordered, unexpected, and malformed response pages before reconciliation', () => {
     expect(validateTextStructure(transportDocument(3), 3).structuralValid).toBe(true);
     expect(validateTextStructure(transportDocument(2), 3).missingPages).toEqual([3]);

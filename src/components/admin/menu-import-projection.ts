@@ -59,6 +59,34 @@ export type MenuImportProjection<T extends ProjectableDraftItem> = {
   issues: ExtractionIssue[];
 };
 
+export type CategoryGroup<T extends ProjectableDraftItem> = {
+  name: string;
+  items: T[];
+};
+
+/**
+ * Groups the already server-projected reviewable items without changing their
+ * validation or approval state. `categoryOrder` comes from persisted draft
+ * categories, so the review UI keeps the menu's source ordering.
+ */
+export function groupProjectedItems<T extends ProjectableDraftItem>(
+  items: T[],
+  categoryName: (item: T) => string,
+  categoryOrder: string[],
+): CategoryGroup<T>[] {
+  const groups = new Map<string, T[]>();
+  for (const item of items) {
+    const name = categoryName(item) || 'Sin categoría';
+    const entries = groups.get(name) ?? [];
+    entries.push(item);
+    groups.set(name, entries);
+  }
+  const order = new Map(categoryOrder.map((name, index) => [name, index]));
+  return [...groups.entries()]
+    .sort(([left], [right]) => (order.get(left) ?? Number.MAX_SAFE_INTEGER) - (order.get(right) ?? Number.MAX_SAFE_INTEGER) || left.localeCompare(right))
+    .map(([name, groupedItems]) => ({ name, items: groupedItems }));
+}
+
 export function isTextOnlyV5Analyzer(analyzerVersion?: string | null) {
   return analyzerVersion === 'menu-import-v5-text';
 }

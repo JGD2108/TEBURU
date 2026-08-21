@@ -5,7 +5,7 @@ import { AlertTriangle, Check, FileText, ImageIcon, Loader2, Pencil, Trash2, Upl
 import { readApiResponse, requireApiSuccess, staffFetch } from '@/lib/api-client';
 import { uploadRecoveryMessage } from '@/lib/menu-import-upload-recovery';
 import { supabase } from '@/lib/supabase';
-import { isTextOnlyV5Analyzer, issueLabel, issueReasons, nativeTextProvenance, projectMenuImport, shouldShowSourceGeometry, type ExtractionIssue } from './menu-import-projection';
+import { groupProjectedItems, isTextOnlyV5Analyzer, issueLabel, issueReasons, nativeTextProvenance, projectMenuImport, shouldShowSourceGeometry, type ExtractionIssue } from './menu-import-projection';
 
 type SourceBox = { x: number; y: number; width: number; height: number };
 type DraftCategory = {
@@ -39,6 +39,15 @@ type DraftItem = {
   category_name?: string | null;
   source_page?: number | null;
   confidence?: number | null;
+  decision_confidence?: number | null;
+  decisionConfidence?: number | null;
+  recommendation?: 'approve' | 'review' | 'reject' | null;
+  bulk_eligible?: boolean;
+  bulkEligible?: boolean;
+  extraction_attributes?: {
+    providerDecision?: { recommendation?: 'approve' | 'review' | 'reject'; decisionConfidence?: number; decisionReasons?: string[] };
+    assistedApproval?: { eligible?: boolean; blockingReasons?: string[]; policyVersion?: string; confidenceThreshold?: number };
+  } | null;
   confidence_flags?: string[] | null;
   image_url?: string | null;
   image_suggestion?: { url?: string | null; confidence?: number | null; approved?: boolean } | null;
@@ -64,6 +73,8 @@ type DraftItem = {
   validationStatus?: 'valid' | 'review' | 'invalid';
   retry_exhausted?: boolean;
   retryExhausted?: boolean;
+  updated_at?: string;
+  updatedAt?: string;
 };
 type DraftItemPatch = Partial<Pick<DraftItem, 'name' | 'description' | 'price' | 'raw_price' | 'normalized_price' | 'price_currency' | 'price_variants' | 'shared_price_provenance' | 'draft_category_id'>> & { category_id?: string | null; approved?: boolean };
 type Evidence = {
@@ -144,21 +155,42 @@ export function safeAnalyzerOptions(options: unknown): AnalyzerVersion[] {
   return safe;
 }
 
-export function defaultAnalyzerVersion(options: unknown): AnalyzerVersion | '' {
-  const safe = safeAnalyzerOptions(options);
-  const serverDefault = Array.isArray(options)
-    ? options.find((option) => option && typeof option === 'object' && (option as AnalyzerOption).default === true && safe.includes((option as AnalyzerOption).version as AnalyzerVersion)) as AnalyzerOption | undefined
-    : undefined;
-  return typeof serverDefault?.version === 'string'
-    ? serverDefault.version as AnalyzerVersion
-    : '';
+export function v5EnabledForOperators(options: unknown) {
+  return safeAnalyzerOptions(options).includes('menu-import-v5-text');
 }
 
-export function finalizeImportBody(authorization: Pick<UploadAuthorization, 'id' | 'token'>, analyzerVersion: AnalyzerVersion | '') {
-  return analyzerVersion
-    ? { authorizationId: authorization.id, token: authorization.token, analyzerVersion }
-    : { authorizationId: authorization.id, token: authorization.token };
+export function finalizeImportBody(authorization: Pick<UploadAuthorization, 'id' | 'token'>) {
+  return { authorizationId: authorization.id, token: authorization.token, analyzerVersion: 'menu-import-v5-text' as const };
 }
+
+export function draftVersionSnapshot(items: DraftItem[]) {
+  const entries = items.map((item) => [item.id, item.updated_at ?? item.updatedAt] as const);
+  return entries.every(([, updatedAt]) => typeof updatedAt === 'string' && updatedAt.length > 0)
+    ? Object.fromEntries(entries as ReadonlyArray<readonly [string, string]>)
+    : undefined;
+}
+
+export function providerDecisionPresentation(item: DraftItem) {
+  const decision = item.extraction_attributes?.providerDecision;
+  const recommendation = item.recommendation ?? decision?.recommendation;
+  const confidence = item.decision_confidence ?? item.decisionConfidence ?? decision?.decisionConfidence ?? item.confidence;
+  return {
+    recommendation,
+    recommendationLabel: recommendation === 'approve' ? 'aprobar' : recommendation === 'review' ? 'revisar' : recommendation === 'reject' ? 'rechazar' : undefined,
+    confidencePercent: typeof confidence === 'number' ? Math.round(confidence * 100) : undefined,
+  };
+}
+
+export function bulkApprovalSummaryText(summary: { approved: number; skipped: number; reasons: string[] }) {
+  return `Aprobados: ${summary.approved}. Omitidos: ${summary.skipped}.${summary.reasons.length ? ` Motivos: ${summary.reasons.join(' · ')}` : ''}`;
+}
+
+export async function refreshPublishedViews(importId: string, reloadImport: (id: string) => Promise<unknown>, reloadMenu?: () => void | Promise<void>) {
+  await reloadImport(importId);
+  await reloadMenu?.();
+}
+
+export const categoryFilterLayout = { display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' } as const;
 
 const menuImportBucket = 'menu-imports';
 const panelStyle = { background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' } as const;
@@ -304,7 +336,7 @@ async function uploadPdfWithSupabase(authorization: UploadAuthorization, file: F
   onProgress(100);
 }
 
-export default function MenuImportPanel() {
+export default function MenuImportPanel({ onPublished }: { onPublished?: () => void | Promise<void> }) {
   const [imports, setImports] = useState<ImportJob[]>([]);
   const [selected, setSelected] = useState<ImportJob | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -312,12 +344,15 @@ export default function MenuImportPanel() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [readiness, setReadiness] = useState<ImportReadiness | null>(null);
-  const [analyzerOptions, setAnalyzerOptions] = useState<AnalyzerVersion[]>([]);
-  const [analyzerVersion, setAnalyzerVersion] = useState<AnalyzerVersion | ''>('');
+  const [v5Available, setV5Available] = useState<boolean | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [publishErrors, setPublishErrors] = useState<string[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [bulkState, setBulkState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [bulkSummary, setBulkSummary] = useState<{ approved: number; skipped: number; reasons: string[] } | null>(null);
+  const [bulkEnabled, setBulkEnabled] = useState(false);
   const uploadAbort = useRef<AbortController | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
 
@@ -331,8 +366,7 @@ export default function MenuImportPanel() {
     const nested = payload.data && !Array.isArray(payload.data) ? payload.data : undefined;
     const jobs = (payload.imports ?? (Array.isArray(payload.data) ? payload.data : nested?.imports) ?? []) as ImportJob[];
     const safeOptions = safeAnalyzerOptions(payload.analyzerOptions ?? nested?.analyzerOptions);
-    setAnalyzerOptions(safeOptions);
-    setAnalyzerVersion((current) => current && safeOptions.includes(current) ? current : defaultAnalyzerVersion(payload.analyzerOptions ?? nested?.analyzerOptions));
+    setV5Available(safeOptions.includes('menu-import-v5-text'));
     setImports(jobs);
     setSelected((current) => keepSelected && current ? jobs.find((job) => job.id === current.id) ?? current : jobs[0] ?? null);
     return jobs;
@@ -365,9 +399,31 @@ export default function MenuImportPanel() {
     return () => window.clearInterval(interval);
   }, [loadSelected, selected]);
 
+  useEffect(() => { setCategoryFilter('All'); setBulkState('idle'); setBulkSummary(null); }, [selected?.id]);
+
+  useEffect(() => {
+    let active = true;
+    setBulkEnabled(false);
+    if (!selected || selected.status !== 'needs_review' || !isTextOnlyV5Analyzer(lineageFor(selected)?.analyzerVersion)) return () => { active = false; };
+    staffJson<{ data?: { enabled?: boolean; eligibleImport?: boolean }; enabled?: boolean; eligibleImport?: boolean }>(
+      `/api/admin/menu-import/${encodeURIComponent(selected.id)}/approve-all`,
+      undefined,
+      'No se pudo comprobar la aprobación asistida.',
+    ).then((payload) => {
+      const result = payload.data ?? payload;
+      if (active) setBulkEnabled(result.enabled === true && result.eligibleImport === true);
+    }).catch(() => { if (active) setBulkEnabled(false); });
+    return () => { active = false; };
+  }, [selected]);
+
   const draftProjection = useMemo(() => projectMenuImport(jobDraft(selected), (item) => fieldProblems(item as DraftItem).length > 0), [selected]);
   const validationCount = useMemo(() => draftProjection.reviewItems.filter((item) => fieldProblems(item).length > 0).length, [draftProjection]);
-  const importUnavailable = readiness?.available === false;
+  const importUnavailable = readiness?.available === false || v5Available === false;
+  const importUnavailableMessage = readiness?.available === false
+    ? readiness.message || 'La importación no está disponible temporalmente.'
+    : v5Available === false
+      ? 'La importación asistida V5 no está habilitada. Pide a un administrador de plataforma que la active o aplique el rollback autorizado.'
+      : null;
 
   async function upload(event: React.FormEvent) {
     event.preventDefault();
@@ -391,7 +447,7 @@ export default function MenuImportPanel() {
         throw new Error('El almacenamiento rechazó el PDF. Inténtalo de nuevo.');
       }
       const finalized = await staffJson<{ data?: { import?: ImportJob } }>('/api/admin/menu-import/finalize', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalizeImportBody(authorization, analyzerVersion)),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalizeImportBody(authorization)),
       }, 'El PDF se subió, pero no se pudo iniciar el análisis. Inténtalo de nuevo.');
       const created = finalized.data?.import;
       if (!created) throw new Error('No se pudo iniciar el análisis del PDF. Inténtalo de nuevo.');
@@ -476,10 +532,31 @@ export default function MenuImportPanel() {
         setPublishErrors((payload.validation_errors ?? payload.errors ?? [errorMessage || 'No se puede publicar este borrador']).map((entry: unknown) => typeof entry === 'string' ? entry : (entry as { message?: string }).message || 'Campo incompleto'));
         return;
       }
-      await loadSelected(selected.id); setMessage('El borrador se agregó al menú actual.');
+      await refreshPublishedViews(selected.id, loadSelected, onPublished);
+      setMessage('El borrador se agregó al menú actual y el menú publicado se actualizó.');
     } catch (error) {
       setPublishErrors([error instanceof Error ? error.message : 'No se pudo publicar este borrador.']);
     } finally { setSubmitting(false); }
+  }
+
+  async function approveAllEligible() {
+    if (!selected) return;
+    const versions = draftVersionSnapshot(jobDraft(selected).items);
+    if (!versions) { setBulkState('error'); setMessage('Actualiza el borrador antes de aprobar todos los elegibles.'); return; }
+    if (!window.confirm('Se aprobarán únicamente los platillos que el servidor todavía considere elegibles. Esta acción no publica el menú. ¿Continuar?')) return;
+    setBulkState('loading'); setBulkSummary(null); setMessage(null);
+    try {
+      const payload = await staffJson<{ data?: { approved?: number; skipped?: number; skippedReasons?: string[]; skipReasons?: string[] }; approved?: number; skipped?: number; skippedReasons?: string[]; skipReasons?: string[] }>(`/api/admin/menu-import/${encodeURIComponent(selected.id)}/approve-all`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ draftVersions: versions }),
+      }, 'No se pudieron aprobar los platillos elegibles. Actualiza el borrador e inténtalo de nuevo.');
+      const result = payload.data ?? payload;
+      setBulkSummary({ approved: Number(result.approved ?? 0), skipped: Number(result.skipped ?? 0), reasons: result.skippedReasons ?? result.skipReasons ?? [] });
+      setBulkState('success');
+      await loadSelected(selected.id);
+    } catch (error) {
+      setBulkState('error');
+      setMessage(error instanceof Error ? error.message : 'No se pudieron aprobar los platillos elegibles.');
+    }
   }
 
   if (loading) return <section style={panelStyle}>Cargando importaciones...</section>;
@@ -491,22 +568,22 @@ export default function MenuImportPanel() {
   const nativeProvenance = selected && textOnlyV5 ? provenanceFor(selected) : undefined;
   const canReplay = selected ? ['pending', 'failed'].includes(selected.status) : false;
   const canDelete = selected ? !['processing', 'published'].includes(selected.status) : false;
+  const reviewableItems = [...validItems, ...reviewItems];
+  const categoryOrder = categories.map((category) => categoryPath({ category_id: category.id } as DraftItem, categories));
+  const categoryGroups = groupProjectedItems(reviewableItems, (item) => categoryPath(item, categories), categoryOrder);
+  const visibleGroups = categoryFilter === 'All' ? categoryGroups : categoryGroups.filter((group) => group.name === categoryFilter);
+  const categoryFilters = categoryGroups.map((group) => group.name);
   return <section aria-label="Importar menú PDF" style={{ display: 'grid', gap: '20px' }}>
     <div style={panelStyle}>
       <h3 style={{ marginTop: 0 }}>Importar menú desde PDF</h3>
       <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>El menú actual no cambia hasta que revises y publiques este borrador.</p>
       <form onSubmit={upload} style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
         <input ref={fileInput} aria-label="Archivo PDF del menú" type="file" accept="application/pdf,.pdf" onChange={(event: ChangeEvent<HTMLInputElement>) => setFile(event.target.files?.[0] ?? null)} />
-        <label style={{ display: 'grid', gap: 4, color: 'var(--text-muted)' }}>Analizador
-          <select aria-label="Analizador para este PDF" value={analyzerVersion} onChange={(event) => setAnalyzerVersion(event.target.value as AnalyzerVersion)} disabled={submitting} style={inputStyle}>
-            <option value="">Predeterminado del servidor (visual)</option>
-            {analyzerOptions.map((version) => <option key={version} value={version}>{analyzerLabels[version]}</option>)}
-          </select>
-        </label>
         <button className="btn-primary" disabled={!file || submitting || !readiness || importUnavailable} type="submit"><Upload size={16} /> {submitting ? 'Subiendo...' : 'Analizar PDF'}</button>
         {submitting && uploadProgress !== null && <><span role="status">Subiendo: {uploadProgress}%</span><button className="btn-secondary" type="button" onClick={() => uploadAbort.current?.abort()}>Cancelar carga</button></>}
       </form>
-      {readiness && importUnavailable && <p role="alert" style={{ marginBottom: 0, color: 'var(--primary)' }}>{readiness.message || 'La importación no está disponible temporalmente.'}</p>}
+      <small style={{ color: 'var(--text-muted)' }}>Análisis con texto nativo asistido (V5).</small>
+      {importUnavailableMessage && <p role="alert" style={{ marginBottom: 0, color: 'var(--primary)' }}>{importUnavailableMessage}</p>}
       {message && <p role="status" style={{ marginBottom: 0, color: 'var(--primary)' }}>{message}</p>}
     </div>
 
@@ -550,11 +627,14 @@ export default function MenuImportPanel() {
       {selected.status === 'failed' && <div role="alert" style={{ color: 'var(--primary)' }}>No fue posible analizar este archivo. {selected.error_message || selected.failure_reason}</div>}
       {selected.status === 'needs_review' && <>
         {(validationCount > 0 || publishErrors.length > 0) && <div role="alert" style={{ padding: 12, borderRadius: 6, background: 'rgba(255,71,87,.12)', color: 'var(--primary)' }}><AlertTriangle size={16} /> {validationCount ? `${validationCount} platillo(s) requieren corrección.` : null}{publishErrors.map((error) => <div key={error}>{error}</div>)}</div>}
-        {validItems.length === 0 && reviewItems.length === 0 && issues.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : <>
-          {validItems.length > 0 && <section aria-label="Platos válidos" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Platos válidos ({validItems.length})</h4>{validItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} showSourceGeometry={showSourceGeometry} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>}
-          {reviewItems.length > 0 && <section aria-label="Candidatos para revisar" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Candidatos para revisar ({reviewItems.length})</h4><p style={{ margin: 0, color: 'var(--text-muted)' }}>Corrige, confirma o elimina estos candidatos antes de publicarlos.</p>{reviewItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} showSourceGeometry={showSourceGeometry} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>}
+        {reviewableItems.length === 0 && issues.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : <>
+          {reviewableItems.length > 0 && <section aria-label="Borrador agrupado por categoría" style={{ display: 'grid', gap: 12 }}>
+            <div style={categoryFilterLayout}><strong>Filtrar categoría:</strong>{['All', ...categoryFilters].map((category) => <button key={category} type="button" className="btn-secondary" aria-pressed={categoryFilter === category} onClick={() => setCategoryFilter(category)}>{category === 'All' ? 'Todos' : category}</button>)}</div>
+            {visibleGroups.length === 0 ? <p>No hay platillos en esta categoría.</p> : visibleGroups.map((group) => <section key={group.name} aria-label={`Categoría ${group.name}`} style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>{group.name} ({group.items.length})</h4>{group.items.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} showSourceGeometry={showSourceGeometry} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>)}
+          </section>}
           {issues.length > 0 && <section aria-label="Incidencias de extracción" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Incidencias de extracción ({issues.length})</h4>{issues.map((issue, index) => <ExtractionIssueCard key={issue.id ?? issue.candidate_id ?? issue.candidateId ?? index} issue={issue} showSourceGeometry={showSourceGeometry} />)}</section>}
         </>}
+        {textOnlyV5 && bulkEnabled && <div style={{ padding: 12, borderRadius: 6, background: 'var(--bg-base)', display: 'grid', gap: 8 }}><div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}><div><strong>Aprobación asistida</strong><small style={{ display: 'block', color: 'var(--text-muted)' }}>El servidor revisa la elegibilidad actual; no publica el menú.</small></div><button className="btn-secondary" disabled={submitting || bulkState === 'loading'} onClick={approveAllEligible}>{bulkState === 'loading' ? 'Aprobando elegibles...' : 'Aprobar todos los elegibles'}</button></div>{bulkState === 'success' && bulkSummary && <p role="status" style={{ margin: 0 }}>{bulkApprovalSummaryText(bulkSummary)}</p>}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}><button className="btn-primary" disabled={submitting || validationCount > 0} onClick={publish}><Check size={16} /> Publicar aprobados</button></div>
       </>}
     </div>}
@@ -583,6 +663,8 @@ function DraftItemCard({ item, categories, evidence, showSourceGeometry, saving,
   const reviewReasons = [...new Set([...problems, ...evidence.flatMap((entry) => entry.review_reasons ?? [])])];
   const sourceBoxes = showSourceGeometry ? [...(item.source_bboxes ?? []), ...(item.source_bbox ? [item.source_bbox] : []), ...evidence.map((entry) => entry.source_bbox ?? entry.bounding_box).filter((box): box is SourceBox => Boolean(box))] : [];
   const ambiguousPrice = reviewReasons.includes('AMBIGUOUS_PRICE');
+  const status = item.validation_status ?? item.validationStatus ?? item.extraction_status ?? item.extractionStatus ?? (problems.length ? 'review' : 'valid');
+  const decision = providerDecisionPresentation(item);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -593,7 +675,7 @@ function DraftItemCard({ item, categories, evidence, showSourceGeometry, saving,
 
   return <article style={{ padding: 16, background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', borderRadius: 10 }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'start' }}>
-      <div><strong style={{ color: 'var(--text-main)', fontSize: '1.05rem' }}>{item.name || 'Platillo sin nombre'}</strong><p style={{ margin: '5px 0', color: 'var(--text-muted)', fontWeight: 600, lineHeight: 1.45 }}>{categoryPath(item, categories)} · {formatPrice(item)} · Página {evidence[0]?.page_number ?? item.source_page ?? 'sin referencia'}</p>{item.parent_section_name && <small style={{ color: 'var(--text-muted)' }}>Sección padre: {item.parent_section_name}</small>}</div>
+      <div><strong style={{ color: 'var(--text-main)', fontSize: '1.05rem' }}>{item.name || 'Platillo sin nombre'}</strong><p style={{ margin: '5px 0', color: 'var(--text-muted)', fontWeight: 600, lineHeight: 1.45 }}>{categoryPath(item, categories)} · {formatPrice(item)} · Página {evidence[0]?.page_number ?? item.source_page ?? 'sin referencia'}</p><small style={{ color: status === 'valid' ? 'var(--text-muted)' : 'var(--primary)' }}>Estado: {status === 'valid' ? 'válido' : status === 'review' ? 'requiere revisión' : 'inválido'}</small>{decision.recommendation && <small style={{ display: 'block', color: 'var(--text-muted)' }}>Recomendación del modelo: {decision.recommendationLabel}{decision.confidencePercent !== undefined ? ` · confianza reportada: ${decision.confidencePercent}%` : ''}</small>}{item.parent_section_name && <small style={{ display: 'block', color: 'var(--text-muted)' }}>Sección padre: {item.parent_section_name}</small>}</div>
       <div style={{ display: 'flex', gap: 8 }}><button aria-label={`${ambiguousPrice ? 'Confirmar precio de' : 'Aprobar'} ${item.name || 'platillo'}`} title={ambiguousPrice ? 'Confirma el candidato después de asignar un precio' : 'Aprobar'} className="btn-secondary" disabled={saving || item.review_status === 'approved'} onClick={() => onSave(item, { approved: true })}><Check size={15} /></button><button aria-label={`Editar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => setEditing((value) => !value)}><Pencil size={15} /></button><button aria-label={`Eliminar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => onRemove(item)}><Trash2 size={15} /></button></div>
     </div>
     {variants.length > 0 && <div aria-label="Variantes de precio" style={{ display: 'grid', gap: 6, marginTop: 12, padding: 10, borderRadius: 6, background: 'var(--bg-base)' }}><strong>Variantes observadas</strong>{variants.map((variant, index) => <small key={`${variant.label ?? 'variante'}-${index}`} style={{ color: 'var(--text-muted)' }}>{variant.label ?? variant.variant_label ?? 'Sin etiqueta'}: {formatPrice(variant)}{variant.shared ? ' · precio compartido' : ''}</small>)}</div>}

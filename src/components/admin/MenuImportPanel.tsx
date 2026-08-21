@@ -225,7 +225,7 @@ function priceVariants(item: DraftItem) {
   return item.price_variants ?? item.variants ?? [];
 }
 
-function formatPrice(price: DraftPrice | Pick<DraftItem, 'price' | 'normalized_price' | 'raw_price' | 'price_currency'>) {
+export function formatPrice(price: DraftPrice | Pick<DraftItem, 'price' | 'normalized_price' | 'raw_price' | 'price_currency'>) {
   const legacy = 'price' in price;
   const raw = legacy ? price.raw_price : price.raw;
   const amount = asFinitePrice(legacy ? price.normalized_price ?? price.price : price.normalized_amount ?? price.amount);

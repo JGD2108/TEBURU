@@ -114,7 +114,7 @@ export default function TableMenu() {
           id: item.id,
           name: item.name,
           desc: item.description,
-          price: item.price,
+          price: Number(item.price),
           cat: item.category.name,
           image: item.image_url,
           ingredients: item.modifiable_ingredients ? item.modifiable_ingredients.split(',') : [],

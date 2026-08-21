@@ -3,6 +3,11 @@ import { staffFetch } from '@/lib/api-client';
 import { Trash2, Plus } from 'lucide-react';
 import MenuImportPanel from '@/components/admin/MenuImportPanel';
 
+function formatMenuPrice(value: unknown) {
+  const amount = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(amount) ? `$${amount.toFixed(2)}` : 'Precio no disponible';
+}
+
 export default function MenuPanel() {
   const [items, setItems] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -240,7 +245,7 @@ export default function MenuPanel() {
                     {item.category?.name}
                   </span>
                 </td>
-                <td style={{ padding: '16px', fontWeight: 600 }}>${item.price.toFixed(2)}</td>
+                <td style={{ padding: '16px', fontWeight: 600 }}>{formatMenuPrice(item.price)}</td>
                 <td style={{ padding: '16px', textAlign: 'right' }}>
                   <button onClick={() => handleDelete(item.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                     <Trash2 size={18} />

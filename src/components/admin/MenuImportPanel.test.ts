@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bulkApprovalSummaryText, categoryFilterLayout, draftVersionSnapshot, finalizeImportBody, providerDecisionPresentation, refreshPublishedViews, safeAnalyzerOptions, v5EnabledForOperators } from './MenuImportPanel';
+import { bulkApprovalSummaryText, categoryFilterLayout, draftVersionSnapshot, finalizeImportBody, formatPrice, providerDecisionPresentation, refreshPublishedViews, safeAnalyzerOptions, v5EnabledForOperators } from './MenuImportPanel';
 import { groupProjectedItems } from './menu-import-projection';
 
 describe('MenuImportPanel V5 operator flow', () => {
@@ -73,5 +73,17 @@ describe('MenuImportPanel V5 operator flow', () => {
     const calls: string[] = [];
     await refreshPublishedViews('import-a', async (id) => { calls.push(`import:${id}`); }, async () => { calls.push('menu'); });
     expect(calls).toEqual(['import:import-a', 'menu']);
+  });
+
+  it('formats heterogeneous persisted prices without assuming a number instance', () => {
+    expect(formatPrice({ price: '12.5', normalized_price: null, raw_price: '$12.50', price_currency: null })).toContain('12.50');
+    expect(formatPrice({ price: 8, normalized_price: '8.00', raw_price: '8', price_currency: 'USD' })).toMatch(/8/);
+    expect(formatPrice({ price: 'not-a-price', normalized_price: null, raw_price: 'market price', price_currency: null })).toBe('Sin normalizar: market price');
+    expect(formatPrice({ price: null, normalized_price: null, raw_price: null, price_currency: null })).toBe('Precio ausente');
+  });
+
+  it('formats variant prices when amounts arrive as strings or numbers', () => {
+    expect(formatPrice({ amount: '10.5', raw: '$10.50', currency: null })).toContain('10.50');
+    expect(formatPrice({ normalized_amount: 14, raw: '$14', currency: 'USD' })).toMatch(/14/);
   });
 });

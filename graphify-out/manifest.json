@@ -155,8 +155,8 @@
     "semantic_hash": ""
   },
   "src/app/t/[table_id]/menu/page.tsx": {
-    "mtime": 1786501110.9938333,
-    "ast_hash": "8f4b90c040f08af440139620b5767f9b",
+    "mtime": 1787353519.776253,
+    "ast_hash": "2fee184c7fab00cd3e70a13278bb8266",
     "semantic_hash": ""
   },
   "src/app/t/[table_id]/page.tsx": {
@@ -180,8 +180,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuPanel.tsx": {
-    "mtime": 1787345671.4543276,
-    "ast_hash": "b8484a1580618705d91d5adc5bff8b9d",
+    "mtime": 1787353462.2844481,
+    "ast_hash": "ea5b73dde4ed31165a214a4aaf909dbe",
     "semantic_hash": ""
   },
   "src/components/admin/OverviewPanel.tsx": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1787346660.2104073,
-    "ast_hash": "e9b5d980fc080c72788fee5d239f0ec1",
+    "mtime": 1787353465.8001165,
+    "ast_hash": "5ff591bcb0fec8c1d6d66a3466ed9713",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -1175,8 +1175,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.test.ts": {
-    "mtime": 1787346660.212408,
-    "ast_hash": "7be6b5f21b5891347bdbf18a7091d04f",
+    "mtime": 1787353476.4573286,
+    "ast_hash": "369c23539ca08005d454cdf1f5315afe",
     "semantic_hash": ""
   },
   "openspec/changes/archive/2026-08-21-menu-import-text-only-evaluation-spike/.openspec.yaml": {
@@ -1230,13 +1230,13 @@
     "semantic_hash": ""
   },
   "openspec/changes/menu-import-v5-assisted-approval-ui/tasks.md": {
-    "mtime": 1787346452.890773,
-    "ast_hash": "bf56b0a75f75848f0b98cd7b9fe03a52",
+    "mtime": 1787347046.3253088,
+    "ast_hash": "c8059c764469c9823710f5f22e327059",
     "semantic_hash": ""
   },
   "openspec/specs/menu-import-text-only-evaluation/spec.md": {
-    "mtime": 1787345105.349264,
-    "ast_hash": "f383863406f5a40a2e71c88ea756239f",
+    "mtime": 1787346813.751138,
+    "ast_hash": "dee3b7bc69fc8da86a5e8b368cefcca6",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/approve-all/route.test.ts": {

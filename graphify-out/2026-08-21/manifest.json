@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1787346291.8641932,
-    "ast_hash": "13699314fab7d060c431c5bcceb3b53b",
+    "mtime": 1787346660.2104073,
+    "ast_hash": "e9b5d980fc080c72788fee5d239f0ec1",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -1175,8 +1175,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.test.ts": {
-    "mtime": 1787346291.8671947,
-    "ast_hash": "77e5c0868e43a2c56509ec2d4f01f1d6",
+    "mtime": 1787346660.212408,
+    "ast_hash": "7be6b5f21b5891347bdbf18a7091d04f",
     "semantic_hash": ""
   },
   "openspec/changes/archive/2026-08-21-menu-import-text-only-evaluation-spike/.openspec.yaml": {
@@ -1230,8 +1230,8 @@
     "semantic_hash": ""
   },
   "openspec/changes/menu-import-v5-assisted-approval-ui/tasks.md": {
-    "mtime": 1787345629.654258,
-    "ast_hash": "a3bc0a37fc89b61b4110c616249849ff",
+    "mtime": 1787346452.890773,
+    "ast_hash": "bf56b0a75f75848f0b98cd7b9fe03a52",
     "semantic_hash": ""
   },
   "openspec/specs/menu-import-text-only-evaluation/spec.md": {
@@ -1240,8 +1240,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/approve-all/route.test.ts": {
-    "mtime": 1787346347.4807034,
-    "ast_hash": "bd0aa814a21224608076a95a921ea030",
+    "mtime": 1787346507.3061726,
+    "ast_hash": "6bccb5eb16db9bac8db8feaddbeb6030",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/approve-all/route.ts": {
@@ -1255,8 +1255,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/assisted-approval-policy.test.ts": {
-    "mtime": 1787346021.043082,
-    "ast_hash": "908f72a0a38a94215f1337cb59b043a7",
+    "mtime": 1787346492.5628605,
+    "ast_hash": "f9c40b9f4e4dabc8bbf6767777da33dc",
     "semantic_hash": ""
   },
   "src/lib/menu-import/assisted-approval-policy.ts": {

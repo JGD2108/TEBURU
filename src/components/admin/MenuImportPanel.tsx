@@ -5,6 +5,7 @@ import { AlertTriangle, Check, FileText, ImageIcon, Loader2, Pencil, Trash2, Upl
 import { readApiResponse, requireApiSuccess, staffFetch } from '@/lib/api-client';
 import { uploadRecoveryMessage } from '@/lib/menu-import-upload-recovery';
 import { supabase } from '@/lib/supabase';
+import { issueLabel, issueReasons, projectMenuImport, type ExtractionIssue } from './menu-import-projection';
 
 type SourceBox = { x: number; y: number; width: number; height: number };
 type DraftCategory = {
@@ -57,6 +58,12 @@ type DraftItem = {
   source_bbox?: SourceBox | null;
   source_bboxes?: SourceBox[] | null;
   review_status?: 'pending' | 'approved' | 'excluded' | 'published';
+  extraction_status?: 'valid' | 'review' | 'invalid';
+  extractionStatus?: 'valid' | 'review' | 'invalid';
+  validation_status?: 'valid' | 'review' | 'invalid';
+  validationStatus?: 'valid' | 'review' | 'invalid';
+  retry_exhausted?: boolean;
+  retryExhausted?: boolean;
 };
 type DraftItemPatch = Partial<Pick<DraftItem, 'name' | 'description' | 'price' | 'raw_price' | 'normalized_price' | 'price_currency' | 'price_variants' | 'shared_price_provenance' | 'draft_category_id'>> & { category_id?: string | null; approved?: boolean };
 type Evidence = {
@@ -75,7 +82,7 @@ type ImportJob = {
   error_message?: string | null;
   failure_reason?: string | null;
   created_at?: string;
-  draft?: { categories?: DraftCategory[]; items?: DraftItem[]; evidence?: Evidence[] };
+  draft?: { categories?: DraftCategory[]; items?: DraftItem[]; evidence?: Evidence[]; extraction_issues?: ExtractionIssue[]; extractionIssues?: ExtractionIssue[]; invalid_fragments?: ExtractionIssue[]; invalidFragments?: ExtractionIssue[] };
   categories?: DraftCategory[];
   items?: DraftItem[];
   validation_errors?: Array<{ item_id?: string; fields?: string[]; message?: string }>;
@@ -113,7 +120,15 @@ const panelStyle = { background: 'var(--bg-surface)', padding: '20px', borderRad
 const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '7px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.7)' } as const;
 
 function jobDraft(job: ImportJob | null) {
-  return { categories: job?.draft?.categories ?? job?.categories ?? [], items: job?.draft?.items ?? job?.items ?? [], evidence: job?.draft?.evidence ?? [] };
+  return {
+    categories: job?.draft?.categories ?? job?.categories ?? [],
+    items: job?.draft?.items ?? job?.items ?? [],
+    evidence: job?.draft?.evidence ?? [],
+    extraction_issues: job?.draft?.extraction_issues,
+    extractionIssues: job?.draft?.extractionIssues,
+    invalid_fragments: job?.draft?.invalid_fragments,
+    invalidFragments: job?.draft?.invalidFragments,
+  };
 }
 
 function asFinitePrice(value: unknown) {
@@ -277,7 +292,8 @@ export default function MenuImportPanel() {
     return () => window.clearInterval(interval);
   }, [loadSelected, selected]);
 
-  const validationCount = useMemo(() => jobDraft(selected).items.filter((item) => item.review_status !== 'excluded' && fieldProblems(item).length > 0).length, [selected]);
+  const draftProjection = useMemo(() => projectMenuImport(jobDraft(selected), (item) => fieldProblems(item as DraftItem).length > 0), [selected]);
+  const validationCount = useMemo(() => draftProjection.reviewItems.filter((item) => fieldProblems(item).length > 0).length, [draftProjection]);
   const importUnavailable = readiness?.available === false;
 
   async function upload(event: React.FormEvent) {
@@ -394,8 +410,8 @@ export default function MenuImportPanel() {
   }
 
   if (loading) return <section style={panelStyle}>Cargando importaciones...</section>;
-  const { categories, items, evidence } = jobDraft(selected);
-  const visibleItems = items.filter((item) => item.review_status !== 'excluded');
+  const { categories, evidence } = jobDraft(selected);
+  const { validItems, reviewItems, issues } = draftProjection;
   const lineage = selected ? lineageFor(selected) : null;
   const canReplay = selected ? ['pending', 'failed'].includes(selected.status) : false;
   const canDelete = selected ? !['processing', 'published'].includes(selected.status) : false;
@@ -443,11 +459,27 @@ export default function MenuImportPanel() {
       {selected.status === 'failed' && <div role="alert" style={{ color: 'var(--primary)' }}>No fue posible analizar este archivo. {selected.error_message || selected.failure_reason}</div>}
       {selected.status === 'needs_review' && <>
         {(validationCount > 0 || publishErrors.length > 0) && <div role="alert" style={{ padding: 12, borderRadius: 6, background: 'rgba(255,71,87,.12)', color: 'var(--primary)' }}><AlertTriangle size={16} /> {validationCount ? `${validationCount} platillo(s) requieren corrección.` : null}{publishErrors.map((error) => <div key={error}>{error}</div>)}</div>}
-        {visibleItems.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : visibleItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}
+        {validItems.length === 0 && reviewItems.length === 0 && issues.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : <>
+          {validItems.length > 0 && <section aria-label="Platos válidos" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Platos válidos ({validItems.length})</h4>{validItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>}
+          {reviewItems.length > 0 && <section aria-label="Candidatos para revisar" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Candidatos para revisar ({reviewItems.length})</h4><p style={{ margin: 0, color: 'var(--text-muted)' }}>Corrige, aprueba o elimina estos candidatos antes de publicarlos.</p>{reviewItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>}
+          {issues.length > 0 && <section aria-label="Incidencias de extracción" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Incidencias de extracción ({issues.length})</h4>{issues.map((issue, index) => <ExtractionIssueCard key={issue.id ?? issue.candidate_id ?? issue.candidateId ?? index} issue={issue} />)}</section>}
+        </>}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}><button className="btn-primary" disabled={submitting || validationCount > 0} onClick={publish}><Check size={16} /> Publicar aprobados</button></div>
       </>}
     </div>}
   </section>;
+}
+
+function ExtractionIssueCard({ issue }: { issue: ExtractionIssue }) {
+  const page = issue.source_page ?? issue.sourcePage;
+  const box = issue.source_bbox ?? issue.sourceBbox;
+  const reasons = issueReasons(issue);
+  const retryExhausted = issue.retry_exhausted ?? issue.retryExhausted;
+  return <article style={{ padding: 16, background: 'var(--bg-surface-elevated)', border: '1px solid rgba(255,71,87,.4)', borderRadius: 10 }}>
+    <strong>{issueLabel(issue)}</strong>
+    <p style={{ margin: '6px 0 0', color: 'var(--text-muted)' }}>No se añadió como platillo.{page ? ` Página ${page}.` : ''}{formatBox(box) ? ` Región: ${formatBox(box)}.` : ''}</p>
+    <div role="alert" style={{ marginTop: 10, color: 'var(--primary)' }}><AlertTriangle size={14} /> {reasons.length ? reasons.join(' · ') : 'Fragmento rechazado durante la extracción'}{retryExhausted ? ' · Se agotaron los reintentos' : ''}</div>
+  </article>;
 }
 
 function DraftItemCard({ item, categories, evidence, saving, onSave, onRemove }: { item: DraftItem; categories: DraftCategory[]; evidence: Evidence[]; saving: boolean; onSave: (item: DraftItem, patch: DraftItemPatch) => Promise<void>; onRemove: (item: DraftItem) => Promise<void> }) {

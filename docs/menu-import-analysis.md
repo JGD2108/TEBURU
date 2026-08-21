@@ -34,7 +34,7 @@ Defaults and deployment values must be selected for the host timeout and Gemini
 quota; do not increase them merely for a single menu fixture.
 
 Version analyzer behavior independently with `MENU_IMPORT_ANALYZER_VERSION`
-(default `menu-import-v3-visual`) and prompt behavior with
+(default `menu-import-v4-visual`; set `menu-import-v3-visual` for rollback) and prompt behavior with
 `MENU_IMPORT_GEMINI_PROMPT_VERSION` (default `visual-v1`). Roll back by setting
 the earlier analyzer version/fallback control; schema migrations are additive
 and must remain in place. Each completed run records analyzer/prompt version,
@@ -42,6 +42,31 @@ model, source hash, page/call/retry counts, duration, token counts when the
 provider reports them, suspicious pages, item/review counts, fallback reasons,
 and safe error codes. Use these fields for cost and quality monitoring; do not
 log provider request bodies or raw provider errors.
+
+### Visual architecture rollout and provider boundary
+
+The analysis provider has an explicit two-stage rollout. Stage 1 is the default:
+it preserves the current request composition while recording a server-generated
+analysis run, render metadata/hash, provider request/raw/decode/validation
+events, candidate IDs, and reconciliation events. Verify this trace for each
+candidate before changing behavior.
+
+Stage 2 is intentionally disabled unless all three server-only controls are
+set: `MENU_IMPORT_ANALYZER_VERSION=menu-import-v4-visual`,
+`MENU_IMPORT_VISUAL_ARCHITECTURE_STAGE=2`, and
+`MENU_IMPORT_STAGE1_LINEAGE_VERIFIED=true`. In Stage 2 the primary Gemini
+request contains the rendered image, schema/instructions, page number, and
+technical metadata only; native/OCR/selected text is retained as bounded
+evidence and is eligible only for a targeted retry. It cannot establish visual
+boundaries.
+
+Textual fallback starts each page with an empty category state and returns
+reviewable evidence (`provider_fallback`) instead of an indistinguishable
+visual success. It is used when rendering or Gemini is unavailable; it does
+not authorize a clean draft merely because text was extracted. Raw provider
+payloads are hashed and may be retained in bounded diagnostics for
+`MENU_IMPORT_LINEAGE_RAW_RETENTION_DAYS` (default 7); credentials and images
+are never copied into those events.
 
 The `menu-imports` bucket is private. PDFs and generated import assets must use
 the `restaurants/<restaurant-id>/...` prefix. Browser access is only through an

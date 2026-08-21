@@ -3,6 +3,7 @@ import {
   analyzePdf,
   buildGeminiRequestBody,
   createGeminiTextStructurer,
+  createGeminiVisualStructurer,
   createPdfAnalysisProvider,
   decodeGeminiVisualDocument,
   decodeGeminiItems,
@@ -12,7 +13,7 @@ import {
   renderedDimensions,
   selectPageEvidence,
 } from './provider';
-import { reconcileVisualDocument, validateVisualDocument } from './visual-analysis';
+import { assignServerIds, bboxIoU, bboxOverlap, createServerIdFactory, DEFAULT_RETRY_BUDGET, mergeRegionalSections, normalizedToPixelBox, pixelToNormalizedBox, reconcileVisualDocument, regionToPageBox, retryInstructions, validateVisualDocument } from './visual-analysis';
 
 const renderedPage = { page: 2, source: 'native' as const, text: 'ENTRADAS\nArepa 10', nativeText: 'ENTRADAS\nArepa 10', image: { mimeType: 'image/jpeg' as const, data: new Uint8Array([1, 2, 3]), width: 800, height: 1200 } };
 const visualOutput = { pages: [{ page: 2, sections: [{ id: 'starters', title: 'ENTRADAS', bbox: { x: 0, y: 0, width: 1, height: 0.4 }, items: [{ name: 'Arepa', attributes: ['maíz', 'queso'], rawPrice: '10', price: { raw: '10', amount: 10, currency: null }, variants: [{ label: 'small', raw: '8', amount: 8, currency: null }, { label: 'large', raw: '10', amount: 10, currency: null }], bbox: { x: 0.1, y: 0.1, width: 0.3, height: 0.05 }, confidence: { section: 'high', name: 'high', description: 'low', price: 'high' } }] }] }] };
@@ -35,7 +36,7 @@ describe('menu-import visual provider', () => {
   });
 
   it('sends a scoped multimodal image and auxiliary text, never the key in the URL', async () => {
-    const body = buildGeminiRequestBody([renderedPage]);
+    const body = buildGeminiRequestBody([renderedPage], undefined, 1);
     expect(JSON.stringify(body)).toContain('inlineData'); expect(JSON.stringify(body)).toContain('primary evidence'); expect(JSON.stringify(body)).toContain('Arepa 10');
     const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(visualOutput) }] } }] })));
     const structurer = createGeminiTextStructurer({ key: 'server-secret', model: 'test', fetch: fetcher });
@@ -83,5 +84,66 @@ describe('menu-import visual provider', () => {
     const ocr = vi.fn().mockResolvedValue([{ page: 1, source: 'ocr', text: 'BEBIDAS\nLimonada 8' }]);
     const result = await analyzePdf(new Uint8Array([1]), { extractNative: vi.fn().mockResolvedValue({ pages: [{ page: 1, source: 'native', text: '' }], images: [] }), ocr, structure: async (pages) => parseMenuText(pages), associateImages: vi.fn().mockResolvedValue([]) });
     expect(ocr).toHaveBeenCalledOnce(); expect(result.items[0]).toMatchObject({ name: 'Limonada', page: 1, price: 8 });
+  });
+
+  it('keeps Stage 1 text instrumentation separate from Stage 2 image-only primary input', () => {
+    const stageOne = JSON.stringify(buildGeminiRequestBody([renderedPage], undefined, 1));
+    const stageTwo = JSON.stringify(buildGeminiRequestBody([renderedPage], undefined, 2));
+    expect(stageOne).toContain('Arepa 10');
+    expect(stageTwo).toContain('VISUAL SOURCE OF TRUTH');
+    expect(stageTwo).not.toContain('Arepa 10');
+    expect(stageTwo).toContain('inlineData');
+  });
+
+  it('records a server-attributable Stage 1 trace for every decoded candidate', async () => {
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(visualOutput) }] } }] })));
+    const structurer = createGeminiVisualStructurer({ key: 'server-secret', model: 'test', fetch: fetcher, architectureStage: 1, analyzerVersion: 'menu-import-v3-visual' });
+    const document = await structurer([renderedPage]);
+    const item = document?.pages[0].sections[0].items[0];
+    expect(item?.itemId).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(item?.candidateId).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(structurer.lastLineage).toEqual(expect.arrayContaining([
+      expect.objectContaining({ stage: 'render', page: 2, imageIncluded: true }),
+      expect.objectContaining({ stage: 'provider_request', page: 2 }),
+      expect.objectContaining({ stage: 'provider_raw', page: 2, rawPayloadHash: expect.any(String) }),
+      expect.objectContaining({ stage: 'decode', candidateId: item?.candidateId, itemId: item?.itemId }),
+      expect.objectContaining({ stage: 'validation', candidateId: item?.candidateId }),
+      expect.objectContaining({ stage: 'reconciliation', candidateId: item?.candidateId }),
+    ]));
+  });
+
+  it('uses server IDs, deterministic bbox conversions, and spatial merge policy', () => {
+    const factory = createServerIdFactory('run');
+    const assigned = assignServerIds({ pages: [{ page: 1, sections: [{ id: 'model-repeat', title: 'DRINKS', items: [{ name: 'Tea', bbox: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 } }] }] }] }, factory);
+    expect(assigned.pages[0].sections[0]).toMatchObject({ id: expect.stringMatching(/^[0-9a-f-]{36}$/i), modelSectionHint: 'model-repeat' });
+    expect(assigned.pages[0].sections[0].items[0].itemId).toMatch(/^[0-9a-f-]{36}$/i);
+    const normalized = pixelToNormalizedBox({ x: 20, y: 10, width: 40, height: 20 }, 200, 100);
+    expect(normalizedToPixelBox(normalized, 200, 100)).toEqual({ x: 20, y: 10, width: 40, height: 20 });
+    expect(regionToPageBox({ x: 0.5, y: 0.5, width: 0.5, height: 0.5 }, { x: 0, y: 0, width: 0.5, height: 1 })).toEqual({ x: 0.25, y: 0.5, width: 0.25, height: 0.5 });
+    expect(bboxIoU({ x: 0, y: 0, width: 0.5, height: 0.5 }, { x: 0.25, y: 0, width: 0.5, height: 0.5 })).toBeCloseTo(1 / 3);
+    expect(bboxOverlap({ x: 0, y: 0, width: 0.5, height: 0.5 }, { x: 0.25, y: 0, width: 0.5, height: 0.5 })).toBeCloseTo(0.5);
+    const merged = mergeRegionalSections([{ id: 'a', title: 'DRINKS', items: [{ name: 'Tea', bbox: { x: 0, y: 0, width: 0.4, height: 0.2 }, validation: { status: 'review', reasons: ['LOW_VISUAL_CONFIDENCE'] } }] }], [{ id: 'b', title: 'DRINKS', items: [{ name: 'Tea', bbox: { x: 0.02, y: 0, width: 0.4, height: 0.2 }, validation: { status: 'valid', reasons: [] } }] }]);
+    expect(merged[0].items).toEqual([expect.objectContaining({ validation: { status: 'valid', reasons: [] } })]);
+  });
+
+  it('bounds semantic retries and never carries fallback categories across pages', () => {
+    expect(DEFAULT_RETRY_BUDGET).toMatchObject({ primary: 1, semanticFullPage: 1, semanticRegional: 2 });
+    expect(retryInstructions([{ code: 'MERGED_NAME', severity: 'warning', page: 1 }], 1)).toEqual([]);
+    expect(parseMenuText([{ page: 1, source: 'native', text: 'STARTERS\nSoup 7' }, { page: 2, source: 'native', text: 'Tea 3' }])).toEqual(expect.arrayContaining([
+      expect.objectContaining({ page: 1, category: 'STARTERS', extractionStatus: 'review' }),
+      expect.objectContaining({ page: 2, category: '', extractionStatus: 'review' }),
+    ]));
+  });
+
+  it('reconciles only adjacent continuation and gives a clear current heading precedence', () => {
+    const reconciled = reconcileVisualDocument({ pages: [
+      { page: 1, sections: [{ id: 'p1', modelSectionHint: 'model-p1', title: 'STARTERS', items: [] }] },
+      { page: 2, sections: [{ id: 'p2', continuationOf: 'model-p1', items: [{ name: 'Soup' }] }, { id: 'new', continuationOf: 'model-p1', title: 'DESSERTS', items: [{ name: 'Cake' }] }] },
+      { page: 3, sections: [{ id: 'p3', continuationOf: 'model-p1', items: [{ name: 'Tea' }] }] },
+    ] });
+    expect(reconciled.document.pages[1].sections[0].title).toBe('STARTERS');
+    expect(reconciled.document.pages[1].sections[1].title).toBe('DESSERTS');
+    expect(reconciled.document.pages[2].sections[0].title).toBeUndefined();
+    expect(reconciled.signals).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'RECONCILIATION_CONFLICT', page: 3 })]));
   });
 });

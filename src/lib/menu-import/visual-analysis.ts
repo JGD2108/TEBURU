@@ -1,218 +1,74 @@
-import type { Confidence, ExtractedMenuItem, PageText } from './types';
+import { randomUUID } from 'node:crypto';
+import type { Confidence, ExtractedMenuItem, NormalizedBBox, ObservedPrice, PageText, PixelBBox, ValidationSignal as SharedValidationSignal } from './types';
 
-export const ANALYZER_PROMPT_VERSION = 'menu-import-visual-v1';
+/** Prompt/schema version only. The analyzer version is selected by the worker. */
+export const ANALYZER_PROMPT_VERSION = 'menu-import-visual-v4';
 export const MAX_PAGE_RETRIES = 2;
-
-export type NormalizedBox = { x: number; y: number; width: number; height: number };
+export type NormalizedBox = NormalizedBBox;
 export type VisualAsset = { mimeType: 'image/jpeg' | 'image/png'; data: Uint8Array; width: number; height: number };
-export type VisualPageEvidence = PageText & {
-  image?: VisualAsset;
-  nativeText?: string;
-  ocrText?: string;
-};
+export type VisualPageEvidence = PageText & { image?: VisualAsset; nativeText?: string; ocrText?: string; region?: NormalizedBox };
+export type ValidationStatus = 'valid' | 'review' | 'invalid';
+export type ValidationReason = 'MERGED_NAME' | 'PRICE_ONLY_NAME' | 'MULTIPLE_PRICES_IN_NAME' | 'INVALID_PAGE_REFERENCE' | 'SUSPICIOUS_CATEGORY' | 'DECORATIVE_CONTENT' | 'SPARSE_PAGE_INCONSISTENCY' | 'INVALID_BBOX' | 'RECONCILIATION_CONFLICT' | 'DESCRIPTION_FRAGMENT' | 'MISSING_SECTION' | 'AMBIGUOUS_SECTION' | 'AMBIGUOUS_PRICE' | 'LOW_VISUAL_CONFIDENCE';
+export type ValidationSignal = { code: ValidationReason; severity: 'error' | 'warning'; page: number; sectionId?: string; itemName?: string };
+export type ItemValidation = { status: ValidationStatus; reasons: ValidationReason[] };
 
-export type ObservedPrice = {
-  raw?: string;
-  amount?: number | null;
-  currency?: string | null;
-  label?: string;
-  shared?: boolean;
-};
+export type VisualMenuItem = { itemId?: string; candidateId?: string; name: string; description?: string; rawPrice?: string; price?: ObservedPrice; variants?: ObservedPrice[]; modifiers?: string[]; options?: string[]; attributes?: string[]; bbox?: NormalizedBox; confidence?: Partial<Record<'name' | 'description' | 'price' | 'section', Confidence>>; validation?: ItemValidation };
+export type VisualSection = { /** Server-assigned. Provider ID is only an opaque hint. */ id: string; modelSectionHint?: string; title?: string; parentId?: string; continuationOf?: string; bbox?: NormalizedBox; items: VisualMenuItem[] };
+export type VisualMenuPage = { page: number; sections: VisualSection[]; metadata?: Record<string, string>; decorative?: string[] };
+export type VisualMenuDocument = { metadata?: Record<string, string>; pages: VisualMenuPage[]; globalPriceNotes?: string[] };
+export type ServerIdKind = 'section' | 'item' | 'candidate' | 'attempt' | 'lineage' | 'reconciled-section' | 'region';
+export type ServerIdFactory = { analysisRunId: string; next: (kind: ServerIdKind, page?: number, attempt?: number) => string };
 
-export type VisualMenuItem = {
-  name: string;
-  description?: string;
-  rawPrice?: string;
-  price?: ObservedPrice;
-  variants?: ObservedPrice[];
-  modifiers?: string[];
-  options?: string[];
-  attributes?: string[];
-  bbox?: NormalizedBox;
-  confidence?: Partial<Record<'name' | 'description' | 'price' | 'section', Confidence>>;
-  reviewReasons?: string[];
-};
+/** IDs are server issued; a provider hint is never accepted as an authority. */
+export function createServerIdFactory(analysisRunId: string): ServerIdFactory {
+  const counters = new Map<string, number>();
+  return { analysisRunId, next(kind, page = 0, attempt = 0) { const key = `${kind}:${page}:${attempt}`; counters.set(key, (counters.get(key) ?? 0) + 1); return randomUUID(); } };
+}
 
-export type VisualSection = {
-  id: string;
-  title?: string;
-  parentId?: string;
-  bbox?: NormalizedBox;
-  continuationOf?: string;
-  items: VisualMenuItem[];
-};
-
-export type VisualMenuPage = {
-  page: number;
-  sections: VisualSection[];
-  metadata?: Record<string, string>;
-  decorative?: string[];
-};
-
-export type VisualMenuDocument = {
-  metadata?: Record<string, string>;
-  pages: VisualMenuPage[];
-  globalPriceNotes?: string[];
-};
-
-export type ValidationSignal = {
-  code:
-    | 'MERGED_NAME'
-    | 'PRICE_ONLY_NAME'
-    | 'MULTIPLE_PRICES_IN_NAME'
-    | 'INVALID_PAGE_REFERENCE'
-    | 'SUSPICIOUS_CATEGORY'
-    | 'DECORATIVE_CONTENT'
-    | 'SPARSE_PAGE_INCONSISTENCY'
-    | 'INVALID_BBOX'
-    | 'RECONCILIATION_CONFLICT';
-  severity: 'error' | 'warning';
-  page: number;
-  sectionId?: string;
-  itemName?: string;
-};
-
-export type PageOutcome = 'accepted' | 'retry' | 'manual_review';
-export type RetryInstruction = { page: number; reason: ValidationSignal['code']; region?: NormalizedBox };
-
-const PRICE_TOKEN = /(?:[$€£]|\b(?:usd|cop|eur|mxn)\b\s*)?\d{1,6}(?:[.,]\d{1,2})?(?:\s*(?:usd|cop|eur|mxn))?/gi;
-const PRICE_ONLY = /^(?:[$€£]|\b(?:usd|cop|eur|mxn)\b\s*)?\d{1,6}(?:[.,]\d{1,2})?(?:\s*(?:usd|cop|eur|mxn))?$/i;
-const DECORATIVE = /(?:https?:\/\/|www\.|@\w+|follow\s+us|thank\s+you|bienvenid[oa]|contact(?:o| us)?|tel(?:ephone)?\s*:)/i;
-const SUSPICIOUS_SECTION = /^(?:menu|welcome|bienvenid[oa]|thank\s+you|follow\s+us|contact(?:o| us)?)$/i;
-
+export function clipNormalizedBox(value: NormalizedBox): NormalizedBox {
+  const x = Math.max(0, Math.min(1, value.x)); const y = Math.max(0, Math.min(1, value.y));
+  const right = Math.max(x, Math.min(1, value.x + value.width)); const bottom = Math.max(y, Math.min(1, value.y + value.height));
+  return { x, y, width: right - x, height: bottom - y };
+}
 export function isNormalizedBox(value: unknown): value is NormalizedBox {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const box = value as Record<string, unknown>;
-  const x = box.x;
-  const y = box.y;
-  const width = box.width;
-  const height = box.height;
-  return [x, y, width, height].every((value) => typeof value === 'number' && Number.isFinite(value))
-    && (x as number) >= 0 && (y as number) >= 0 && (width as number) > 0 && (height as number) > 0
-    && (x as number) + (width as number) <= 1 && (y as number) + (height as number) <= 1;
+  return ['x', 'y', 'width', 'height'].every((key) => typeof box[key] === 'number' && Number.isFinite(box[key])) && (box.x as number) >= 0 && (box.y as number) >= 0 && (box.width as number) > 0 && (box.height as number) > 0 && (box.x as number) + (box.width as number) <= 1 && (box.y as number) + (box.height as number) <= 1;
 }
+export function pixelToNormalizedBox(value: PixelBBox, width: number, height: number): NormalizedBox { if (!(width > 0 && height > 0)) throw new Error('MENU_IMPORT_INVALID_IMAGE_DIMENSIONS'); return clipNormalizedBox({ x: value.x / width, y: value.y / height, width: value.width / width, height: value.height / height }); }
+export function normalizedToPixelBox(value: NormalizedBox, width: number, height: number): PixelBBox { if (!isNormalizedBox(value) || !(width > 0 && height > 0)) throw new Error('MENU_IMPORT_INVALID_BBOX_CONVERSION'); const box = clipNormalizedBox(value); return { x: Math.round(box.x * width), y: Math.round(box.y * height), width: Math.round(box.width * width), height: Math.round(box.height * height) }; }
+/** Converts a crop-relative provider box back to the full rendered page. */
+export function regionToPageBox(value: NormalizedBox, region: NormalizedBox): NormalizedBox { if (!isNormalizedBox(value) || !isNormalizedBox(region)) throw new Error('MENU_IMPORT_INVALID_REGION_BBOX'); return clipNormalizedBox({ x: region.x + value.x * region.width, y: region.y + value.y * region.height, width: value.width * region.width, height: value.height * region.height }); }
+export function bboxIoU(left?: NormalizedBox, right?: NormalizedBox): number { if (!left || !right || !isNormalizedBox(left) || !isNormalizedBox(right)) return 0; const x = Math.max(left.x, right.x); const y = Math.max(left.y, right.y); const width = Math.max(0, Math.min(left.x + left.width, right.x + right.width) - x); const height = Math.max(0, Math.min(left.y + left.height, right.y + right.height) - y); const intersection = width * height; return intersection ? intersection / (left.width * left.height + right.width * right.height - intersection) : 0; }
+export function bboxOverlap(left?: NormalizedBox, right?: NormalizedBox): number { if (!left || !right || !isNormalizedBox(left) || !isNormalizedBox(right)) return 0; const x = Math.max(left.x, right.x); const y = Math.max(left.y, right.y); const width = Math.max(0, Math.min(left.x + left.width, right.x + right.width) - x); const height = Math.max(0, Math.min(left.y + left.height, right.y + right.height) - y); const intersection = width * height; return intersection / Math.min(left.width * left.height, right.width * right.height); }
 
-function nameSignals(page: number, section: VisualSection, item: VisualMenuItem): ValidationSignal[] {
-  const name = item.name.trim();
-  const signals: ValidationSignal[] = [];
-  const prices = name.match(PRICE_TOKEN) ?? [];
-  if (PRICE_ONLY.test(name)) signals.push({ code: 'PRICE_ONLY_NAME', severity: 'error', page, sectionId: section.id, itemName: name });
-  if (prices.length > 1) signals.push({ code: 'MULTIPLE_PRICES_IN_NAME', severity: 'error', page, sectionId: section.id, itemName: name });
-  if ((/\s(?:\/|\||;|•)\s/.test(name) || /\b(?:and|y)\b/i.test(name)) && name.length > 36) {
-    signals.push({ code: 'MERGED_NAME', severity: 'warning', page, sectionId: section.id, itemName: name });
-  }
-  if (DECORATIVE.test(name)) signals.push({ code: 'DECORATIVE_CONTENT', severity: 'error', page, sectionId: section.id, itemName: name });
-  if (item.bbox && !isNormalizedBox(item.bbox)) signals.push({ code: 'INVALID_BBOX', severity: 'error', page, sectionId: section.id, itemName: name });
-  return signals;
-}
+export function assignServerIds(document: VisualMenuDocument, factory: ServerIdFactory, attempt = 1): VisualMenuDocument { return { ...document, pages: document.pages.map((page) => ({ ...page, sections: page.sections.map((section) => ({ ...section, id: factory.next('section', page.page, attempt), modelSectionHint: section.modelSectionHint ?? section.id, items: section.items.map((item) => ({ ...item, itemId: factory.next('item', page.page, attempt), candidateId: factory.next('candidate', page.page, attempt) })) })) })) }; }
 
-/** Deterministic checks intentionally inspect evidence, never infer menu content. */
-export function validateVisualDocument(document: VisualMenuDocument, evidence: VisualPageEvidence[]): ValidationSignal[] {
-  const expectedPages = new Set(evidence.map((page) => page.page));
-  const signals: ValidationSignal[] = [];
-  for (const page of document.pages) {
-    if (!expectedPages.has(page.page)) {
-      signals.push({ code: 'INVALID_PAGE_REFERENCE', severity: 'error', page: page.page });
-      continue;
-    }
-    const pageEvidence = evidence.find((entry) => entry.page === page.page);
-    const itemCount = page.sections.reduce((total, section) => total + section.items.length, 0);
-    if ((pageEvidence?.text.trim().length ?? 0) >= 80 && itemCount === 0) {
-      signals.push({ code: 'SPARSE_PAGE_INCONSISTENCY', severity: 'warning', page: page.page });
-    }
-    for (const section of page.sections) {
-      if (section.bbox && !isNormalizedBox(section.bbox)) signals.push({ code: 'INVALID_BBOX', severity: 'error', page: page.page, sectionId: section.id });
-      if (!section.title?.trim() || SUSPICIOUS_SECTION.test(section.title.trim()) || DECORATIVE.test(section.title)) {
-        signals.push({ code: 'SUSPICIOUS_CATEGORY', severity: 'warning', page: page.page, sectionId: section.id });
-      }
-      if (section.title && DECORATIVE.test(section.title)) signals.push({ code: 'DECORATIVE_CONTENT', severity: 'error', page: page.page, sectionId: section.id });
-      for (const item of section.items) signals.push(...nameSignals(page.page, section, item));
-    }
-  }
-  return signals;
-}
+const PRICE_TOKEN = /(?:\p{Sc}\s*)?\d{1,6}(?:[.,]\d{1,2})?(?:\s*[A-Za-z]{3,5})?/giu;
+const PRICE_ONLY = /^(?:\p{Sc}\s*)?\d{1,6}(?:[.,]\d{1,2})?(?:\s*[A-Za-z]{3,5})?$/iu;
+const DECORATIVE = /(?:https?:\/\/|www\.|@\w+|follow\s+us|thank\s+you|bienvenid[oa]|contact(?:o| us)?|tel(?:ephone)?\s*:)/i;
+const SUSPICIOUS_SECTION = /^(?:menu|welcome|bienvenid[oa]|thank\s+you|follow\s+us|contact(?:o| us)?)$/i;
+function itemSignals(page: number, section: VisualSection, item: VisualMenuItem): ValidationSignal[] { const name = item.name.trim(); const signals: ValidationSignal[] = []; const prices = name.match(PRICE_TOKEN) ?? []; if (PRICE_ONLY.test(name)) signals.push({ code: 'PRICE_ONLY_NAME', severity: 'error', page, sectionId: section.id, itemName: name }); if (prices.length > 1) signals.push({ code: 'MULTIPLE_PRICES_IN_NAME', severity: 'error', page, sectionId: section.id, itemName: name }); if ((/\s(?:\/|\||;|•)\s/.test(name) || /\b(?:and|y)\b/i.test(name)) && name.length > 36) signals.push({ code: 'MERGED_NAME', severity: 'warning', page, sectionId: section.id, itemName: name }); if (DECORATIVE.test(name)) signals.push({ code: 'DECORATIVE_CONTENT', severity: 'error', page, sectionId: section.id, itemName: name }); if (item.bbox && !isNormalizedBox(item.bbox)) signals.push({ code: 'INVALID_BBOX', severity: 'error', page, sectionId: section.id, itemName: name }); if (item.confidence?.name === 'low') signals.push({ code: 'LOW_VISUAL_CONFIDENCE', severity: 'warning', page, sectionId: section.id, itemName: name }); if (!section.title?.trim() && !section.continuationOf) signals.push({ code: 'MISSING_SECTION', severity: 'warning', page, sectionId: section.id, itemName: name }); return signals; }
+export function validationForItem(page: number, section: VisualSection, item: VisualMenuItem): ItemValidation { const reasons = itemSignals(page, section, item).map((signal) => signal.code); const invalid = reasons.some((reason) => ['PRICE_ONLY_NAME', 'MULTIPLE_PRICES_IN_NAME', 'DECORATIVE_CONTENT', 'INVALID_BBOX'].includes(reason)); return { status: invalid ? 'invalid' : reasons.length ? 'review' : 'valid', reasons }; }
+/** Deterministic checks inspect output/evidence only; they never infer menu content. */
+export function validateVisualDocument(document: VisualMenuDocument, evidence: VisualPageEvidence[]): ValidationSignal[] { const expectedPages = new Set(evidence.map((page) => page.page)); const signals: ValidationSignal[] = []; for (const page of document.pages) { if (!expectedPages.has(page.page)) { signals.push({ code: 'INVALID_PAGE_REFERENCE', severity: 'error', page: page.page }); continue; } const pageEvidence = evidence.find((entry) => entry.page === page.page); if ((pageEvidence?.text.trim().length ?? 0) >= 80 && page.sections.every((section) => !section.items.length)) signals.push({ code: 'SPARSE_PAGE_INCONSISTENCY', severity: 'warning', page: page.page }); for (const section of page.sections) { if (section.bbox && !isNormalizedBox(section.bbox)) signals.push({ code: 'INVALID_BBOX', severity: 'error', page: page.page, sectionId: section.id }); if (!section.title?.trim() || SUSPICIOUS_SECTION.test(section.title.trim()) || DECORATIVE.test(section.title)) signals.push({ code: 'SUSPICIOUS_CATEGORY', severity: 'warning', page: page.page, sectionId: section.id }); if (section.title && DECORATIVE.test(section.title)) signals.push({ code: 'DECORATIVE_CONTENT', severity: 'error', page: page.page, sectionId: section.id }); for (const item of section.items) signals.push(...itemSignals(page.page, section, item)); } } return signals; }
+export function applyValidation(document: VisualMenuDocument): VisualMenuDocument { return { ...document, pages: document.pages.map((page) => ({ ...page, sections: page.sections.map((section) => ({ ...section, items: section.items.map((item) => ({ ...item, validation: validationForItem(page.page, section, item) })) })) })) }; }
 
-export function outcomeForPage(signals: ValidationSignal[], modelConfidence: Confidence | undefined, attempt: number): PageOutcome {
-  if (signals.some((signal) => signal.severity === 'error')) return attempt < MAX_PAGE_RETRIES ? 'retry' : 'manual_review';
-  if (signals.length || modelConfidence === 'low') return 'manual_review';
-  return 'accepted';
-}
+export type RetryBudget = { primary: number; semanticFullPage: number; semanticRegional: number; providerTransient: number };
+export const DEFAULT_RETRY_BUDGET: RetryBudget = { primary: 1, semanticFullPage: 1, semanticRegional: 2, providerTransient: 2 };
+export type PageOutcome = 'accepted' | 'retry' | 'manual_review';
+export type RetryInstruction = { page: number; reason: ValidationReason; region?: NormalizedBox; kind?: 'semantic-full-page' | 'semantic-regional' };
+export function outcomeForPage(signals: ValidationSignal[], modelConfidence: Confidence | undefined, attempt: number): PageOutcome { if (signals.some((signal) => signal.severity === 'error')) return attempt < MAX_PAGE_RETRIES ? 'retry' : 'manual_review'; return signals.length || modelConfidence === 'low' ? 'manual_review' : 'accepted'; }
+export function retryInstructions(signals: ValidationSignal[], attempt: number): RetryInstruction[] { if (attempt >= DEFAULT_RETRY_BUDGET.semanticFullPage) return []; return signals.filter((signal) => signal.severity === 'error' || ['MERGED_NAME', 'SPARSE_PAGE_INCONSISTENCY', 'MISSING_SECTION', 'LOW_VISUAL_CONFIDENCE'].includes(signal.code)).filter((signal, index, values) => values.findIndex((entry) => entry.page === signal.page && entry.code === signal.code) === index).map((signal) => ({ page: signal.page, reason: signal.code, kind: 'semantic-full-page' })); }
+export function difficultRegions(page: VisualPageEvidence, signals: ValidationSignal[]): NormalizedBox[] { return signals.some((signal) => signal.page === page.page) ? [{ x: 0, y: 0, width: 0.5, height: 1 }, { x: 0.5, y: 0, width: 0.5, height: 1 }] : []; }
 
-export function retryInstructions(signals: ValidationSignal[], attempt: number): RetryInstruction[] {
-  if (attempt >= MAX_PAGE_RETRIES) return [];
-  const instructions: RetryInstruction[] = [];
-  for (const signal of signals) {
-    if (signal.severity !== 'error' && signal.code !== 'MERGED_NAME' && signal.code !== 'SPARSE_PAGE_INCONSISTENCY') continue;
-    if (!instructions.some((entry) => entry.page === signal.page && entry.reason === signal.code)) {
-      instructions.push({ page: signal.page, reason: signal.code });
-    }
-  }
-  return instructions;
-}
-
-export function difficultRegions(page: VisualPageEvidence, signals: ValidationSignal[]): NormalizedBox[] {
-  if (!signals.some((signal) => signal.page === page.page)) return [];
-  // Two stable halves preserve enough surrounding alignment while bounding retry payloads.
-  return [{ x: 0, y: 0, width: 0.5, height: 1 }, { x: 0.5, y: 0, width: 0.5, height: 1 }];
-}
-
-function sameItem(left: VisualMenuItem, right: VisualMenuItem) {
-  return left.name.trim().toLocaleLowerCase() === right.name.trim().toLocaleLowerCase()
-    && (left.description ?? '').trim().toLocaleLowerCase() === (right.description ?? '').trim().toLocaleLowerCase()
-    && (left.rawPrice ?? left.price?.raw ?? '') === (right.rawPrice ?? right.price?.raw ?? '');
-}
-
-/** Reconciles only source-equivalent candidates; same names in different sections/pages survive. */
-export function reconcileVisualDocument(document: VisualMenuDocument): { document: VisualMenuDocument; signals: ValidationSignal[] } {
-  const signals: ValidationSignal[] = [];
-  const sections = new Map<string, VisualSection>();
-  const pages: VisualMenuPage[] = [];
-  let previousSection: VisualSection | undefined;
-  for (const page of [...document.pages].sort((a, b) => a.page - b.page)) {
-    const nextSections: VisualSection[] = [];
-    for (const section of page.sections) {
-      const key = `${page.page}:${section.id}`;
-      const copy = { ...section, items: [...section.items] };
-      if (!copy.title?.trim() && previousSection && copy.continuationOf === previousSection.id) {
-        copy.title = previousSection.title;
-      } else if (!copy.title?.trim() && copy.items.length) {
-        signals.push({ code: 'RECONCILIATION_CONFLICT', severity: 'warning', page: page.page, sectionId: copy.id });
-      }
-      const existing = sections.get(key);
-      if (existing) {
-        copy.items = copy.items.filter((item) => !existing.items.some((candidate) => sameItem(candidate, item)));
-      }
-      sections.set(key, copy);
-      nextSections.push(copy);
-      if (copy.title?.trim()) previousSection = copy;
-    }
-    pages.push({ ...page, sections: nextSections });
-  }
-  return { document: { ...document, pages }, signals };
-}
-
-export function flattenVisualDocument(document: VisualMenuDocument): ExtractedMenuItem[] {
-  const items: ExtractedMenuItem[] = [];
-  for (const page of document.pages) {
-    for (const section of page.sections) {
-      for (const item of section.items) {
-        const price = item.price?.amount ?? (item.variants?.length === 1 ? item.variants[0].amount ?? undefined : undefined);
-        items.push({
-          category: section.title?.trim() ?? '',
-          name: item.name.trim(),
-          description: item.description?.trim() || undefined,
-          ingredients: item.attributes?.map((attribute) => attribute.trim()).filter(Boolean),
-          price: typeof price === 'number' && Number.isFinite(price) && price >= 0 ? price : undefined,
-          page: page.page,
-          confidence: {
-            category: item.confidence?.section ?? (section.title?.trim() ? 'medium' : 'low'),
-            name: item.confidence?.name ?? 'medium',
-            description: item.confidence?.description ?? 'low',
-            price: item.confidence?.price ?? (typeof price === 'number' ? 'medium' : 'low'),
-          },
-        });
-      }
-    }
-  }
-  return items;
-}
+export type DeduplicationPolicy = { minIoU: number; minOverlap: number; requireMatchingRawPrice: boolean };
+export const DEFAULT_DEDUPLICATION_POLICY: DeduplicationPolicy = { minIoU: 0.5, minOverlap: 0.8, requireMatchingRawPrice: false };
+function normalizedName(value: string) { return value.trim().toLocaleLowerCase().replace(/\s+/g, ' '); }
+function rawPrice(item: VisualMenuItem) { return item.rawPrice ?? item.price?.raw ?? ''; }
+function sameCandidate(left: VisualMenuItem, right: VisualMenuItem, policy: DeduplicationPolicy) { if (normalizedName(left.name) !== normalizedName(right.name)) return false; if (policy.requireMatchingRawPrice && rawPrice(left) !== rawPrice(right)) return false; return bboxIoU(left.bbox, right.bbox) >= policy.minIoU || bboxOverlap(left.bbox, right.bbox) >= policy.minOverlap; }
+/** Regional output replaces only overlapping ambiguous/invalid candidates and leaves the rest intact. */
+export function mergeRegionalSections(base: VisualSection[], regional: VisualSection[], policy = DEFAULT_DEDUPLICATION_POLICY): VisualSection[] { const merged = base.map((section) => ({ ...section, items: [...section.items] })); for (const incoming of regional) { const target = merged.find((section) => normalizedName(section.title ?? '') === normalizedName(incoming.title ?? '')) ?? merged[0]; if (!target) { merged.push({ ...incoming, items: [...incoming.items] }); continue; } for (const item of incoming.items) { const index = target.items.findIndex((candidate) => sameCandidate(candidate, item, policy)); if (index < 0) target.items.push(item); else if (target.items[index].validation?.status !== 'valid' && item.validation?.status === 'valid') target.items[index] = item; } } return merged; }
+/** Only immediately adjacent page sections can be inherited; a new heading always wins. */
+export function reconcileVisualDocument(document: VisualMenuDocument, factory?: ServerIdFactory): { document: VisualMenuDocument; signals: ValidationSignal[] } { const signals: ValidationSignal[] = []; const pages: VisualMenuPage[] = []; let priorEligible: VisualSection[] = []; for (const page of [...document.pages].sort((a, b) => a.page - b.page)) { const sections = page.sections.map((section) => ({ ...section, items: [...section.items] })); for (const section of sections) { const explicitHeading = Boolean(section.title?.trim()); const continuation = section.continuationOf ? priorEligible.find((prior) => section.continuationOf === prior.id || section.continuationOf === prior.modelSectionHint) : undefined; if (!explicitHeading && continuation) { section.title = continuation.title; if (factory) section.parentId = factory.next('reconciled-section', page.page, 0); } else if (!explicitHeading && section.items.length) signals.push({ code: 'RECONCILIATION_CONFLICT', severity: 'warning', page: page.page, sectionId: section.id }); } pages.push({ ...page, sections }); priorEligible = sections.filter((section) => Boolean(section.title?.trim())); } return { document: { ...document, pages }, signals }; }
+export function flattenVisualDocument(document: VisualMenuDocument, options: { excludeInvalid?: boolean } = {}): ExtractedMenuItem[] { const items: ExtractedMenuItem[] = []; for (const page of document.pages) for (const section of page.sections) for (const item of section.items) { if ((options.excludeInvalid ?? true) && (item.validation?.status === 'invalid' || (item as VisualMenuItem & { extractionStatus?: string }).extractionStatus === 'invalid')) continue; const price = item.price?.amount ?? (item.variants?.length === 1 ? item.variants[0].amount ?? undefined : undefined); const validationSignals: SharedValidationSignal[] | undefined = item.validation?.reasons.map((code) => ({ code, severity: item.validation?.status === 'invalid' ? 'error' : 'warning', source: { page: page.page, bbox: item.bbox } })); items.push({ itemId: item.itemId, candidateId: item.candidateId, extractionStatus: item.validation?.status, category: section.title?.trim() ?? '', sectionKey: section.id, name: item.name.trim(), rawName: item.name.trim(), description: item.description?.trim() || undefined, ingredients: item.attributes?.map((attribute) => attribute.trim()).filter(Boolean), rawPrice: item.rawPrice ?? item.price?.raw ?? null, priceVariants: item.variants, price: typeof price === 'number' && Number.isFinite(price) && price >= 0 ? price : undefined, page: page.page, source: { page: page.page, bbox: item.bbox }, validationSignals, reviewReasons: item.validation?.reasons.map((code) => ({ code, source: { page: page.page, bbox: item.bbox } })), confidence: { category: item.confidence?.section ?? (section.title?.trim() ? 'medium' : 'low'), name: item.confidence?.name ?? 'medium', description: item.confidence?.description ?? 'low', price: item.confidence?.price ?? (typeof price === 'number' ? 'medium' : 'low') } }); } return items; }

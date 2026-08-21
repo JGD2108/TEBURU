@@ -3,9 +3,12 @@ import type { PoolClient } from 'pg';
 import { getPoolClient } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { analyzePdf, createPdfAnalysisProvider } from './provider';
-import type { AnalysisMetrics, AnalysisResult, Confidence, ExtractedImage, ExtractedSection, PdfAnalysisProvider } from './types';
+import { resolveAnalyzerVersion } from './analyzer-version';
+import { computeMenuImportMetrics } from './metrics';
+import { createMenuImportIdFactory, isServerLineageId, sanitizeLineageEvent } from './lineage';
+import type { AnalysisMetrics, AnalysisResult, Confidence, ExtractedImage, ExtractedSection, LineageEvent, PdfAnalysisProvider } from './types';
 
-export const ANALYZER_VERSION = process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v3-visual';
+export const ANALYZER_VERSION = resolveAnalyzerVersion();
 export const MAX_ATTEMPTS = 3;
 const LEASE_MS = 10 * 60 * 1000;
 const ANALYSIS_TIMEOUT_MS = 120 * 1000;
@@ -20,6 +23,7 @@ type StructureLineage = {
   fallbackReason?: string;
 };
 type AnalysisResultWithStructureLineage = AnalysisResult & { structureMetadata?: StructureLineage };
+type PersistedItemLink = { item: AnalysisResult['items'][number]; draftItemId: string; candidateId: string; itemId: string };
 export type SourceReader = (path: string) => Promise<Uint8Array>;
 export type ImportAssetWriter = (job: { id: string; restaurantId: string; executionId?: string }, asset: ExtractedImage) => Promise<string>;
 
@@ -122,10 +126,13 @@ async function persistSections(client: PoolClient, job: Execution, sections: Ext
   return ids;
 }
 
-async function persistDraft(client: PoolClient, job: Execution, result: AnalysisResult, writeAsset?: ImportAssetWriter) {
+async function persistDraft(client: PoolClient, job: Execution, result: AnalysisResult, writeAsset?: ImportAssetWriter): Promise<PersistedItemLink[]> {
   const sectionIds = await persistSections(client, job, result.sections);
   const categories = new Map<string, string>();
+  const persisted: PersistedItemLink[] = [];
+  const ids = createMenuImportIdFactory();
   for (const item of result.items) {
+    if (item.extractionStatus === 'invalid') continue;
     const categoryName = item.category?.trim();
     let categoryId = item.sectionKey ? sectionIds.get(item.sectionKey) : undefined;
     if (!categoryId && categoryName) categoryId = categories.get(categoryName.toLowerCase());
@@ -139,12 +146,15 @@ async function persistDraft(client: PoolClient, job: Execution, result: Analysis
     }
     const itemKey = sha256(new TextEncoder().encode(`${job.id}|${categoryId ?? ''}|${item.rawName ?? item.name ?? ''}|${item.description ?? ''}|${item.rawPrice ?? item.price ?? ''}`));
     const draft = await client.query<{ id: string }>(`INSERT INTO menu_import_draft_items
-      (import_job_id, restaurant_id, draft_category_id, name, raw_name, description, raw_description, price, raw_price, normalized_currency, source_page, source_bbox, field_confidence, extraction_attributes, modifiers, options, validation_signals, review_reasons, idempotency_key)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13::jsonb,$14::jsonb,$15::jsonb,$16::jsonb,$17::jsonb,$18::jsonb,$19)
-      ON CONFLICT (import_job_id, idempotency_key) DO UPDATE SET name = EXCLUDED.name, raw_name = EXCLUDED.raw_name, description = EXCLUDED.description, raw_description = EXCLUDED.raw_description, price = EXCLUDED.price, raw_price = EXCLUDED.raw_price, normalized_currency = EXCLUDED.normalized_currency, source_page = EXCLUDED.source_page, source_bbox = EXCLUDED.source_bbox, field_confidence = EXCLUDED.field_confidence, extraction_attributes = EXCLUDED.extraction_attributes, modifiers = EXCLUDED.modifiers, options = EXCLUDED.options, validation_signals = EXCLUDED.validation_signals, review_reasons = EXCLUDED.review_reasons RETURNING id`,
+      (import_job_id, restaurant_id, draft_category_id, name, raw_name, description, raw_description, price, raw_price, normalized_currency, source_page, source_bbox, field_confidence, extraction_attributes, modifiers, options, validation_signals, review_reasons, extraction_status, retry_exhausted, idempotency_key)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13::jsonb,$14::jsonb,$15::jsonb,$16::jsonb,$17::jsonb,$18::jsonb,$19,$20,$21)
+      ON CONFLICT (import_job_id, idempotency_key) DO UPDATE SET name = EXCLUDED.name, raw_name = EXCLUDED.raw_name, description = EXCLUDED.description, raw_description = EXCLUDED.raw_description, price = EXCLUDED.price, raw_price = EXCLUDED.raw_price, normalized_currency = EXCLUDED.normalized_currency, source_page = EXCLUDED.source_page, source_bbox = EXCLUDED.source_bbox, field_confidence = EXCLUDED.field_confidence, extraction_attributes = EXCLUDED.extraction_attributes, modifiers = EXCLUDED.modifiers, options = EXCLUDED.options, validation_signals = EXCLUDED.validation_signals, review_reasons = EXCLUDED.review_reasons, extraction_status = EXCLUDED.extraction_status, retry_exhausted = EXCLUDED.retry_exhausted RETURNING id`,
       [job.id, job.restaurant_id, categoryId ?? null, item.name?.trim() || null, item.rawName ?? item.name ?? null,
         item.description ?? (item.ingredients?.length ? item.ingredients.join(', ') : null), item.description ?? null, item.price ?? null, item.rawPrice ?? null, item.currency ?? null,
-        item.source?.page ?? item.page, bbox(item.source?.bbox), json(item.confidence), json(item.attributes ?? {}), json(item.modifiers), json(item.options), json(item.validationSignals), json(item.reviewReasons), itemKey]);
+        item.source?.page ?? item.page, bbox(item.source?.bbox), json(item.confidence), json(item.attributes ?? {}), json(item.modifiers), json(item.options), json(item.validationSignals), json(item.reviewReasons), item.extractionStatus ?? 'valid', item.retryExhausted ?? false, itemKey]);
+    // Provider identifiers are hints only. The lineage IDs linking persistence are
+    // generated here, after decode, and remain authoritative across retries.
+    persisted.push({ item, draftItemId: draft.rows[0].id, candidateId: ids.candidate(), itemId: ids.item() });
     const sourcePage = item.source?.page ?? item.page;
     const evidenceKey = sha256(new TextEncoder().encode(`${job.id}|${draft.rows[0].id}|${sourcePage}|${item.rawName ?? item.name ?? ''}`));
     await client.query(`INSERT INTO menu_import_source_evidence
@@ -175,6 +185,53 @@ async function persistDraft(client: PoolClient, job: Execution, result: Analysis
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (import_job_id, idempotency_key) DO NOTHING`,
       [randomUUID(), job.id, job.restaurant_id, storagePath, asset.mimeType, confidenceScore(suggestion.confidence),
         suggestion.confidence === AUTO_ASSIGN_IMAGE_CONFIDENCE, imageKey]);
+  }
+  return persisted;
+}
+
+/** Store only server-sanitized events; raw response retention stays private and bounded. */
+async function persistLineage(client: PoolClient, job: Execution, result: AnalysisResult, persisted: PersistedItemLink[]) {
+  const ids = createMenuImportIdFactory();
+  const events: LineageEvent[] = [
+    ...(result.lineage ?? []),
+    ...persisted.map(({ item, draftItemId, candidateId, itemId }) => ({
+      id: ids.event(), analysisRunId: job.analysis_execution_id, attemptId: job.analysis_execution_id,
+      page: item.source?.page ?? item.page, candidateId, itemId, sourceKind: 'unknown' as const,
+      stage: 'persistence' as const, validationStatus: item.extractionStatus,
+      validationReasons: item.reviewReasons?.map((reason) => reason.code),
+      metadata: { draftItemId },
+    })),
+  ];
+  for (const event of events) {
+    const safe = sanitizeLineageEvent({
+      ...event,
+      // Only values minted by this server are allowed into UUID linkage columns.
+      id: ids.event(), analysisRunId: job.analysis_execution_id,
+      attemptId: isServerLineageId(event.attemptId) ? event.attemptId : job.analysis_execution_id,
+      parentAttemptId: isServerLineageId(event.parentAttemptId) ? event.parentAttemptId : undefined,
+      candidateId: isServerLineageId(event.candidateId) ? event.candidateId : undefined,
+      itemId: isServerLineageId(event.itemId) ? event.itemId : undefined,
+      sectionId: isServerLineageId(event.sectionId) ? event.sectionId : undefined,
+      reconciledSectionId: isServerLineageId(event.reconciledSectionId) ? event.reconciledSectionId : undefined,
+    });
+    await client.query(`INSERT INTO menu_import_analysis_lineage_events
+      (id, import_job_id, restaurant_id, analysis_execution_id, event_stage, source_kind, page_number, attempt_id,
+       parent_attempt_id, candidate_id, extracted_item_id, section_id, reconciled_section_id, retry_reason, region_id,
+       event_data, raw_payload, raw_payload_hash, raw_payload_expires_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19)
+      ON CONFLICT (analysis_execution_id, id) DO NOTHING`, [
+      safe.id, job.id, job.restaurant_id, job.analysis_execution_id, safe.stage, safe.sourceKind, safe.page ?? null,
+      safe.attemptId ?? null, safe.parentAttemptId ?? null, safe.candidateId ?? null, safe.itemId ?? null,
+      safe.sectionId ?? null, safe.reconciledSectionId ?? null, safe.retryReason ?? null, safe.regionId ?? null,
+      json({ analyzerVersion: safe.analyzerVersion, model: safe.model, region: safe.region, image: {
+        mimeType: safe.imageMimeType, width: safe.imageWidth, height: safe.imageHeight, byteSize: safe.imageByteSize,
+        hash: safe.imageHash, included: safe.imageIncluded,
+      }, auxiliaryTextType: safe.auxiliaryTextType, auxiliaryTextLength: safe.auxiliaryTextLength,
+      latencyMs: safe.latencyMs, inputTokens: safe.inputTokens, outputTokens: safe.outputTokens,
+      validationStatus: safe.validationStatus, validationReasons: safe.validationReasons,
+      reconciliationDecision: safe.reconciliationDecision, metadata: safe.metadata }),
+      safe.rawPayload ?? null, safe.rawPayloadHash ?? null, safe.rawPayloadExpiresAt ?? null,
+    ]);
   }
 }
 
@@ -255,19 +312,21 @@ export async function processMenuImportExecution(executionId: string, reader: So
     if (!stillOwner.rows[0]) { await client.query('ROLLBACK'); return 'stale'; }
     const reused = await reusePriorDraft(client, job, sourceHash);
     if (!reused) {
-      await persistDraft(client, job, analyzed, writeAsset);
+      const persisted = await persistDraft(client, job, analyzed, writeAsset);
+      await persistLineage(client, job, analyzed, persisted);
       const lineage = structureLineage(analyzed);
       const metrics = analysisMetrics(analyzed, Date.now() - analysisStartedAt);
+      const structuralMetrics = computeMenuImportMetrics(analyzed.items, analyzed.lineage ?? [], metrics.pageCount ?? 0);
       logger.info('menu_import.structure_provider', { importId: job.id, restaurantId: job.restaurant_id, analysisExecutionId: executionId, provider: lineage.provider, model: lineage.model, fallbackReason: lineage.fallbackReason });
       await client.query(`UPDATE menu_import_analysis_runs
         SET structure_provider = $2, structure_model = $3, structure_fallback_reason = $4,
           prompt_version = $5, page_count = $6, provider_call_count = $7, retry_count = $8, duration_ms = $9,
           input_tokens = $10, output_tokens = $11, suspicious_pages = $12::jsonb, extracted_item_count = $13,
-          review_item_count = $14, fallback_reasons = $15::jsonb, updated_at = now()
+          review_item_count = $14, fallback_reasons = $15::jsonb, structural_metrics = $16::jsonb, updated_at = now()
         WHERE analysis_execution_id = $1`, [executionId, lineage.provider, lineage.model ?? null, lineage.fallbackReason ?? null,
         metrics.promptVersion, metrics.pageCount, metrics.providerCallCount, metrics.retryCount, metrics.durationMs,
         metrics.inputTokens, metrics.outputTokens, json(metrics.suspiciousPages), metrics.extractedItemCount,
-        metrics.reviewItemCount, json(metrics.fallbackReasons)]);
+        metrics.reviewItemCount, json(metrics.fallbackReasons), json(structuralMetrics)]);
     }
     await client.query(`UPDATE menu_import_analysis_runs SET status = $2, completed_at = now(), updated_at = now() WHERE analysis_execution_id = $1`, [executionId, reused ? 'reused' : 'completed']);
     await client.query(`UPDATE menu_import_jobs SET status = 'needs_review', analysis_lease_expires_at = NULL, updated_at = now() WHERE id = $1 AND status = 'processing' AND analysis_execution_id = $2`, [job.id, executionId]);

@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1786983862.6505158,
-    "ast_hash": "73cbd05edaf011823512b989113eb4f0",
+    "mtime": 1787280903.9873462,
+    "ast_hash": "4487ea938d05c9c61b6f1d87ec0fd552",
     "semantic_hash": ""
   },
   "scripts/add_access_code.js": {
@@ -640,8 +640,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/route.ts": {
-    "mtime": 1787265834.5422416,
-    "ast_hash": "6c4e377f616af8809a7eb1fe7782a152",
+    "mtime": 1787281616.186036,
+    "ast_hash": "4de56f105b92fbd1c8508fdf6e129303",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/source/route.ts": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/MenuImportPanel.tsx": {
-    "mtime": 1787266211.4297512,
-    "ast_hash": "f7881786153326e0c2daaeaf1e4c1d2e",
+    "mtime": 1787280927.8691783,
+    "ast_hash": "6b9e1c742d1456d28b190689b36b83db",
     "semantic_hash": ""
   },
   "src/lib/api-client.test.ts": {
@@ -675,23 +675,23 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/provider.test.ts": {
-    "mtime": 1787266396.7977028,
-    "ast_hash": "ace717ea1645d84d0e04ff5b41deac43",
+    "mtime": 1787281515.1153126,
+    "ast_hash": "4a114ed959076e0441e485ad10e9ca72",
     "semantic_hash": ""
   },
   "src/lib/menu-import/provider.ts": {
-    "mtime": 1787266558.6943846,
-    "ast_hash": "1714efb4f28dfcf70514047c6fc3cc31",
+    "mtime": 1787281870.1199317,
+    "ast_hash": "9535c693cae5e41e1bf28049fa31c040",
     "semantic_hash": ""
   },
   "src/lib/menu-import/types.ts": {
-    "mtime": 1787266482.0252657,
-    "ast_hash": "4ba1192ff0526bffd0267d5e00069205",
+    "mtime": 1787281724.6161735,
+    "ast_hash": "183c23948c4e67b268ffca3a54e63ce2",
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.ts": {
-    "mtime": 1787265881.0401323,
-    "ast_hash": "84a5830982c9f5a1fa4a20fd0ce42b57",
+    "mtime": 1787281734.2136118,
+    "ast_hash": "8e2ea5e35ca2ed35e8ab416202e5126a",
     "semantic_hash": ""
   },
   "supabase/migrations/20260816120000_pdf_menu_imports.sql": {
@@ -729,31 +729,6 @@
     "ast_hash": "fa9c21f7fb080f5adf69819e7bd8cb31",
     "semantic_hash": ""
   },
-  "openspec/changes/add-pdf-menu-import/.openspec.yaml": {
-    "mtime": 1786895771.5041685,
-    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
-    "semantic_hash": ""
-  },
-  "openspec/changes/add-pdf-menu-import/design.md": {
-    "mtime": 1786895969.253113,
-    "ast_hash": "ebc8af79daa9128e93f354bc678d227a",
-    "semantic_hash": ""
-  },
-  "openspec/changes/add-pdf-menu-import/proposal.md": {
-    "mtime": 1786895948.8270528,
-    "ast_hash": "e2454006693add3ff9d4c872874c632a",
-    "semantic_hash": ""
-  },
-  "openspec/changes/add-pdf-menu-import/specs/pdf-menu-import/spec.md": {
-    "mtime": 1786895959.038574,
-    "ast_hash": "be6a49533728b9991e2b0b821e473cc9",
-    "semantic_hash": ""
-  },
-  "openspec/changes/add-pdf-menu-import/tasks.md": {
-    "mtime": 1786898744.395901,
-    "ast_hash": "6bc3d020b8e5a7c8ff6c79035934d982",
-    "semantic_hash": ""
-  },
   "openspec/config.yaml": {
     "mtime": 1786895549.9859362,
     "ast_hash": "a88f7d80935e1a432dc9b5affe49eb27",
@@ -762,31 +737,6 @@
   "src/app/api/admin/menu-import/routes.test.ts": {
     "mtime": 1787265579.0280967,
     "ast_hash": "21ba4b3a69950a91aaa779a5f0f34907",
-    "semantic_hash": ""
-  },
-  "openspec/changes/harden-menu-import-deployment/.openspec.yaml": {
-    "mtime": 1786899730.417891,
-    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
-    "semantic_hash": ""
-  },
-  "openspec/changes/harden-menu-import-deployment/design.md": {
-    "mtime": 1786899835.8451118,
-    "ast_hash": "57ccdf4a7f84d1f675ce7b7961018579",
-    "semantic_hash": ""
-  },
-  "openspec/changes/harden-menu-import-deployment/proposal.md": {
-    "mtime": 1786899767.1415598,
-    "ast_hash": "60c3633eb62103d3ef2df2ff8f826ce1",
-    "semantic_hash": ""
-  },
-  "openspec/changes/harden-menu-import-deployment/specs/menu-import-deployment-reliability/spec.md": {
-    "mtime": 1786899825.4203131,
-    "ast_hash": "a374f829b694584653464d84a105c628",
-    "semantic_hash": ""
-  },
-  "openspec/changes/harden-menu-import-deployment/tasks.md": {
-    "mtime": 1786901978.4576473,
-    "ast_hash": "a50a84cf8b7017838dde5d06dd96fffb",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/finalize/route.ts": {
@@ -829,84 +779,9 @@
     "ast_hash": "421cddb04d60dd3021c7ef28b0396d50",
     "semantic_hash": ""
   },
-  "openspec/changes/fix-menu-import-upload-finalize/.openspec.yaml": {
-    "mtime": 1786907056.2845619,
-    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-upload-finalize/design.md": {
-    "mtime": 1786907169.1791515,
-    "ast_hash": "ba56bb76edc03dd33f73c01a8956ac30",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-upload-finalize/proposal.md": {
-    "mtime": 1786907142.0540822,
-    "ast_hash": "04754de9a19a166d3332d5539916d5f8",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-upload-finalize/specs/menu-import-upload-finalization/spec.md": {
-    "mtime": 1786907159.0069742,
-    "ast_hash": "4c30b0c259a02ddc0fe3f36f0981dccc",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-upload-finalize/tasks.md": {
-    "mtime": 1786907956.2513645,
-    "ast_hash": "860dbcde027fb9de64a8833445f51833",
-    "semantic_hash": ""
-  },
   "supabase/migrations/20260816200000_event_driven_menu_import_analysis.sql": {
     "mtime": 1786938689.5241928,
     "ast_hash": "60b1ab94330141c47475246ce359bb90",
-    "semantic_hash": ""
-  },
-  "openspec/changes/event-driven-menu-import-analysis/.openspec.yaml": {
-    "mtime": 1786911605.7807634,
-    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
-    "semantic_hash": ""
-  },
-  "openspec/changes/event-driven-menu-import-analysis/design.md": {
-    "mtime": 1786911833.9214692,
-    "ast_hash": "6fe4c8f2a24e2e32df911736570663ca",
-    "semantic_hash": ""
-  },
-  "openspec/changes/event-driven-menu-import-analysis/proposal.md": {
-    "mtime": 1786911703.5686927,
-    "ast_hash": "85a1cf3f934161b936ee637f7515574b",
-    "semantic_hash": ""
-  },
-  "openspec/changes/event-driven-menu-import-analysis/specs/event-driven-menu-import-analysis/spec.md": {
-    "mtime": 1786911758.9697087,
-    "ast_hash": "028f5c619a7a9f1e11e9f8a08a963f3d",
-    "semantic_hash": ""
-  },
-  "openspec/changes/event-driven-menu-import-analysis/tasks.md": {
-    "mtime": 1786913788.180826,
-    "ast_hash": "ccf6c10b7fa5d400930161eb5eb9b225",
-    "semantic_hash": ""
-  },
-  "openspec/changes/orchestrate-menu-import-analysis/.openspec.yaml": {
-    "mtime": 1786911059.6282713,
-    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
-    "semantic_hash": ""
-  },
-  "openspec/changes/orchestrate-menu-import-analysis/design.md": {
-    "mtime": 1786911345.5915365,
-    "ast_hash": "b9f8f8e2f1d850414f0ba646c0c9acb4",
-    "semantic_hash": ""
-  },
-  "openspec/changes/orchestrate-menu-import-analysis/proposal.md": {
-    "mtime": 1786911143.6108222,
-    "ast_hash": "b1832bbeb5f3e39a292edfe26abc0ad8",
-    "semantic_hash": ""
-  },
-  "openspec/changes/orchestrate-menu-import-analysis/specs/menu-import-analysis-orchestration/spec.md": {
-    "mtime": 1786911288.048383,
-    "ast_hash": "cb1345d08ff2f3968d6280958d69d784",
-    "semantic_hash": ""
-  },
-  "openspec/changes/orchestrate-menu-import-analysis/tasks.md": {
-    "mtime": 1786911389.5997531,
-    "ast_hash": "6dab126918ff9ca6d2697ce84df54994",
     "semantic_hash": ""
   },
   "src/app/api/internal/menu-import-analysis/route.test.ts": {
@@ -920,8 +795,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.test.ts": {
-    "mtime": 1787266588.1684215,
-    "ast_hash": "0485531c4292c6c10d410b64969ee208",
+    "mtime": 1787281072.877289,
+    "ast_hash": "ed2466ddd9c67440a0dea84b8b91b829",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/retry/route.ts": {
@@ -935,8 +810,8 @@
     "semantic_hash": ""
   },
   "docs/menu-import-analysis.md": {
-    "mtime": 1787265902.5612037,
-    "ast_hash": "21dd82e19094f081a6780c92d29828d4",
+    "mtime": 1787281695.4534013,
+    "ast_hash": "76414d4a4bbfa250088111e6f9de1d00",
     "semantic_hash": ""
   },
   "scripts/verify-menu-import-pgcrypto-migration.mjs": {
@@ -947,31 +822,6 @@
   "docs/menu-import-migration-recovery.md": {
     "mtime": 1786938731.2914398,
     "ast_hash": "7ee7ccfec7627e7216c84e20be6bb5cd",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-pgcrypto-migration/.openspec.yaml": {
-    "mtime": 1786937593.236061,
-    "ast_hash": "5d3ffc0eb72a7abf828a315792aba2de",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-pgcrypto-migration/design.md": {
-    "mtime": 1786938330.469846,
-    "ast_hash": "c7a2320517e481066bba35e2ef407fba",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-pgcrypto-migration/proposal.md": {
-    "mtime": 1786938258.091914,
-    "ast_hash": "53acbef116d749bb21527bf452679fb9",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-pgcrypto-migration/specs/menu-import-migration-reliability/spec.md": {
-    "mtime": 1786938268.255827,
-    "ast_hash": "39af90ed6ee2091d7d3733d8ffb054e1",
-    "semantic_hash": ""
-  },
-  "openspec/changes/fix-menu-import-pgcrypto-migration/tasks.md": {
-    "mtime": 1786938917.7541206,
-    "ast_hash": "84b2592074807e8c31629c1037fff8da",
     "semantic_hash": ""
   },
   "src/lib/menu-import/dispatcher.ts": {
@@ -1044,34 +894,9 @@
     "ast_hash": "2d3f8eedd6606956899f1c69bbd5efdf",
     "semantic_hash": ""
   },
-  "openspec/changes/rebuild-menu-import-visual-extraction/.openspec.yaml": {
-    "mtime": 1787265068.9154541,
-    "ast_hash": "7b12d49e8be3ef61db53339455ffdade",
-    "semantic_hash": ""
-  },
-  "openspec/changes/rebuild-menu-import-visual-extraction/design.md": {
-    "mtime": 1787265222.1482658,
-    "ast_hash": "f934bc97c6aba1dc690b1ecb6fdeba7e",
-    "semantic_hash": ""
-  },
-  "openspec/changes/rebuild-menu-import-visual-extraction/proposal.md": {
-    "mtime": 1787265109.1986437,
-    "ast_hash": "1f9c6afb8280d301b9b57679d1b4becf",
-    "semantic_hash": ""
-  },
-  "openspec/changes/rebuild-menu-import-visual-extraction/specs/menu-import-gemini-structure/spec.md": {
-    "mtime": 1787265212.238497,
-    "ast_hash": "5537f2952ebee584fad9cdcf3e458726",
-    "semantic_hash": ""
-  },
-  "openspec/changes/rebuild-menu-import-visual-extraction/tasks.md": {
-    "mtime": 1787267014.6096604,
-    "ast_hash": "ba6f8426268b366351cae1829d997948",
-    "semantic_hash": ""
-  },
   "src/lib/menu-import/visual-analysis.ts": {
-    "mtime": 1787266221.712025,
-    "ast_hash": "ca916683bdb02bdacb915247baf73428",
+    "mtime": 1787281505.4453206,
+    "ast_hash": "07cce6022346018d757e3b38d1c5c20b",
     "semantic_hash": ""
   },
   "test-results/.last-run.json": {
@@ -1082,6 +907,101 @@
   "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md": {
     "mtime": 1787265659.7466202,
     "ast_hash": "c70f6f5bcb5729d360879b92b6500f59",
+    "semantic_hash": ""
+  },
+  "scripts/run-menu-import-live-evaluation.mjs": {
+    "mtime": 1787281686.814744,
+    "ast_hash": "d4542d2c7c5e6b1897c4b59bf24e6748",
+    "semantic_hash": ""
+  },
+  "scripts/verify-menu-import-deterministic.mjs": {
+    "mtime": 1787280883.821942,
+    "ast_hash": "b7ca8697c8b7864feec692fefa88706f",
+    "semantic_hash": ""
+  },
+  "src/components/admin/menu-import-projection.test.ts": {
+    "mtime": 1787280889.4354162,
+    "ast_hash": "2d96b6ed14c7466476acca29b96ac26b",
+    "semantic_hash": ""
+  },
+  "src/components/admin/menu-import-projection.ts": {
+    "mtime": 1787280927.8651786,
+    "ast_hash": "9edc80fb51fe0d821ef866e890b3e1be",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/visual-architecture.test.ts": {
+    "mtime": 1787280849.3392,
+    "ast_hash": "6c04c5c51c644245868f79d7359539a6",
+    "semantic_hash": ""
+  },
+  "openspec/changes/menu-import-v3-visual-architecture/.openspec.yaml": {
+    "mtime": 1787278977.1278548,
+    "ast_hash": "7b12d49e8be3ef61db53339455ffdade",
+    "semantic_hash": ""
+  },
+  "openspec/changes/menu-import-v3-visual-architecture/design.md": {
+    "mtime": 1787279677.7336452,
+    "ast_hash": "573f89b803960fc034cf146b09c488a0",
+    "semantic_hash": ""
+  },
+  "openspec/changes/menu-import-v3-visual-architecture/proposal.md": {
+    "mtime": 1787279625.6757922,
+    "ast_hash": "ee333fed4b9b8017a557f79ab7e6a28e",
+    "semantic_hash": ""
+  },
+  "openspec/changes/menu-import-v3-visual-architecture/specs/menu-import-gemini-structure/spec.md": {
+    "mtime": 1787279755.2769392,
+    "ast_hash": "e63818154e187b722ea202b9ec22003f",
+    "semantic_hash": ""
+  },
+  "openspec/changes/menu-import-v3-visual-architecture/specs/menu-import-visual-architecture/spec.md": {
+    "mtime": 1787279745.0777016,
+    "ast_hash": "4bce49ab36b7c298d8db1df177d69bdb",
+    "semantic_hash": ""
+  },
+  "openspec/changes/menu-import-v3-visual-architecture/tasks.md": {
+    "mtime": 1787281779.7440815,
+    "ast_hash": "8af3b884cf00c8aa0c3c1e0bae7d44f4",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260821025509_add_menu_import_analysis_lineage_events.sql": {
+    "mtime": 1787280995.0965583,
+    "ast_hash": "10e16b3688ddb53133421180ea171271",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/analyzer-version.ts": {
+    "mtime": 1787281059.5293367,
+    "ast_hash": "791aa097b14f1ad5b3a4471296481fdb",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/lineage.test.ts": {
+    "mtime": 1787281059.5366952,
+    "ast_hash": "2e400da370f01bf5e986fe874d782b1e",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/lineage.ts": {
+    "mtime": 1787281870.1344588,
+    "ast_hash": "decd1c776ee24db0212b7744f3e06508",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260821032000_add_menu_import_validation_status.sql": {
+    "mtime": 1787281578.2756379,
+    "ast_hash": "4d85a3e75c72e856a3358d85b651fd55",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/metrics.test.ts": {
+    "mtime": 1787281724.614172,
+    "ast_hash": "9933101fdb82ddd19b526c8b2ef6b620",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/metrics.ts": {
+    "mtime": 1787281817.517835,
+    "ast_hash": "0594a73b9a0056f23dea23dd7710a752",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260821032100_add_menu_import_analysis_metrics.sql": {
+    "mtime": 1787281734.2116117,
+    "ast_hash": "b4e080c48547e035316a3b9942a1f2b0",
     "semantic_hash": ""
   }
 }

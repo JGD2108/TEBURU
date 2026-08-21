@@ -11,6 +11,8 @@
     "test:integration": "node scripts/verify-migrations.mjs",
     "test:menu-import-migration": "node scripts/verify-menu-import-pgcrypto-migration.mjs",
     "test:menu-import-pg-net-migration": "node scripts/verify-menu-import-pg-net-migration.mjs",
+    "test:menu-import-deterministic": "node scripts/verify-menu-import-deterministic.mjs",
+    "test:menu-import-live": "node scripts/run-menu-import-live-evaluation.mjs",
     "verify:remote-security": "node scripts/verify-remote-security.mjs",
     "test:e2e": "playwright test"
   },

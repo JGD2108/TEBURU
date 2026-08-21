@@ -40,6 +40,8 @@ describe('menu import execution ownership', () => {
     expect(evidence[1]).toEqual(expect.arrayContaining([importId, 'restaurant-a', 'item-a']));
     const structureLineage = client.query.mock.calls.find(([sql]) => String(sql).includes('SET structure_provider'))!;
     expect(structureLineage[1]).toEqual(expect.arrayContaining([executionId, 'gemini', 'gemini-test', null]));
+    const persistedLineage = client.query.mock.calls.find(([sql]) => String(sql).includes('INSERT INTO menu_import_analysis_lineage_events'))!;
+    expect(persistedLineage[1]).toEqual(expect.arrayContaining([importId, 'restaurant-a', executionId, 'persistence']));
     expect(client.query.mock.calls.some(([sql]) => String(sql).includes("status = 'needs_review'") && String(sql).includes('analysis_execution_id = $2'))).toBe(true);
   });
 

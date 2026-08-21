@@ -11,13 +11,23 @@ export async function GET(request: Request, context: RouteContext<'/api/admin/me
     const { id } = await context.params;
     const imported = await query(`SELECT id, status, source_filename, source_size_bytes, failure_reason, source_sha256, analyzer_version, analysis_execution_id, analysis_attempt_count, analysis_lease_expires_at, created_at, updated_at, published_at FROM menu_import_jobs WHERE id = $1 AND restaurant_id = $2`, [id, staff.restaurantId]);
     if (!imported.rows[0]) return jsonError(request, 'IMPORT_UPLOAD_NOT_FOUND', 'Importación no encontrada.', 404);
-    const [categories, items, evidence, images, priceVariants, metadata] = await Promise.all([
+    const [categories, items, evidence, images, priceVariants, metadata, lineageEvents] = await Promise.all([
       query(`SELECT * FROM menu_import_draft_categories WHERE import_job_id = $1 AND restaurant_id = $2 ORDER BY sort_order, name`, [id, staff.restaurantId]),
       query(`SELECT * FROM menu_import_draft_items WHERE import_job_id = $1 AND restaurant_id = $2 ORDER BY created_at`, [id, staff.restaurantId]),
       query(`SELECT e.* FROM menu_import_source_evidence e JOIN menu_import_draft_items i ON i.id = e.draft_item_id WHERE e.import_job_id = $1 AND i.restaurant_id = $2`, [id, staff.restaurantId]),
       query(`SELECT * FROM menu_import_image_suggestions WHERE import_job_id = $1 AND restaurant_id = $2`, [id, staff.restaurantId]),
       query(`SELECT v.* FROM menu_import_draft_price_variants v WHERE v.import_job_id = $1 AND v.restaurant_id = $2 ORDER BY v.draft_item_id, v.sort_order`, [id, staff.restaurantId]),
       query(`SELECT * FROM menu_import_document_metadata WHERE import_job_id = $1 AND restaurant_id = $2`, [id, staff.restaurantId]),
+      // Safe inspection projection: raw provider payloads and arbitrary diagnostics remain private.
+      query(`SELECT analysis_execution_id, event_stage, source_kind, page_number, attempt_id, parent_attempt_id,
+        candidate_id, extracted_item_id, section_id, reconciled_section_id, retry_reason, region_id,
+        event_data->>'validationStatus' AS validation_status,
+        event_data->'validationReasons' AS validation_reasons,
+        event_data->'metadata'->>'rawName' AS name,
+        raw_payload_hash, raw_payload_expires_at, created_at
+        FROM menu_import_analysis_lineage_events
+        WHERE import_job_id = $1 AND restaurant_id = $2
+        ORDER BY created_at, id`, [id, staff.restaurantId]),
     ]);
     const lineage = await query(`SELECT analysis_execution_id, attempt, status, source_sha256, analyzer_version,
       structure_provider, structure_model, structure_fallback_reason, prompt_version, page_count, provider_call_count,
@@ -26,8 +36,11 @@ export async function GET(request: Request, context: RouteContext<'/api/admin/me
       FROM menu_import_analysis_runs WHERE import_job_id = $1 AND restaurant_id = $2 ORDER BY attempt DESC`, [id, staff.restaurantId]);
     // Deliberately return nullable draft fields and raw evidence: review must not
     // manufacture a category, currency, or zero price for an incomplete item.
-    const draft = { categories: categories.rows, items: items.rows, evidence: evidence.rows, priceVariants: priceVariants.rows, metadata: metadata.rows[0] ?? null, imageSuggestions: images.rows };
-    return jsonSuccess(request, { import: imported.rows[0], draft, lineage: lineage.rows }, {}, { import: imported.rows[0], draft, lineage: lineage.rows });
+    const extractionIssues = (lineageEvents.rows ?? [])
+      .filter((event) => event.event_stage === 'validation' && event.validation_status === 'invalid')
+      .map((event) => ({ id: event.candidate_id, candidate_id: event.candidate_id, name: event.name, source_page: event.page_number, validation_reasons: event.validation_reasons ?? [], retry_reason: event.retry_reason }));
+    const draft = { categories: categories.rows, items: items.rows, evidence: evidence.rows, priceVariants: priceVariants.rows, metadata: metadata.rows[0] ?? null, imageSuggestions: images.rows, extraction_issues: extractionIssues };
+    return jsonSuccess(request, { import: imported.rows[0], draft, lineage: lineage.rows, lineageEvents: lineageEvents.rows ?? [] }, {}, { import: imported.rows[0], draft, lineage: lineage.rows, lineageEvents: lineageEvents.rows ?? [] });
   } catch (error) { logger.error('menu_import.get_failed', error); return jsonError(request, 'INTERNAL_ERROR', 'No se pudo cargar la importación.', 500); }
 }
 

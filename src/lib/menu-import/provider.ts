@@ -1,12 +1,19 @@
 import 'server-only';
-import type { ExtractedImage, ExtractedMenuItem, ImageSuggestion, PageText, PdfAnalysisProvider, PdfDocument, StructuredMenuOutput } from './types';
+import { createHash, randomUUID } from 'node:crypto';
+import type { ExtractedImage, ExtractedMenuItem, ImageSuggestion, LineageEvent, PageText, PdfAnalysisProvider, PdfDocument, StructuredMenuOutput } from './types';
 import {
   ANALYZER_PROMPT_VERSION,
+  applyValidation,
+  assignServerIds,
+  createServerIdFactory,
+  DEFAULT_RETRY_BUDGET,
   difficultRegions,
   flattenVisualDocument,
   isNormalizedBox,
+  mergeRegionalSections,
   outcomeForPage,
   reconcileVisualDocument,
+  regionToPageBox,
   retryInstructions,
   type NormalizedBox,
   type ValidationSignal,
@@ -19,8 +26,7 @@ import {
 } from './visual-analysis';
 
 const MIN_NATIVE_TEXT_CHARACTERS = 40;
-const PRICE = /(?:[$€£]|\b(?:USD|COP|EUR|MXN)\b\s*)?(\d+(?:[.,]\d{1,2})?)(?:\s*(?:USD|COP|EUR|MXN))?\s*$/i;
-const CATEGORY = /^[A-Z\u00C1\u00C9\u00CD\u00D3\u00DA\u00D1][A-Z\u00C1\u00C9\u00CD\u00D3\u00DA\u00D1 &/\-]{2,}$/;
+const PRICE = /(?:\p{Sc}\s*)?(\d{1,6}(?:[.,]\d{1,2})?)(?:\s*[A-Za-z]{3,5})?\s*$/iu;
 const CONFIDENCE_VALUES = new Set(['high', 'medium', 'low']);
 const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
 const GEMINI_DEFAULT_TIMEOUT_MS = 8_000;
@@ -39,6 +45,11 @@ function boundedEnv(name: string, fallback: number, minimum: number, maximum: nu
 function confidence(value: string | undefined, threshold = 3): 'high' | 'medium' | 'low' {
   if (!value?.trim()) return 'low';
   return value.trim().length >= threshold ? 'high' : 'medium';
+}
+
+function isCategoryHeading(value: string) {
+  const letters = value.replace(/[^\p{L}]/gu, '');
+  return letters.length >= 3 && value === value.toLocaleUpperCase();
 }
 
 type NodeCanvasGlobals = { DOMMatrix: unknown; ImageData: unknown; Path2D: unknown };
@@ -155,18 +166,21 @@ function ppmFromRgba(data: Uint8ClampedArray, width: number, height: number): Ui
 }
 
 export type GeminiFetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-export type GeminiConfig = { key?: string; model?: string; timeoutMs?: number; fetch?: GeminiFetch };
+export type GeminiConfig = { key?: string; model?: string; timeoutMs?: number; fetch?: GeminiFetch; architectureStage?: 1 | 2; analyzerVersion?: string; rawRetentionDays?: number };
 export type GeminiTextStructurer = ((pages: PageText[]) => Promise<ExtractedMenuItem[] | undefined>) & {
   lastFallbackReason?: string;
   model?: string;
   lastSignals?: ValidationSignal[];
   lastRetries?: Array<{ page: number; reason: string; region?: NormalizedBox }>;
+  lastLineage?: LineageEvent[];
 };
 export type GeminiVisualStructurer = ((pages: VisualPageEvidence[]) => Promise<VisualMenuDocument | undefined>) & {
   lastFallbackReason?: string;
   model?: string;
   lastSignals?: ValidationSignal[];
   lastRetries?: Array<{ page: number; reason: string; region?: NormalizedBox }>;
+  lastLineage?: LineageEvent[];
+  architectureStage?: 1 | 2;
 };
 
 export type PdfAnalysisOptions = {
@@ -179,10 +193,15 @@ export type PdfAnalysisOptions = {
 };
 
 function serverGeminiConfig(): GeminiConfig {
+  const analyzerVersion = process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual';
+  const requestedStage = process.env.MENU_IMPORT_VISUAL_ARCHITECTURE_STAGE === '2' ? 2 : 1;
   return {
     key: process.env.MENU_IMPORT_GEMINI_API_KEY || process.env.GEMINI_KEY || process.env.GEMINI_API_KEY,
     model: process.env.MENU_IMPORT_GEMINI_MODEL || GEMINI_DEFAULT_MODEL,
     timeoutMs: boundedEnv('MENU_IMPORT_GEMINI_TIMEOUT_MS', GEMINI_DEFAULT_TIMEOUT_MS, 1_000, 30_000),
+    architectureStage: requestedStage === 2 && analyzerVersion === 'menu-import-v4-visual' && process.env.MENU_IMPORT_STAGE1_LINEAGE_VERIFIED === 'true' ? 2 : 1,
+    analyzerVersion,
+    rawRetentionDays: boundedEnv('MENU_IMPORT_LINEAGE_RAW_RETENTION_DAYS', 7, 0, 30),
   };
 }
 
@@ -205,10 +224,12 @@ const SECTION_SCHEMA = { type: 'object', additionalProperties: false, required: 
 const PAGE_SCHEMA = { type: 'object', additionalProperties: false, required: ['page', 'sections'], properties: { page: { type: 'integer' }, metadata: { type: 'object', additionalProperties: { type: 'string' } }, decorative: { type: 'array', items: { type: 'string' } }, sections: { type: 'array', items: SECTION_SCHEMA } } } as const;
 const VISUAL_RESPONSE_SCHEMA = { type: 'object', additionalProperties: false, required: ['pages'], properties: { metadata: { type: 'object', additionalProperties: { type: 'string' } }, globalPriceNotes: { type: 'array', items: { type: 'string' } }, pages: { type: 'array', items: PAGE_SCHEMA } } } as const;
 
-export function buildGeminiRequestBody(pages: VisualPageEvidence[], retry?: { reason: string; region?: NormalizedBox }) {
-  const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [{
-    text: `Analyze the supplied restaurant-menu PAGE IMAGE(S) as the primary evidence. Reconstruct visual columns, typography, tables, hierarchy, aligned prices, and continuation. Auxiliary extracted text is only corroborating evidence; never derive layout from its reading order. Return JSON matching the schema. Discover section titles and currencies from the page—never invent labels, translations, categories, or prices. Preserve raw prices and leave amount/currency null when uncertain. Use normalized bboxes (0..1). Treat decorative/contact/social content as decorative, not products.${retry ? ` Retry focus: ${retry.reason}.${retry.region ? ` Focus region ${JSON.stringify(retry.region)}.` : ''}` : ''}\nAUXILIARY EVIDENCE:\n${JSON.stringify(pages.map(pageAuxiliaryText))}`,
-  }];
+export function buildGeminiRequestBody(pages: VisualPageEvidence[], retry?: { reason: string; region?: NormalizedBox }, stage: 1 | 2 = 2) {
+  const retryText = retry ? ` Retry focus: ${retry.reason}.${retry.region ? ` Focus region ${JSON.stringify(retry.region)}.` : ''}` : '';
+  const text = stage === 2
+    ? `Analyze the supplied restaurant-menu PAGE IMAGE(S). The rendered image is the VISUAL SOURCE OF TRUTH for boundaries, columns, tables, hierarchy, and price associations. Return JSON matching the schema. Discover labels and currencies from the page; never invent labels, translations, categories, or prices. Preserve raw prices and leave amount/currency null when uncertain. Use normalized bboxes (0..1). Decorative/contact/social content is not a product.${retryText}`
+    : `Analyze the supplied restaurant-menu PAGE IMAGE(S) as the primary evidence. Reconstruct visual columns, typography, tables, hierarchy, aligned prices, and continuation. Auxiliary extracted text is only corroborating evidence; never derive layout from its reading order. Return JSON matching the schema. Discover section titles and currencies from the page—never invent labels, translations, categories, or prices. Preserve raw prices and leave amount/currency null when uncertain. Use normalized bboxes (0..1). Treat decorative/contact/social content as decorative, not products.${retryText}\nAUXILIARY EVIDENCE:\n${JSON.stringify(pages.map(pageAuxiliaryText))}`;
+  const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [{ text }];
   for (const page of pages) {
     if (!page.image) continue;
     parts.push({ text: `PAGE ${page.page} image` });
@@ -266,27 +287,34 @@ export function decodeGeminiVisualDocument(value: unknown, evidence: VisualPageE
         if (itemConfidence && Object.values(itemConfidence).some((entry) => !CONFIDENCE_VALUES.has(entry as string))) return undefined;
         const modifiers = stringArray(item.modifiers); const options = stringArray(item.options); const attributes = stringArray(item.attributes);
         if ((item.modifiers !== undefined && !modifiers) || (item.options !== undefined && !options) || (item.attributes !== undefined && !attributes)) return undefined;
-        items.push({ name: item.name.trim(), description: typeof item.description === 'string' ? item.description.trim() || undefined : undefined, rawPrice: typeof item.rawPrice === 'string' ? item.rawPrice.trim() || undefined : undefined, price, variants: variants as VisualMenuItem['variants'], modifiers, options, attributes, bbox: item.bbox as NormalizedBox | undefined, confidence: itemConfidence as VisualMenuItem['confidence'] });
+        const cropRegion = evidence.find((entry) => entry.page === page.page)?.region;
+        const itemBox = item.bbox as NormalizedBox | undefined;
+        items.push({ name: item.name.trim(), description: typeof item.description === 'string' ? item.description.trim() || undefined : undefined, rawPrice: typeof item.rawPrice === 'string' ? item.rawPrice.trim() || undefined : undefined, price, variants: variants as VisualMenuItem['variants'], modifiers, options, attributes, bbox: itemBox && cropRegion ? regionToPageBox(itemBox, cropRegion) : itemBox, confidence: itemConfidence as VisualMenuItem['confidence'] });
       }
-      sections.push({ id: section.id.trim(), title: typeof section.title === 'string' ? section.title.trim() || undefined : undefined, parentId: section.parentId as string | undefined, continuationOf: section.continuationOf as string | undefined, bbox: section.bbox as NormalizedBox | undefined, items });
+      const cropRegion = evidence.find((entry) => entry.page === page.page)?.region;
+      const sectionBox = section.bbox as NormalizedBox | undefined;
+      sections.push({ id: section.id.trim(), modelSectionHint: section.id.trim(), title: typeof section.title === 'string' ? section.title.trim() || undefined : undefined, parentId: section.parentId as string | undefined, continuationOf: section.continuationOf as string | undefined, bbox: sectionBox && cropRegion ? regionToPageBox(sectionBox, cropRegion) : sectionBox, items });
     }
     pages.push({ page: page.page, sections, metadata: stringRecord(page.metadata), decorative: stringArray(page.decorative) });
   }
   return { metadata: stringRecord(root.metadata), globalPriceNotes: stringArray(root.globalPriceNotes), pages };
 }
 
+function sha256Text(value: string) { return createHash('sha256').update(value).digest('hex'); }
+
 async function callGemini(fetcher: GeminiFetch, config: GeminiConfig, pages: VisualPageEvidence[], retry?: { reason: string; region?: NormalizedBox }) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), config.timeoutMs ?? GEMINI_DEFAULT_TIMEOUT_MS);
   try {
     const response = await fetcher(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model ?? GEMINI_DEFAULT_MODEL)}:generateContent`, {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': config.key ?? '' }, body: JSON.stringify(buildGeminiRequestBody(pages, retry)), signal: controller.signal,
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': config.key ?? '' }, body: JSON.stringify(buildGeminiRequestBody(pages, retry, config.architectureStage ?? 1)), signal: controller.signal,
     });
     if (!response.ok) return { reason: response.status === 429 ? 'GEMINI_RATE_LIMITED' : 'GEMINI_REQUEST_FAILED' as const };
     const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+    const rawPayload = JSON.stringify(payload);
     const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
     if (typeof text !== 'string') return { reason: 'GEMINI_INVALID_RESPONSE' as const };
-    try { return { document: JSON.parse(text) as unknown }; } catch { return { reason: 'GEMINI_INVALID_RESPONSE' as const }; }
+    try { return { document: JSON.parse(text) as unknown, rawPayloadHash: sha256Text(rawPayload), rawPayload: config.rawRetentionDays ? rawPayload.slice(0, 16_000) : undefined }; } catch { return { reason: 'GEMINI_INVALID_RESPONSE' as const }; }
   } catch (error) {
     return { reason: error instanceof DOMException && error.name === 'AbortError' ? 'GEMINI_TIMEOUT' as const : 'GEMINI_REQUEST_FAILED' as const };
   } finally { clearTimeout(timer); }
@@ -301,31 +329,53 @@ async function cropVisualPage(page: VisualPageEvidence, region: NormalizedBox): 
   const width = Math.max(1, Math.floor(source.width * region.width)); const height = Math.max(1, Math.floor(source.height * region.height));
   const target = canvas.createCanvas(width, height); const context = target.getContext('2d');
   context.drawImage(source, sx, sy, width, height, 0, 0, width, height);
-  try { return { ...page, image: { mimeType: 'image/jpeg', data: new Uint8Array(target.toBuffer('image/jpeg', 85)), width, height } }; }
+  try { return { ...page, region, image: { mimeType: 'image/jpeg', data: new Uint8Array(target.toBuffer('image/jpeg', 85)), width, height } }; }
   finally { target.width = 1; target.height = 1; }
 }
 
 /** Server-only multimodal provider boundary. It records bounded retry evidence but never returns provider payloads. */
 export function createGeminiVisualStructurer(config: GeminiConfig = serverGeminiConfig()): GeminiVisualStructurer {
   const structurer: GeminiVisualStructurer = async (pages) => {
-    structurer.lastFallbackReason = undefined; structurer.lastSignals = []; structurer.lastRetries = []; structurer.model = config.model ?? GEMINI_DEFAULT_MODEL;
+    structurer.lastFallbackReason = undefined; structurer.lastSignals = []; structurer.lastRetries = []; structurer.lastLineage = []; structurer.model = config.model ?? GEMINI_DEFAULT_MODEL;
     if (!config.key) { structurer.lastFallbackReason = 'GEMINI_NOT_CONFIGURED'; return undefined; }
     if (!pages.some((page) => page.image)) { structurer.lastFallbackReason = 'GEMINI_NO_RENDERED_PAGES'; return undefined; }
     const fetcher = config.fetch ?? fetch;
+    const stage = config.architectureStage ?? 1;
+    structurer.architectureStage = stage;
+    const ids = createServerIdFactory(randomUUID());
+    const event = (entry: Omit<LineageEvent, 'id' | 'analysisRunId'>) => structurer.lastLineage!.push({ ...entry, id: ids.next('lineage', entry.page, 0), analysisRunId: ids.analysisRunId });
     const accepted: VisualMenuPage[] = [];
     for (const page of pages) {
       if (!page.image) continue;
+      const imageHash = createHash('sha256').update(page.image.data).digest('hex');
+      event({ sourceKind: 'gemini-visual', stage: 'render', page: page.page, analyzerVersion: config.analyzerVersion, imageMimeType: page.image.mimeType, imageWidth: page.image.width, imageHeight: page.image.height, imageByteSize: page.image.data.byteLength, imageHash, imageIncluded: true });
       let attempt = 0;
       let decoded: VisualMenuDocument | undefined;
       let signals: ValidationSignal[] = [];
-      while (attempt <= 2) {
+      const maxAttempts = stage === 2 ? DEFAULT_RETRY_BUDGET.primary + DEFAULT_RETRY_BUDGET.semanticFullPage : 3;
+      while (attempt < maxAttempts) {
         const retry = attempt ? retryInstructions(signals, attempt - 1).find((entry) => entry.page === page.page) : undefined;
         if (retry) structurer.lastRetries.push(retry);
-        const response = await callGemini(fetcher, config, [page], retry);
+        const attemptId = ids.next('attempt', page.page, attempt + 1);
+        const auxiliary = retry ? pageAuxiliaryText(page) : undefined;
+        event({ sourceKind: 'gemini-visual', stage: 'provider_request', page: page.page, attemptId, analyzerVersion: config.analyzerVersion, model: structurer.model, retryReason: retry?.reason, imageIncluded: true, auxiliaryTextType: retry ? (auxiliary?.ocrText ? 'ocr' : auxiliary?.nativeText ? 'native' : auxiliary?.selectedText ? 'selected' : undefined) : undefined, auxiliaryTextLength: retry ? (auxiliary?.ocrText ?? auxiliary?.nativeText ?? auxiliary?.selectedText ?? '').length : undefined });
+        const startedAt = Date.now();
+        let response = await callGemini(fetcher, config, [page], retry);
+        let providerRetry = 0;
+        while (!('document' in response) && providerRetry < DEFAULT_RETRY_BUDGET.providerTransient && ['GEMINI_RATE_LIMITED', 'GEMINI_TIMEOUT', 'GEMINI_REQUEST_FAILED'].includes(response.reason)) {
+          providerRetry += 1;
+          event({ sourceKind: 'provider-transient-retry', stage: 'retry', page: page.page, attemptId, analyzerVersion: config.analyzerVersion, model: structurer.model, retryReason: response.reason });
+          response = await callGemini(fetcher, config, [page], retry);
+        }
         if (!('document' in response)) { structurer.lastFallbackReason = response.reason; return undefined; }
+        event({ sourceKind: 'gemini-visual', stage: 'provider_raw', page: page.page, attemptId, analyzerVersion: config.analyzerVersion, model: structurer.model, retryReason: retry?.reason, latencyMs: Date.now() - startedAt, rawPayloadHash: response.rawPayloadHash, rawPayload: response.rawPayload, metadata: { rawRetentionDays: config.rawRetentionDays ?? 7 } });
         decoded = decodeGeminiVisualDocument(response.document, [page]);
         if (!decoded) { structurer.lastFallbackReason = 'GEMINI_INVALID_RESPONSE'; return undefined; }
+        decoded = assignServerIds(decoded, ids, attempt + 1);
+        if (stage === 2) decoded = applyValidation(decoded);
+        for (const section of decoded.pages[0]?.sections ?? []) for (const item of section.items) event({ sourceKind: 'gemini-visual', stage: 'decode', page: page.page, attemptId, candidateId: item.candidateId, itemId: item.itemId, sectionId: section.id, analyzerVersion: config.analyzerVersion, model: structurer.model });
         signals = validateVisualDocument(decoded, [page]);
+        for (const section of decoded.pages[0]?.sections ?? []) for (const item of section.items) event({ sourceKind: 'gemini-visual', stage: 'validation', page: page.page, attemptId, candidateId: item.candidateId, itemId: item.itemId, sectionId: section.id, analyzerVersion: config.analyzerVersion, validationStatus: item.validation?.status, validationReasons: item.validation?.reasons, metadata: { rawName: item.name } });
         const pageConfidence = decoded.pages[0]?.sections.flatMap((section) => section.items).some((item) => item.confidence?.name === 'low') ? 'low' : 'medium';
         const outcome = outcomeForPage(signals, pageConfidence, attempt);
         if (outcome !== 'retry') break;
@@ -334,22 +384,29 @@ export function createGeminiVisualStructurer(config: GeminiConfig = serverGemini
       if (!decoded) continue;
       // A remaining hard ambiguity receives at most two physical region retries.
       if (signals.some((signal) => signal.severity === 'error')) {
-        for (const region of difficultRegions(page, signals).slice(0, 2)) {
+        for (const region of difficultRegions(page, signals).slice(0, stage === 2 ? DEFAULT_RETRY_BUDGET.semanticRegional : 2)) {
           const cropped = await cropVisualPage(page, region).catch(() => undefined);
           if (!cropped) continue;
           structurer.lastRetries.push({ page: page.page, reason: 'VISUAL_REGION_RETRY', region });
           const response = await callGemini(fetcher, config, [cropped], { reason: 'VISUAL_REGION_RETRY', region });
           if (!('document' in response)) continue;
-          const regional = decodeGeminiVisualDocument(response.document, [cropped]);
-          if (regional?.pages[0]) decoded.pages[0].sections.push(...regional.pages[0].sections);
+          let regional = decodeGeminiVisualDocument(response.document, [cropped]);
+          if (regional) regional = assignServerIds(stage === 2 ? applyValidation(regional) : regional, ids, attempt + 2);
+          if (regional?.pages[0]) decoded.pages[0].sections = stage === 2 ? mergeRegionalSections(decoded.pages[0].sections, regional.pages[0].sections) : [...decoded.pages[0].sections, ...regional.pages[0].sections];
         }
         signals = validateVisualDocument(decoded, [page]);
       }
       structurer.lastSignals.push(...signals);
       accepted.push(...decoded.pages);
     }
-    const reconciled = reconcileVisualDocument({ pages: accepted });
+    const reconciled = reconcileVisualDocument({ pages: accepted }, ids);
     structurer.lastSignals.push(...reconciled.signals);
+    for (const page of reconciled.document.pages) for (const section of page.sections) for (const item of section.items) {
+      const common = { sourceKind: 'gemini-visual' as const, page: page.page, candidateId: item.candidateId, itemId: item.itemId, sectionId: section.id, analyzerVersion: config.analyzerVersion };
+      event({ ...common, stage: 'reconciliation', reconciliationDecision: section.parentId ? 'adjacent-continuation' : 'page-local' });
+      event({ ...common, stage: 'normalization' });
+      event({ ...common, stage: 'projection' });
+    }
     return reconciled.document;
   };
   return structurer;
@@ -360,7 +417,7 @@ export function createGeminiTextStructurer(config: GeminiConfig = serverGeminiCo
   const visual = createGeminiVisualStructurer(config);
   const structurer: GeminiTextStructurer = async (pages) => {
     const document = await visual(pages as VisualPageEvidence[]);
-    structurer.model = visual.model; structurer.lastSignals = visual.lastSignals; structurer.lastRetries = visual.lastRetries; structurer.lastFallbackReason = visual.lastFallbackReason;
+    structurer.model = visual.model; structurer.lastSignals = visual.lastSignals; structurer.lastRetries = visual.lastRetries; structurer.lastLineage = visual.lastLineage; structurer.lastFallbackReason = visual.lastFallbackReason;
     return document ? flattenVisualDocument(document) : undefined;
   };
   return structurer;
@@ -391,18 +448,21 @@ export function textItemsToPageText(items: object[]) {
 }
 
 /** Generic, deliberately conservative local fallback. It makes no restaurant or currency assumptions. */
-export function parseMenuText(pages: PageText[]): ExtractedMenuItem[] {
-  const items: ExtractedMenuItem[] = []; let category = '';
+export function parseMenuText(pages: PageText[], options: { allowNonRenderableRecovery?: boolean } = {}): ExtractedMenuItem[] {
+  const items: ExtractedMenuItem[] = [];
   for (const page of pages) {
+    // Text fallback is page-local evidence; category state never crosses a page boundary.
+    let category = '';
     for (const rawLine of page.text.split(/\r?\n/)) {
       const line = rawLine.replace(/\s+/g, ' ').trim(); if (!line) continue;
-      if (CATEGORY.test(line) && !PRICE.test(line)) { category = line; continue; }
+      if (isCategoryHeading(line) && !PRICE.test(line)) { category = line; continue; }
       const match = line.match(PRICE); if (!match) continue;
       const nameAndDescription = line.slice(0, match.index).replace(/[.\u00B7\u2022\-\u2013\u2014]+\s*$/, '').trim();
       if (nameAndDescription.length < 2) continue;
       const split = nameAndDescription.split(/\s+[\u2013\u2014-]\s+/); const name = split.shift()!.trim(); const description = split.join(' - ').trim() || undefined;
       const price = Number(match[1].replace(',', '.'));
-      items.push({ category, name, description, price: Number.isFinite(price) ? price : undefined, page: page.page, confidence: { category: category ? 'high' : 'low', name: confidence(name), description: description ? confidence(description, 12) : 'low', price: Number.isFinite(price) ? 'high' : 'low' } });
+      const extractionStatus = options.allowNonRenderableRecovery ? 'valid' : 'review';
+      items.push({ category, sectionKey: category || null, name, rawName: name, description, price: Number.isFinite(price) ? price : undefined, rawPrice: match[0].trim(), extractionStatus, page: page.page, source: { page: page.page, excerpt: line }, validationSignals: options.allowNonRenderableRecovery ? undefined : [{ code: 'provider_fallback', severity: 'warning', source: { page: page.page, excerpt: line } }], reviewReasons: options.allowNonRenderableRecovery ? undefined : [{ code: 'provider_fallback', source: { page: page.page, excerpt: line } }], confidence: { category: category ? 'high' : 'low', name: confidence(name), description: description ? confidence(description, 12) : 'low', price: Number.isFinite(price) ? 'high' : 'low' } });
     }
   }
   return items;
@@ -433,16 +493,19 @@ export function createPdfAnalysisProvider(overrides: Partial<PdfAnalysisProvider
   let structureMetadata: import('./types').StructureMetadata = { provider: 'local-fallback', fallbackReason: 'GEMINI_UNAVAILABLE' };
   const limits = { ...configuredRenderLimits(), ...options.renderLimits };
   const maxPages = Math.max(1, Math.min(50, options.maxPages ?? boundedEnv('MENU_IMPORT_RENDER_MAX_PAGES', DEFAULT_MAX_PAGES, 1, 50)));
-  const structureDocument = async (pages: PageText[]): Promise<StructuredMenuOutput> => {
+  type ProviderStructureOutput = StructuredMenuOutput & { canonicalDocument?: VisualMenuDocument; lineage?: LineageEvent[] };
+  const structureDocument = async (pages: PageText[]): Promise<ProviderStructureOutput> => {
     if (geminiVisualStructurer) {
       const visualDocument = await geminiVisualStructurer(pages as VisualPageEvidence[]);
       if (visualDocument) {
         structureMetadata = { provider: 'gemini', model: (geminiVisualStructurer.model || GEMINI_DEFAULT_MODEL).slice(0, 100) };
         return {
-          items: flattenVisualDocument(visualDocument),
+          items: flattenVisualDocument(visualDocument, { excludeInvalid: geminiVisualStructurer.architectureStage === 2 }),
           sections: visualDocument.pages.flatMap((page) => page.sections.map((section, sortOrder) => ({ key: `${page.page}:${section.id}`, name: section.title ?? null, sortOrder, source: section.bbox ? { page: page.page, bbox: section.bbox } : { page: page.page }, confidence: section.items.some((item) => item.confidence?.section === 'low') ? 'low' : 'medium' as const }))),
           documentMetadata: { pageCount: visualDocument.pages.length },
-          metrics: { analyzerVersion: 'menu-import-v3-visual', promptVersion: ANALYZER_PROMPT_VERSION, model: geminiVisualStructurer.model, pageCount: visualDocument.pages.length, retryCount: geminiVisualStructurer.lastRetries?.length ?? 0, suspiciousPages: [...new Set(geminiVisualStructurer.lastSignals?.map((signal) => signal.page) ?? [])] },
+          metrics: { analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', promptVersion: ANALYZER_PROMPT_VERSION, model: geminiVisualStructurer.model, pageCount: visualDocument.pages.length, retryCount: geminiVisualStructurer.lastRetries?.length ?? 0, suspiciousPages: [...new Set(geminiVisualStructurer.lastSignals?.map((signal) => signal.page) ?? [])] },
+          canonicalDocument: visualDocument,
+          lineage: geminiVisualStructurer.lastLineage,
         };
       }
       structureMetadata = { provider: 'local-fallback', fallbackReason: (geminiVisualStructurer.lastFallbackReason || 'GEMINI_REQUEST_FAILED').slice(0, 200) };
@@ -450,10 +513,12 @@ export function createPdfAnalysisProvider(overrides: Partial<PdfAnalysisProvider
     const structured = await geminiStructurer(pages);
     if (structured) {
       structureMetadata = { provider: 'gemini', model: (geminiStructurer.model || GEMINI_DEFAULT_MODEL).slice(0, 100) };
-      return { items: structured, metrics: { analyzerVersion: 'menu-import-v3-visual', promptVersion: ANALYZER_PROMPT_VERSION, model: geminiStructurer.model, pageCount: pages.length, retryCount: geminiStructurer.lastRetries?.length ?? 0 } };
+      return { items: structured, metrics: { analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', promptVersion: ANALYZER_PROMPT_VERSION, model: geminiStructurer.model, pageCount: pages.length, retryCount: geminiStructurer.lastRetries?.length ?? 0 }, lineage: geminiStructurer.lastLineage };
     }
     structureMetadata = { provider: 'local-fallback', fallbackReason: (geminiStructurer.lastFallbackReason || 'GEMINI_REQUEST_FAILED').slice(0, 200) };
-    return { items: parseMenuText(pages), metrics: { analyzerVersion: 'menu-import-v3-visual', promptVersion: ANALYZER_PROMPT_VERSION, pageCount: pages.length, fallbackReasons: [structureMetadata.fallbackReason ?? 'GEMINI_REQUEST_FAILED'] } };
+    const fallbackRunId = randomUUID();
+    const fallbackItems = parseMenuText(pages);
+    return { items: fallbackItems, metrics: { analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', promptVersion: ANALYZER_PROMPT_VERSION, pageCount: pages.length, fallbackReasons: [structureMetadata.fallbackReason ?? 'GEMINI_REQUEST_FAILED'] }, lineage: fallbackItems.map((item) => ({ id: randomUUID(), analysisRunId: fallbackRunId, page: item.page, candidateId: randomUUID(), sourceKind: 'textual-fallback', stage: 'decode' as const, analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', validationStatus: item.extractionStatus, validationReasons: item.reviewReasons?.map((reason) => reason.code) })) };
   };
   return {
     async extractNative(pdf) {
@@ -485,6 +550,6 @@ export async function analyzePdf(pdf: Uint8Array, provider = createPdfAnalysisPr
   if (weakPages.length) ocrPages = await provider.ocr(pdf).catch(() => []);
   const selectedPages = selectPageEvidence(visualNative, ocrPages);
   const document: PdfDocument = { pages: selectedPages, images: native.images, usedOcr: selectedPages.some((page) => page.source === 'ocr') };
-  const structured = provider.structureDocument ? await provider.structureDocument(document.pages) : { items: await provider.structure(document.pages) };
+  const structured = (provider.structureDocument ? await provider.structureDocument(document.pages) : { items: await provider.structure(document.pages) }) as StructuredMenuOutput & { canonicalDocument?: VisualMenuDocument; lineage?: LineageEvent[] };
   return { ...structured, images: document.images, suggestions: await provider.associateImages(structured.items, document.images), structureMetadata: provider.getStructureMetadata?.() };
 }

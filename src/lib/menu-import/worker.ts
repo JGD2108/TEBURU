@@ -2,10 +2,10 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { getPoolClient } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { analyzePdf, createPdfAnalysisProvider } from './provider';
-import { resolveAnalyzerVersion } from './analyzer-version';
+import { MENU_IMPORT_ANALYZER_V5, resolveAnalyzerVersion } from './analyzer-version';
 import { computeMenuImportMetrics } from './metrics';
 import { createMenuImportIdFactory, isServerLineageId, sanitizeLineageEvent } from './lineage';
+import { analyzeV5Text, type V5TextFailureResult } from './v5-text';
 import type { AnalysisMetrics, AnalysisResult, Confidence, ExtractedImage, ExtractedSection, LineageEvent, PdfAnalysisProvider } from './types';
 
 export const ANALYZER_VERSION = resolveAnalyzerVersion();
@@ -15,12 +15,13 @@ const ANALYSIS_TIMEOUT_MS = 120 * 1000;
 const AUTO_ASSIGN_IMAGE_CONFIDENCE: Confidence = 'high';
 const ALLOWED_ASSET_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
-type Job = { id: string; restaurant_id: string; source_storage_path: string; source_size_bytes?: number | string };
+type Job = { id: string; restaurant_id: string; source_storage_path: string; source_size_bytes?: number | string; analyzer_version?: string | null };
 type Execution = Job & { analysis_execution_id: string; attempt: number };
 type StructureLineage = {
   provider: 'gemini' | 'local-fallback';
   model?: string;
   fallbackReason?: string;
+  failureClass?: 'provider_rate_limited' | 'visual_semantic_failure';
 };
 type AnalysisResultWithStructureLineage = AnalysisResult & { structureMetadata?: StructureLineage };
 type PersistedItemLink = { item: AnalysisResult['items'][number]; draftItemId: string; candidateId: string; itemId: string };
@@ -50,6 +51,8 @@ function analysisMetrics(result: AnalysisResultWithStructureLineage, durationMs:
     pageCount: metrics.pageCount ?? result.documentMetadata?.pageCount ?? null,
     providerCallCount: Math.max(0, metrics.providerCalls ?? 0), retryCount: Math.max(0, metrics.retryCount ?? 0),
     durationMs: Math.max(0, metrics.durationMs ?? durationMs), inputTokens: metrics.inputTokens ?? null, outputTokens: metrics.outputTokens ?? null,
+    totalTokens: metrics.totalTokens ?? null, nativeTextCharacters: metrics.nativeTextCharacters ?? null,
+    nonEmptyPages: metrics.nonEmptyPages ?? null, textDocumentHash: metrics.textDocumentHash ?? null,
     suspiciousPages: metrics.suspiciousPages ?? [], extractedItemCount: result.items.length, reviewItemCount,
     fallbackReasons: metrics.fallbackReasons ?? (result.structureMetadata?.fallbackReason ? [result.structureMetadata.fallbackReason] : []),
   };
@@ -67,17 +70,23 @@ async function withTimeout<T>(work: Promise<T>, timeoutMs = ANALYSIS_TIMEOUT_MS)
   }
 }
 
+/** Visual code is loaded only for V3/V4 executions, keeping V5 free of that dependency path. */
+async function analyzeVisualPdf(pdf: Uint8Array, provider?: PdfAnalysisProvider) {
+  const { analyzePdf, createPdfAnalysisProvider } = await import('./provider');
+  return analyzePdf(pdf, provider ?? createPdfAnalysisProvider());
+}
+
 async function claimNextExecution(client: PoolClient): Promise<Execution | undefined> {
   const executionId = randomUUID();
   const result = await client.query<Execution>(`UPDATE menu_import_jobs
-    SET status = 'processing', analysis_execution_id = $1, analyzer_version = $2,
+    SET status = 'processing', analysis_execution_id = $1, analyzer_version = COALESCE(analyzer_version, $2),
         analysis_attempt_count = analysis_attempt_count + 1,
         analysis_lease_expires_at = now() + ($3 * interval '1 millisecond'),
         analysis_available_at = now(), failure_reason = NULL, updated_at = now()
     WHERE id = (SELECT id FROM menu_import_jobs
       WHERE status = 'pending' AND analysis_available_at <= now()
       ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1)
-    RETURNING id, restaurant_id, source_storage_path, source_size_bytes, analysis_execution_id`,
+    RETURNING id, restaurant_id, source_storage_path, source_size_bytes, analyzer_version, analysis_execution_id`,
     [executionId, ANALYZER_VERSION, LEASE_MS]);
   const job = result.rows[0];
   if (!job) return undefined;
@@ -91,7 +100,7 @@ async function claimNextExecution(client: PoolClient): Promise<Execution | undef
 
 async function loadExecution(client: PoolClient, executionId: string): Promise<Execution | undefined> {
   const result = await client.query<Execution>(`SELECT id, restaurant_id, source_storage_path, source_size_bytes,
-      analysis_execution_id, analysis_attempt_count AS attempt
+      analysis_execution_id, analysis_attempt_count AS attempt, analyzer_version
     FROM menu_import_jobs
     WHERE analysis_execution_id = $1 AND status = 'processing'
       AND analysis_lease_expires_at > now()`, [executionId]);
@@ -102,6 +111,8 @@ function json(value: unknown) { return JSON.stringify(value ?? []); }
 function bbox(value: { x: number; y: number; width: number; height: number } | undefined) { return value ? json(value) : null; }
 function safeFailureCode(error: unknown) {
   const message = error instanceof Error ? error.message : '';
+  const v5 = message.match(/MENU_IMPORT_V5_([A-Z_]+)/);
+  if (v5?.[1]) return v5[1];
   if (message.includes('TIMEOUT')) return 'ANALYSIS_TIMEOUT';
   if (message.includes('RATE_LIMIT')) return 'ANALYSIS_RATE_LIMITED';
   if (message.includes('MALFORMED')) return 'ANALYSIS_MALFORMED_OUTPUT';
@@ -127,7 +138,14 @@ async function persistSections(client: PoolClient, job: Execution, sections: Ext
 }
 
 async function persistDraft(client: PoolClient, job: Execution, result: AnalysisResult, writeAsset?: ImportAssetWriter): Promise<PersistedItemLink[]> {
-  const sectionIds = await persistSections(client, job, result.sections);
+  // V5 invalid candidates are never draft categories/items. Keeping their
+  // section only in lineage prevents an invalid-only page from appearing as a
+  // seemingly editable empty category.
+  const usedSectionKeys = new Set(result.items.map((item) => item.sectionKey).filter((key): key is string => Boolean(key)));
+  const sections = job.analyzer_version === MENU_IMPORT_ANALYZER_V5
+    ? result.sections?.filter((section) => usedSectionKeys.has(section.key))
+    : result.sections;
+  const sectionIds = await persistSections(client, job, sections);
   const categories = new Map<string, string>();
   const persisted: PersistedItemLink[] = [];
   const ids = createMenuImportIdFactory();
@@ -154,7 +172,12 @@ async function persistDraft(client: PoolClient, job: Execution, result: Analysis
         item.source?.page ?? item.page, bbox(item.source?.bbox), json(item.confidence), json(item.attributes ?? {}), json(item.modifiers), json(item.options), json(item.validationSignals), json(item.reviewReasons), item.extractionStatus ?? 'valid', item.retryExhausted ?? false, itemKey]);
     // Provider identifiers are hints only. The lineage IDs linking persistence are
     // generated here, after decode, and remain authoritative across retries.
-    persisted.push({ item, draftItemId: draft.rows[0].id, candidateId: ids.candidate(), itemId: ids.item() });
+    persisted.push({
+      item,
+      draftItemId: draft.rows[0].id,
+      candidateId: isServerLineageId(item.candidateId) ? item.candidateId : ids.candidate(),
+      itemId: isServerLineageId(item.itemId) ? item.itemId : ids.item(),
+    });
     const sourcePage = item.source?.page ?? item.page;
     const evidenceKey = sha256(new TextEncoder().encode(`${job.id}|${draft.rows[0].id}|${sourcePage}|${item.rawName ?? item.name ?? ''}`));
     await client.query(`INSERT INTO menu_import_source_evidence
@@ -239,7 +262,7 @@ async function reusePriorDraft(client: PoolClient, job: Execution, sourceHash: s
   const prior = await client.query<{ import_job_id: string }>(`SELECT import_job_id FROM menu_import_analysis_runs
     WHERE restaurant_id = $1 AND source_sha256 = $2 AND analyzer_version = $3
       AND status IN ('completed','reused') AND import_job_id <> $4
-    ORDER BY completed_at DESC NULLS LAST LIMIT 1`, [job.restaurant_id, sourceHash, ANALYZER_VERSION, job.id]);
+    ORDER BY completed_at DESC NULLS LAST LIMIT 1`, [job.restaurant_id, sourceHash, job.analyzer_version ?? ANALYZER_VERSION, job.id]);
   if (!prior.rows[0]?.import_job_id) return false;
   const oldJob = prior.rows[0].import_job_id;
   const categoryMap = new Map<string, string>();
@@ -290,9 +313,10 @@ async function reusePriorDraft(client: PoolClient, job: Execution, sourceHash: s
 /** Processes a job already claimed by the webhook and identified by execution UUID. */
 export type MenuImportExecutionOutcome = 'completed' | 'reused' | 'stale';
 
-export async function processMenuImportExecution(executionId: string, reader: SourceReader, provider: PdfAnalysisProvider = createPdfAnalysisProvider(), writeAsset?: ImportAssetWriter): Promise<MenuImportExecutionOutcome> {
+export async function processMenuImportExecution(executionId: string, reader: SourceReader, provider?: PdfAnalysisProvider, writeAsset?: ImportAssetWriter): Promise<MenuImportExecutionOutcome> {
   const client = await getPoolClient();
   let job: Execution | undefined;
+  let v5Failure: V5TextFailureResult | undefined;
   try {
     job = await loadExecution(client, executionId);
     if (!job) return 'stale';
@@ -306,7 +330,23 @@ export async function processMenuImportExecution(executionId: string, reader: So
     // Provider/rendering work is intentionally outside a database transaction:
     // only reconciled observations are committed while the lease is still ours.
     const analysisStartedAt = Date.now();
-    const analyzed = await withTimeout(analyzePdf(pdf, provider)) as AnalysisResultWithStructureLineage;
+    let analyzed: AnalysisResultWithStructureLineage;
+    if (job.analyzer_version === MENU_IMPORT_ANALYZER_V5) {
+      const v5 = await analyzeV5Text({
+        restaurantId: job.restaurant_id,
+        pdf,
+        apiKey: process.env.GEMINI_API_KEY,
+        attemptId: executionId,
+      });
+      if (v5.kind === 'failure') {
+        v5Failure = v5;
+        throw new Error(`MENU_IMPORT_V5_${v5.failure.code}`);
+      }
+      analyzed = v5.analysis;
+    } else {
+      analyzed = await withTimeout(analyzeVisualPdf(pdf, provider)) as AnalysisResultWithStructureLineage;
+      if (analyzed.structureMetadata?.failureClass === 'provider_rate_limited') throw new Error('MENU_IMPORT_PROVIDER_RATE_LIMITED');
+    }
     await client.query('BEGIN');
     const stillOwner = await client.query('SELECT 1 FROM menu_import_jobs WHERE id = $1 AND status = \'processing\' AND analysis_execution_id = $2 AND analysis_lease_expires_at > now()', [job.id, executionId]);
     if (!stillOwner.rows[0]) { await client.query('ROLLBACK'); return 'stale'; }
@@ -316,7 +356,14 @@ export async function processMenuImportExecution(executionId: string, reader: So
       await persistLineage(client, job, analyzed, persisted);
       const lineage = structureLineage(analyzed);
       const metrics = analysisMetrics(analyzed, Date.now() - analysisStartedAt);
-      const structuralMetrics = computeMenuImportMetrics(analyzed.items, analyzed.lineage ?? [], metrics.pageCount ?? 0);
+      const structuralMetrics = {
+        ...computeMenuImportMetrics(analyzed.items, analyzed.lineage ?? [], metrics.pageCount ?? 0),
+        totalTokens: metrics.totalTokens,
+        nativeTextCharacters: metrics.nativeTextCharacters,
+        nonEmptyPages: metrics.nonEmptyPages,
+        textDocumentHash: metrics.textDocumentHash,
+        fallbackUsage: job.analyzer_version === MENU_IMPORT_ANALYZER_V5 ? false : undefined,
+      };
       logger.info('menu_import.structure_provider', { importId: job.id, restaurantId: job.restaurant_id, analysisExecutionId: executionId, provider: lineage.provider, model: lineage.model, fallbackReason: lineage.fallbackReason });
       await client.query(`UPDATE menu_import_analysis_runs
         SET structure_provider = $2, structure_model = $3, structure_fallback_reason = $4,
@@ -337,8 +384,27 @@ export async function processMenuImportExecution(executionId: string, reader: So
     await client.query('ROLLBACK').catch(() => undefined);
     if (job) {
       const failureCode = safeFailureCode(error);
-      const terminal = job.attempt >= MAX_ATTEMPTS;
+      // V5 has one automatic full-document provider request per execution.
+      // A later attempt is an authenticated manual requeue, never a scheduler retry.
+      const terminal = job.analyzer_version === MENU_IMPORT_ANALYZER_V5 || job.attempt >= MAX_ATTEMPTS;
       const next = terminal ? 'failed' : 'pending';
+      if (v5Failure) {
+        await persistLineage(client, job, v5Failure.analysis, []);
+        const metrics = v5Failure.analysis.metrics ?? {};
+        await client.query(`UPDATE menu_import_analysis_runs
+          SET structure_provider = 'gemini', structure_model = $2, prompt_version = $3,
+            page_count = $4, provider_call_count = $5, retry_count = 0, duration_ms = $6,
+            input_tokens = $7, output_tokens = $8, structural_metrics = $9::jsonb, updated_at = now()
+          WHERE analysis_execution_id = $1`, [executionId, metrics.model ?? null, metrics.promptVersion ?? null,
+          v5Failure.preflight?.pdfPages ?? null, metrics.providerCalls ?? 0, metrics.durationMs ?? null,
+          metrics.inputTokens ?? null, metrics.outputTokens ?? null, json({
+            failure: v5Failure.failure.code,
+            retryable: v5Failure.failure.retryable,
+            preflight: v5Failure.preflight,
+            structural: v5Failure.structural,
+            fallbackUsage: false,
+          })]);
+      }
       await client.query(`UPDATE menu_import_analysis_runs SET status = 'failed', error_code = $3, error_reason = $3, completed_at = now(), updated_at = now()
         WHERE import_job_id = $2 AND analysis_execution_id = $1`, [executionId, job.id, failureCode]);
       await client.query(`UPDATE menu_import_jobs SET status = $2, failure_reason = $3, analysis_available_at = CASE WHEN $2 = 'pending' THEN now() + (($4)::int * interval '10 seconds') ELSE now() END, analysis_lease_expires_at = NULL, updated_at = now()
@@ -350,12 +416,12 @@ export async function processMenuImportExecution(executionId: string, reader: So
 }
 
 /** Entry point used by the event consumer after it has committed the claim. */
-export async function processClaimedMenuImport(_jobId: string, executionId: string, reader: SourceReader, provider: PdfAnalysisProvider = createPdfAnalysisProvider()): Promise<MenuImportExecutionOutcome> {
+export async function processClaimedMenuImport(_jobId: string, executionId: string, reader: SourceReader, provider?: PdfAnalysisProvider): Promise<MenuImportExecutionOutcome> {
   return processMenuImportExecution(executionId, reader, provider);
 }
 
 /** Backwards-compatible queue entry point for local/manual workers. */
-export async function processNextMenuImport(reader: SourceReader, provider: PdfAnalysisProvider = createPdfAnalysisProvider(), writeAsset?: ImportAssetWriter): Promise<string | null> {
+export async function processNextMenuImport(reader: SourceReader, provider?: PdfAnalysisProvider, writeAsset?: ImportAssetWriter): Promise<string | null> {
   const client = await getPoolClient();
   try {
     await client.query('BEGIN');

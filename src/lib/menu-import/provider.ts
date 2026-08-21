@@ -1,6 +1,7 @@
 import 'server-only';
 import { createHash, randomUUID } from 'node:crypto';
 import type { ExtractedImage, ExtractedMenuItem, ImageSuggestion, LineageEvent, PageText, PdfAnalysisProvider, PdfDocument, StructuredMenuOutput } from './types';
+import { createGeminiRateScheduler, type GeminiRateScheduler } from './gemini-rate-scheduler';
 import {
   ANALYZER_PROMPT_VERSION,
   applyValidation,
@@ -28,7 +29,7 @@ import {
 const MIN_NATIVE_TEXT_CHARACTERS = 40;
 const PRICE = /(?:\p{Sc}\s*)?(\d{1,6}(?:[.,]\d{1,2})?)(?:\s*[A-Za-z]{3,5})?\s*$/iu;
 const CONFIDENCE_VALUES = new Set(['high', 'medium', 'low']);
-const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash';
+const GEMINI_DEFAULT_MODEL = 'gemini-3.7-flash';
 const GEMINI_DEFAULT_TIMEOUT_MS = 8_000;
 const GEMINI_MAX_AUXILIARY_CHARS = 8_000;
 const DEFAULT_RENDER_MAX_DIMENSION = 2_048;
@@ -166,13 +167,22 @@ function ppmFromRgba(data: Uint8ClampedArray, width: number, height: number): Ui
 }
 
 export type GeminiFetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-export type GeminiConfig = { key?: string; model?: string; timeoutMs?: number; fetch?: GeminiFetch; architectureStage?: 1 | 2; analyzerVersion?: string; rawRetentionDays?: number };
+export type GeminiProviderDiagnostic = { status: number; errorStatus?: string; errorCode?: number; errorMessage?: string; quotaMetric?: string; quotaLimit?: string; quotaDimensions?: Record<string, string>; retryAfterMs?: number; page?: number; attempt?: number };
+export type GeminiConfig = {
+  key?: string; model?: string; timeoutMs?: number; fetch?: GeminiFetch; architectureStage?: 1 | 2; analyzerVersion?: string; rawRetentionDays?: number;
+  concurrency?: number; minIntervalMs?: number; maxRateRetries?: number; scheduler?: GeminiRateScheduler;
+  sleep?: (milliseconds: number) => Promise<void>; random?: () => number;
+  onPageComplete?: (page: VisualMenuPage, lineage: LineageEvent[]) => Promise<void> | void;
+};
 export type GeminiTextStructurer = ((pages: PageText[]) => Promise<ExtractedMenuItem[] | undefined>) & {
   lastFallbackReason?: string;
   model?: string;
   lastSignals?: ValidationSignal[];
   lastRetries?: Array<{ page: number; reason: string; region?: NormalizedBox }>;
   lastLineage?: LineageEvent[];
+  lastProviderDiagnostics?: GeminiProviderDiagnostic[];
+  lastProviderRequestCount?: number;
+  lastProviderTransientRetries?: number;
 };
 export type GeminiVisualStructurer = ((pages: VisualPageEvidence[]) => Promise<VisualMenuDocument | undefined>) & {
   lastFallbackReason?: string;
@@ -181,6 +191,9 @@ export type GeminiVisualStructurer = ((pages: VisualPageEvidence[]) => Promise<V
   lastRetries?: Array<{ page: number; reason: string; region?: NormalizedBox }>;
   lastLineage?: LineageEvent[];
   architectureStage?: 1 | 2;
+  lastProviderDiagnostics?: GeminiProviderDiagnostic[];
+  lastProviderRequestCount?: number;
+  lastProviderTransientRetries?: number;
 };
 
 export type PdfAnalysisOptions = {
@@ -199,6 +212,9 @@ function serverGeminiConfig(): GeminiConfig {
     key: process.env.MENU_IMPORT_GEMINI_API_KEY || process.env.GEMINI_KEY || process.env.GEMINI_API_KEY,
     model: process.env.MENU_IMPORT_GEMINI_MODEL || GEMINI_DEFAULT_MODEL,
     timeoutMs: boundedEnv('MENU_IMPORT_GEMINI_TIMEOUT_MS', GEMINI_DEFAULT_TIMEOUT_MS, 1_000, 30_000),
+    concurrency: boundedEnv('MENU_IMPORT_GEMINI_CONCURRENCY', 1, 1, 8),
+    minIntervalMs: boundedEnv('MENU_IMPORT_GEMINI_MIN_INTERVAL_MS', 0, 0, 60_000),
+    maxRateRetries: boundedEnv('MENU_IMPORT_GEMINI_MAX_RATE_RETRIES', 2, 0, 5),
     architectureStage: requestedStage === 2 && analyzerVersion === 'menu-import-v4-visual' && process.env.MENU_IMPORT_STAGE1_LINEAGE_VERIFIED === 'true' ? 2 : 1,
     analyzerVersion,
     rawRetentionDays: boundedEnv('MENU_IMPORT_LINEAGE_RAW_RETENTION_DAYS', 7, 0, 30),
@@ -222,7 +238,8 @@ const ITEM_SCHEMA = { type: 'object', additionalProperties: false, required: ['n
 } } as const;
 const SECTION_SCHEMA = { type: 'object', additionalProperties: false, required: ['id', 'items'], properties: { id: { type: 'string' }, title: { type: 'string' }, parentId: { type: 'string' }, continuationOf: { type: 'string' }, bbox: BOX_SCHEMA, items: { type: 'array', items: ITEM_SCHEMA } } } as const;
 const PAGE_SCHEMA = { type: 'object', additionalProperties: false, required: ['page', 'sections'], properties: { page: { type: 'integer' }, metadata: { type: 'object', additionalProperties: { type: 'string' } }, decorative: { type: 'array', items: { type: 'string' } }, sections: { type: 'array', items: SECTION_SCHEMA } } } as const;
-const VISUAL_RESPONSE_SCHEMA = { type: 'object', additionalProperties: false, required: ['pages'], properties: { metadata: { type: 'object', additionalProperties: { type: 'string' } }, globalPriceNotes: { type: 'array', items: { type: 'string' } }, pages: { type: 'array', items: PAGE_SCHEMA } } } as const;
+/** Shared canonical schema; evaluation-only callers use the same provider contract. */
+export const VISUAL_RESPONSE_SCHEMA = { type: 'object', additionalProperties: false, required: ['pages'], properties: { metadata: { type: 'object', additionalProperties: { type: 'string' } }, globalPriceNotes: { type: 'array', items: { type: 'string' } }, pages: { type: 'array', items: PAGE_SCHEMA } } } as const;
 
 export function buildGeminiRequestBody(pages: VisualPageEvidence[], retry?: { reason: string; region?: NormalizedBox }, stage: 1 | 2 = 2) {
   const retryText = retry ? ` Retry focus: ${retry.reason}.${retry.region ? ` Focus region ${JSON.stringify(retry.region)}.` : ''}` : '';
@@ -235,7 +252,12 @@ export function buildGeminiRequestBody(pages: VisualPageEvidence[], retry?: { re
     parts.push({ text: `PAGE ${page.page} image` });
     parts.push({ inlineData: { mimeType: page.image.mimeType, data: Buffer.from(page.image.data).toString('base64') } });
   }
-  return { contents: [{ role: 'user', parts }], generationConfig: { temperature: 0, responseMimeType: 'application/json', responseJsonSchema: VISUAL_RESPONSE_SCHEMA } };
+  const generationConfig = {
+    ...(stage === 1 ? { temperature: 0 } : {}),
+    responseMimeType: 'application/json',
+    responseJsonSchema: VISUAL_RESPONSE_SCHEMA,
+  };
+  return { contents: [{ role: 'user', parts }], generationConfig };
 }
 
 function record(value: unknown): Record<string, unknown> | undefined {
@@ -302,22 +324,80 @@ export function decodeGeminiVisualDocument(value: unknown, evidence: VisualPageE
 
 function sha256Text(value: string) { return createHash('sha256').update(value).digest('hex'); }
 
-async function callGemini(fetcher: GeminiFetch, config: GeminiConfig, pages: VisualPageEvidence[], retry?: { reason: string; region?: NormalizedBox }) {
+type GeminiCallResult =
+  | { document: unknown; rawPayloadHash: string; rawPayload?: string; inputTokens?: number; outputTokens?: number; totalTokens?: number }
+  | ({ reason: 'GEMINI_RATE_LIMITED' | 'GEMINI_TIMEOUT' | 'GEMINI_REQUEST_FAILED' | 'GEMINI_INVALID_RESPONSE'; retryAfterMs?: number; diagnostic?: GeminiProviderDiagnostic });
+
+function retryAfterMilliseconds(response: Response, payload: Record<string, unknown>): number | undefined {
+  const header = response.headers.get('retry-after');
+  if (header) {
+    const seconds = Number(header);
+    if (Number.isFinite(seconds)) return Math.max(0, Math.ceil(seconds * 1_000));
+    const timestamp = Date.parse(header);
+    if (Number.isFinite(timestamp)) return Math.max(0, timestamp - Date.now());
+  }
+  const error = payload.error && typeof payload.error === 'object' ? payload.error as Record<string, unknown> : {};
+  const details = Array.isArray(error.details) ? error.details as Array<Record<string, unknown>> : [];
+  const retryInfo = details.find((entry) => String(entry['@type'] ?? '').includes('RetryInfo'));
+  const retryDelay = retryInfo?.retryDelay;
+  if (typeof retryDelay === 'string') {
+    const seconds = Number.parseFloat(retryDelay.replace(/s$/, ''));
+    if (Number.isFinite(seconds)) return Math.max(0, Math.ceil(seconds * 1_000));
+  }
+  return undefined;
+}
+
+function providerDiagnostic(response: Response, payload: Record<string, unknown>, page?: number, attempt?: number): GeminiProviderDiagnostic {
+  const error = payload.error && typeof payload.error === 'object' ? payload.error as Record<string, unknown> : {};
+  const details = Array.isArray(error.details) ? error.details as Array<Record<string, unknown>> : [];
+  const quota = details.find((entry) => String(entry['@type'] ?? '').includes('QuotaFailure'));
+  const violation = Array.isArray(quota?.violations) && quota.violations[0] && typeof quota.violations[0] === 'object' ? quota.violations[0] as Record<string, unknown> : {};
+  const dimensions = violation.quotaDimensions && typeof violation.quotaDimensions === 'object' ? Object.fromEntries(Object.entries(violation.quotaDimensions as Record<string, unknown>).filter(([, value]) => typeof value === 'string').map(([key, value]) => [key, String(value)])) : undefined;
+  return {
+    status: response.status,
+    errorStatus: typeof error.status === 'string' ? error.status : undefined,
+    errorCode: typeof error.code === 'number' ? error.code : undefined,
+    errorMessage: typeof error.message === 'string' ? error.message.replaceAll(/AIza[0-9A-Za-z_-]+/g, '[REDACTED_KEY]').slice(0, 500) : undefined,
+    quotaMetric: typeof violation.quotaMetric === 'string' ? violation.quotaMetric : undefined,
+    quotaLimit: typeof violation.quotaId === 'string' ? violation.quotaId : undefined,
+    quotaDimensions: dimensions && Object.keys(dimensions).length ? dimensions : undefined,
+    retryAfterMs: retryAfterMilliseconds(response, payload), page, attempt,
+  };
+}
+
+async function callGemini(fetcher: GeminiFetch, config: GeminiConfig, scheduler: GeminiRateScheduler, pages: VisualPageEvidence[], retry?: { reason: string; region?: NormalizedBox }, page?: number, attempt?: number): Promise<GeminiCallResult> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), config.timeoutMs ?? GEMINI_DEFAULT_TIMEOUT_MS);
   try {
-    const response = await fetcher(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model ?? GEMINI_DEFAULT_MODEL)}:generateContent`, {
-      method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': config.key ?? '' }, body: JSON.stringify(buildGeminiRequestBody(pages, retry, config.architectureStage ?? 1)), signal: controller.signal,
+    const response = await scheduler.schedule(async () => {
+      const timer = setTimeout(() => controller.abort(), config.timeoutMs ?? GEMINI_DEFAULT_TIMEOUT_MS);
+      try {
+        return await fetcher(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model ?? GEMINI_DEFAULT_MODEL)}:generateContent`, {
+          method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': config.key ?? '' }, body: JSON.stringify(buildGeminiRequestBody(pages, retry, config.architectureStage ?? 1)), signal: controller.signal,
+        });
+      } finally { clearTimeout(timer); }
     });
-    if (!response.ok) return { reason: response.status === 429 ? 'GEMINI_RATE_LIMITED' : 'GEMINI_REQUEST_FAILED' as const };
-    const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+    const payload = await response.json().catch(() => ({})) as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>; usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number }; error?: unknown };
+    if (!response.ok) {
+      const diagnostic = providerDiagnostic(response, payload as Record<string, unknown>, page, attempt);
+      return { reason: response.status === 429 ? 'GEMINI_RATE_LIMITED' : 'GEMINI_REQUEST_FAILED', retryAfterMs: diagnostic.retryAfterMs, diagnostic };
+    }
     const rawPayload = JSON.stringify(payload);
     const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (typeof text !== 'string') return { reason: 'GEMINI_INVALID_RESPONSE' as const };
-    try { return { document: JSON.parse(text) as unknown, rawPayloadHash: sha256Text(rawPayload), rawPayload: config.rawRetentionDays ? rawPayload.slice(0, 16_000) : undefined }; } catch { return { reason: 'GEMINI_INVALID_RESPONSE' as const }; }
+    if (typeof text !== 'string') return { reason: 'GEMINI_INVALID_RESPONSE' };
+    try { return { document: JSON.parse(text) as unknown, rawPayloadHash: sha256Text(rawPayload), rawPayload: config.rawRetentionDays ? rawPayload.slice(0, 16_000) : undefined, inputTokens: payload.usageMetadata?.promptTokenCount, outputTokens: payload.usageMetadata?.candidatesTokenCount, totalTokens: payload.usageMetadata?.totalTokenCount }; } catch { return { reason: 'GEMINI_INVALID_RESPONSE' }; }
   } catch (error) {
-    return { reason: error instanceof DOMException && error.name === 'AbortError' ? 'GEMINI_TIMEOUT' as const : 'GEMINI_REQUEST_FAILED' as const };
-  } finally { clearTimeout(timer); }
+    return { reason: error instanceof DOMException && error.name === 'AbortError' ? 'GEMINI_TIMEOUT' : 'GEMINI_REQUEST_FAILED' };
+  }
+}
+
+function providerRetryDelay(response: Extract<GeminiCallResult, { reason: string }>, retryNumber: number, config: GeminiConfig) {
+  if (response.retryAfterMs !== undefined) return response.retryAfterMs;
+  const base = Math.min(60_000, 1_000 * (2 ** Math.max(0, retryNumber - 1)));
+  return Math.round(base * (0.75 + (config.random ?? Math.random)() * 0.5));
+}
+
+function isDailyQuotaExhausted(response: GeminiCallResult) {
+  return 'diagnostic' in response && Boolean(response.diagnostic?.quotaLimit?.includes('PerDay'));
 }
 
 async function cropVisualPage(page: VisualPageEvidence, region: NormalizedBox): Promise<VisualPageEvidence | undefined> {
@@ -335,8 +415,9 @@ async function cropVisualPage(page: VisualPageEvidence, region: NormalizedBox): 
 
 /** Server-only multimodal provider boundary. It records bounded retry evidence but never returns provider payloads. */
 export function createGeminiVisualStructurer(config: GeminiConfig = serverGeminiConfig()): GeminiVisualStructurer {
+  const scheduler = config.scheduler ?? createGeminiRateScheduler({ concurrency: config.concurrency ?? 1, minIntervalMs: config.minIntervalMs ?? 0, sleep: config.sleep });
   const structurer: GeminiVisualStructurer = async (pages) => {
-    structurer.lastFallbackReason = undefined; structurer.lastSignals = []; structurer.lastRetries = []; structurer.lastLineage = []; structurer.model = config.model ?? GEMINI_DEFAULT_MODEL;
+    structurer.lastFallbackReason = undefined; structurer.lastSignals = []; structurer.lastRetries = []; structurer.lastLineage = []; structurer.lastProviderDiagnostics = []; structurer.lastProviderRequestCount = 0; structurer.lastProviderTransientRetries = 0; structurer.model = config.model ?? GEMINI_DEFAULT_MODEL;
     if (!config.key) { structurer.lastFallbackReason = 'GEMINI_NOT_CONFIGURED'; return undefined; }
     if (!pages.some((page) => page.image)) { structurer.lastFallbackReason = 'GEMINI_NO_RENDERED_PAGES'; return undefined; }
     const fetcher = config.fetch ?? fetch;
@@ -360,15 +441,24 @@ export function createGeminiVisualStructurer(config: GeminiConfig = serverGemini
         const auxiliary = retry ? pageAuxiliaryText(page) : undefined;
         event({ sourceKind: 'gemini-visual', stage: 'provider_request', page: page.page, attemptId, analyzerVersion: config.analyzerVersion, model: structurer.model, retryReason: retry?.reason, imageIncluded: true, auxiliaryTextType: retry ? (auxiliary?.ocrText ? 'ocr' : auxiliary?.nativeText ? 'native' : auxiliary?.selectedText ? 'selected' : undefined) : undefined, auxiliaryTextLength: retry ? (auxiliary?.ocrText ?? auxiliary?.nativeText ?? auxiliary?.selectedText ?? '').length : undefined });
         const startedAt = Date.now();
-        let response = await callGemini(fetcher, config, [page], retry);
+        structurer.lastProviderRequestCount = (structurer.lastProviderRequestCount ?? 0) + 1;
+        let response = await callGemini(fetcher, config, scheduler, [page], retry, page.page, attempt + 1);
+        if ('diagnostic' in response && response.diagnostic) structurer.lastProviderDiagnostics.push(response.diagnostic);
         let providerRetry = 0;
-        while (!('document' in response) && providerRetry < DEFAULT_RETRY_BUDGET.providerTransient && ['GEMINI_RATE_LIMITED', 'GEMINI_TIMEOUT', 'GEMINI_REQUEST_FAILED'].includes(response.reason)) {
-          providerRetry += 1;
-          event({ sourceKind: 'provider-transient-retry', stage: 'retry', page: page.page, attemptId, analyzerVersion: config.analyzerVersion, model: structurer.model, retryReason: response.reason });
-          response = await callGemini(fetcher, config, [page], retry);
+        let rateRetry = 0;
+        while (!('document' in response) && !isDailyQuotaExhausted(response) && (response.reason === 'GEMINI_RATE_LIMITED' ? rateRetry < (config.maxRateRetries ?? 2) : providerRetry < DEFAULT_RETRY_BUDGET.providerTransient) && ['GEMINI_RATE_LIMITED', 'GEMINI_TIMEOUT', 'GEMINI_REQUEST_FAILED'].includes(response.reason)) {
+          if (response.reason === 'GEMINI_RATE_LIMITED') rateRetry += 1;
+          else { providerRetry += 1; structurer.lastProviderTransientRetries = (structurer.lastProviderTransientRetries ?? 0) + 1; }
+          const waitMs = providerRetryDelay(response, response.reason === 'GEMINI_RATE_LIMITED' ? rateRetry : providerRetry, config);
+          event({ sourceKind: 'provider-transient-retry', stage: 'retry', page: page.page, attemptId, analyzerVersion: config.analyzerVersion, model: structurer.model, retryReason: response.reason, metadata: { status: response.diagnostic?.status, retryAfterMs: response.retryAfterMs, quotaMetric: response.diagnostic?.quotaMetric, quotaLimit: response.diagnostic?.quotaLimit, quotaDimensions: response.diagnostic?.quotaDimensions, backoffMs: waitMs } });
+          if (config.sleep && waitMs > 0) await config.sleep(waitMs);
+          else if (waitMs > 0) await new Promise<void>((resolve) => setTimeout(resolve, waitMs));
+          structurer.lastProviderRequestCount = (structurer.lastProviderRequestCount ?? 0) + 1;
+          response = await callGemini(fetcher, config, scheduler, [page], retry, page.page, attempt + 1);
+          if ('diagnostic' in response && response.diagnostic) structurer.lastProviderDiagnostics.push(response.diagnostic);
         }
         if (!('document' in response)) { structurer.lastFallbackReason = response.reason; return undefined; }
-        event({ sourceKind: 'gemini-visual', stage: 'provider_raw', page: page.page, attemptId, analyzerVersion: config.analyzerVersion, model: structurer.model, retryReason: retry?.reason, latencyMs: Date.now() - startedAt, rawPayloadHash: response.rawPayloadHash, rawPayload: response.rawPayload, metadata: { rawRetentionDays: config.rawRetentionDays ?? 7 } });
+        event({ sourceKind: 'gemini-visual', stage: 'provider_raw', page: page.page, attemptId, analyzerVersion: config.analyzerVersion, model: structurer.model, retryReason: retry?.reason, latencyMs: Date.now() - startedAt, inputTokens: response.inputTokens, outputTokens: response.outputTokens, rawPayloadHash: response.rawPayloadHash, rawPayload: response.rawPayload, metadata: { rawRetentionDays: config.rawRetentionDays ?? 7 } });
         decoded = decodeGeminiVisualDocument(response.document, [page]);
         if (!decoded) { structurer.lastFallbackReason = 'GEMINI_INVALID_RESPONSE'; return undefined; }
         decoded = assignServerIds(decoded, ids, attempt + 1);
@@ -388,7 +478,9 @@ export function createGeminiVisualStructurer(config: GeminiConfig = serverGemini
           const cropped = await cropVisualPage(page, region).catch(() => undefined);
           if (!cropped) continue;
           structurer.lastRetries.push({ page: page.page, reason: 'VISUAL_REGION_RETRY', region });
-          const response = await callGemini(fetcher, config, [cropped], { reason: 'VISUAL_REGION_RETRY', region });
+          structurer.lastProviderRequestCount = (structurer.lastProviderRequestCount ?? 0) + 1;
+          const response = await callGemini(fetcher, config, scheduler, [cropped], { reason: 'VISUAL_REGION_RETRY', region }, page.page, attempt + 1);
+          if ('diagnostic' in response && response.diagnostic) structurer.lastProviderDiagnostics.push(response.diagnostic);
           if (!('document' in response)) continue;
           let regional = decodeGeminiVisualDocument(response.document, [cropped]);
           if (regional) regional = assignServerIds(stage === 2 ? applyValidation(regional) : regional, ids, attempt + 2);
@@ -398,6 +490,7 @@ export function createGeminiVisualStructurer(config: GeminiConfig = serverGemini
       }
       structurer.lastSignals.push(...signals);
       accepted.push(...decoded.pages);
+      if (config.onPageComplete && decoded.pages[0]) await config.onPageComplete(decoded.pages[0], structurer.lastLineage.filter((event) => event.page === page.page));
     }
     const reconciled = reconcileVisualDocument({ pages: accepted }, ids);
     structurer.lastSignals.push(...reconciled.signals);
@@ -503,19 +596,23 @@ export function createPdfAnalysisProvider(overrides: Partial<PdfAnalysisProvider
           items: flattenVisualDocument(visualDocument, { excludeInvalid: geminiVisualStructurer.architectureStage === 2 }),
           sections: visualDocument.pages.flatMap((page) => page.sections.map((section, sortOrder) => ({ key: `${page.page}:${section.id}`, name: section.title ?? null, sortOrder, source: section.bbox ? { page: page.page, bbox: section.bbox } : { page: page.page }, confidence: section.items.some((item) => item.confidence?.section === 'low') ? 'low' : 'medium' as const }))),
           documentMetadata: { pageCount: visualDocument.pages.length },
-          metrics: { analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', promptVersion: ANALYZER_PROMPT_VERSION, model: geminiVisualStructurer.model, pageCount: visualDocument.pages.length, retryCount: geminiVisualStructurer.lastRetries?.length ?? 0, suspiciousPages: [...new Set(geminiVisualStructurer.lastSignals?.map((signal) => signal.page) ?? [])] },
+          metrics: { analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', promptVersion: ANALYZER_PROMPT_VERSION, model: geminiVisualStructurer.model, pageCount: visualDocument.pages.length, providerCalls: geminiVisualStructurer.lastProviderRequestCount ?? 0, providerTransientRetries: geminiVisualStructurer.lastProviderTransientRetries ?? 0, retryCount: geminiVisualStructurer.lastRetries?.length ?? 0, inputTokens: (geminiVisualStructurer.lastLineage ?? []).reduce((sum, event) => sum + (event.inputTokens ?? 0), 0), outputTokens: (geminiVisualStructurer.lastLineage ?? []).reduce((sum, event) => sum + (event.outputTokens ?? 0), 0), suspiciousPages: [...new Set(geminiVisualStructurer.lastSignals?.map((signal) => signal.page) ?? [])] },
           canonicalDocument: visualDocument,
           lineage: geminiVisualStructurer.lastLineage,
         };
       }
-      structureMetadata = { provider: 'local-fallback', fallbackReason: (geminiVisualStructurer.lastFallbackReason || 'GEMINI_REQUEST_FAILED').slice(0, 200) };
+      structureMetadata = { provider: 'local-fallback', fallbackReason: (geminiVisualStructurer.lastFallbackReason || 'GEMINI_REQUEST_FAILED').slice(0, 200), textualFallbackUsed: false };
+      if (geminiVisualStructurer.architectureStage === 2 && geminiVisualStructurer.lastFallbackReason === 'GEMINI_RATE_LIMITED') {
+        structureMetadata = { provider: 'local-fallback', fallbackReason: 'GEMINI_RATE_LIMITED', failureClass: 'provider_rate_limited', textualFallbackUsed: false };
+        return { items: [], sections: [], documentMetadata: { pageCount: 0 }, metrics: { analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', promptVersion: ANALYZER_PROMPT_VERSION, pageCount: 0, retryCount: 0, providerCalls: geminiVisualStructurer.lastProviderRequestCount ?? 0, providerTransientRetries: geminiVisualStructurer.lastProviderTransientRetries ?? 0 }, lineage: geminiVisualStructurer.lastLineage };
+      }
     }
     const structured = await geminiStructurer(pages);
     if (structured) {
       structureMetadata = { provider: 'gemini', model: (geminiStructurer.model || GEMINI_DEFAULT_MODEL).slice(0, 100) };
       return { items: structured, metrics: { analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', promptVersion: ANALYZER_PROMPT_VERSION, model: geminiStructurer.model, pageCount: pages.length, retryCount: geminiStructurer.lastRetries?.length ?? 0 }, lineage: geminiStructurer.lastLineage };
     }
-    structureMetadata = { provider: 'local-fallback', fallbackReason: (geminiStructurer.lastFallbackReason || 'GEMINI_REQUEST_FAILED').slice(0, 200) };
+    structureMetadata = { provider: 'local-fallback', fallbackReason: (geminiStructurer.lastFallbackReason || 'GEMINI_REQUEST_FAILED').slice(0, 200), textualFallbackUsed: true };
     const fallbackRunId = randomUUID();
     const fallbackItems = parseMenuText(pages);
     return { items: fallbackItems, metrics: { analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', promptVersion: ANALYZER_PROMPT_VERSION, pageCount: pages.length, fallbackReasons: [structureMetadata.fallbackReason ?? 'GEMINI_REQUEST_FAILED'] }, lineage: fallbackItems.map((item) => ({ id: randomUUID(), analysisRunId: fallbackRunId, page: item.page, candidateId: randomUUID(), sourceKind: 'textual-fallback', stage: 'decode' as const, analyzerVersion: process.env.MENU_IMPORT_ANALYZER_VERSION || 'menu-import-v4-visual', validationStatus: item.extractionStatus, validationReasons: item.reviewReasons?.map((reason) => reason.code) })) };

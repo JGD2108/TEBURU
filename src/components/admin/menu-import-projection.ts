@@ -32,6 +32,19 @@ export type ExtractionIssue = {
   retryExhausted?: boolean;
 };
 
+export type NativeTextProvenance = {
+  inputKind?: string;
+  fallbackUsage?: string;
+  serializerVersion?: string;
+  pdfSha256?: string;
+  textDocumentHash?: string;
+  pdfPages?: number;
+  textDocumentPages?: number;
+  textCharacters?: number;
+};
+
+type ProvenanceRecord = Record<string, unknown>;
+
 type ProjectionInput<T extends ProjectableDraftItem> = {
   items: T[];
   extraction_issues?: ExtractionIssue[];
@@ -45,6 +58,37 @@ export type MenuImportProjection<T extends ProjectableDraftItem> = {
   reviewItems: T[];
   issues: ExtractionIssue[];
 };
+
+export function isTextOnlyV5Analyzer(analyzerVersion?: string | null) {
+  return analyzerVersion === 'menu-import-v5-text';
+}
+
+/** V5 has page-local native-text evidence, never visual geometry. */
+export function shouldShowSourceGeometry(analyzerVersion?: string | null) {
+  return !isTextOnlyV5Analyzer(analyzerVersion);
+}
+
+/**
+ * Keeps the admin display limited to V5's declared, non-secret text provenance.
+ * Unknown metadata is deliberately ignored.
+ */
+export function nativeTextProvenance(value: unknown): NativeTextProvenance | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const source = value as ProvenanceRecord;
+  const text = (key: string) => typeof source[key] === 'string' && source[key].trim() ? source[key].trim() : undefined;
+  const number = (key: string) => typeof source[key] === 'number' && Number.isFinite(source[key]) && source[key] >= 0 ? source[key] : undefined;
+  const result: NativeTextProvenance = {
+    inputKind: text('inputKind') ?? text('input_kind'),
+    fallbackUsage: text('fallbackUsage') ?? text('fallback_usage'),
+    serializerVersion: text('serializerVersion') ?? text('serializer_version'),
+    pdfSha256: text('pdfSha256') ?? text('pdf_sha256'),
+    textDocumentHash: text('textDocumentHash') ?? text('text_document_hash'),
+    pdfPages: number('pdfPages') ?? number('pdf_pages'),
+    textDocumentPages: number('textDocumentPages') ?? number('text_document_pages'),
+    textCharacters: number('textCharacters') ?? number('text_characters'),
+  };
+  return Object.values(result).some((entry) => entry !== undefined) ? result : undefined;
+}
 
 function explicitStatus(item: ProjectableDraftItem): ExtractionStatus | undefined {
   return item.validation_status ?? item.validationStatus ?? item.extraction_status ?? item.extractionStatus;

@@ -640,8 +640,8 @@
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/route.ts": {
-    "mtime": 1787281072.8712847,
-    "ast_hash": "5b2a08b22faac5a08c23964a572b898e",
+    "mtime": 1787281616.186036,
+    "ast_hash": "4de56f105b92fbd1c8508fdf6e129303",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/source/route.ts": {
@@ -675,23 +675,23 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/provider.test.ts": {
-    "mtime": 1787281515.1153126,
-    "ast_hash": "4a114ed959076e0441e485ad10e9ca72",
+    "mtime": 1787285336.6758497,
+    "ast_hash": "7763d2e3df2dc8bb7674c5e22c491f83",
     "semantic_hash": ""
   },
   "src/lib/menu-import/provider.ts": {
-    "mtime": 1787281598.5620732,
-    "ast_hash": "3510f6179f3127f103fc95edfe265f34",
+    "mtime": 1787285454.696503,
+    "ast_hash": "32f406323eacfa063d065392f3c8bb92",
     "semantic_hash": ""
   },
   "src/lib/menu-import/types.ts": {
-    "mtime": 1787280995.087557,
-    "ast_hash": "6a78290db9bea1208c6e5e0621014b11",
+    "mtime": 1787285110.4074867,
+    "ast_hash": "3784bec66094588e62c9af476c53e4e7",
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.ts": {
-    "mtime": 1787281590.340919,
-    "ast_hash": "4b87f1a4a578b63b2685e93c0b5facdf",
+    "mtime": 1787285037.0451145,
+    "ast_hash": "422d72730d2cc0473b0f132bda6082ed",
     "semantic_hash": ""
   },
   "supabase/migrations/20260816120000_pdf_menu_imports.sql": {
@@ -795,8 +795,8 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/worker.test.ts": {
-    "mtime": 1787281072.877289,
-    "ast_hash": "ed2466ddd9c67440a0dea84b8b91b829",
+    "mtime": 1787285278.7610662,
+    "ast_hash": "cbab1d496afc3abd00b14da7b1775709",
     "semantic_hash": ""
   },
   "src/app/api/admin/menu-import/[id]/retry/route.ts": {
@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "docs/menu-import-analysis.md": {
-    "mtime": 1787281338.0113442,
-    "ast_hash": "06e8458909676c06f7e0f9d62859093d",
+    "mtime": 1787281695.4534013,
+    "ast_hash": "76414d4a4bbfa250088111e6f9de1d00",
     "semantic_hash": ""
   },
   "scripts/verify-menu-import-pgcrypto-migration.mjs": {
@@ -900,18 +900,18 @@
     "semantic_hash": ""
   },
   "test-results/.last-run.json": {
-    "mtime": 1787265659.8021402,
+    "mtime": 1787282710.261309,
     "ast_hash": "66954584d3ce62d9d40f8f564ebb01d8",
     "semantic_hash": ""
   },
   "test-results/production-smoke-health-pu-0b526-mous-authorization-boundary/error-context.md": {
-    "mtime": 1787265659.7466202,
+    "mtime": 1787282710.2251165,
     "ast_hash": "c70f6f5bcb5729d360879b92b6500f59",
     "semantic_hash": ""
   },
   "scripts/run-menu-import-live-evaluation.mjs": {
-    "mtime": 1787280903.9854167,
-    "ast_hash": "9736cef1bad6a365c48bc4d00a96860c",
+    "mtime": 1787285030.755139,
+    "ast_hash": "b0cb2991793bdeb1c3bd5ba87743642b",
     "semantic_hash": ""
   },
   "scripts/verify-menu-import-deterministic.mjs": {
@@ -960,8 +960,8 @@
     "semantic_hash": ""
   },
   "openspec/changes/menu-import-v3-visual-architecture/tasks.md": {
-    "mtime": 1787281163.666237,
-    "ast_hash": "771edf09b0bc6a4a9947ac82e76ec8aa",
+    "mtime": 1787281779.7440815,
+    "ast_hash": "8af3b884cf00c8aa0c3c1e0bae7d44f4",
     "semantic_hash": ""
   },
   "supabase/migrations/20260821025509_add_menu_import_analysis_lineage_events.sql": {
@@ -980,13 +980,48 @@
     "semantic_hash": ""
   },
   "src/lib/menu-import/lineage.ts": {
-    "mtime": 1787281124.9446552,
-    "ast_hash": "6fb10715e2f78e480e08fbe80c5195d8",
+    "mtime": 1787281870.1344588,
+    "ast_hash": "decd1c776ee24db0212b7744f3e06508",
     "semantic_hash": ""
   },
   "supabase/migrations/20260821032000_add_menu_import_validation_status.sql": {
     "mtime": 1787281578.2756379,
     "ast_hash": "4d85a3e75c72e856a3358d85b651fd55",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/metrics.test.ts": {
+    "mtime": 1787281724.614172,
+    "ast_hash": "9933101fdb82ddd19b526c8b2ef6b620",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/metrics.ts": {
+    "mtime": 1787281817.517835,
+    "ast_hash": "0594a73b9a0056f23dea23dd7710a752",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260821032100_add_menu_import_analysis_metrics.sql": {
+    "mtime": 1787281734.2116117,
+    "ast_hash": "b4e080c48547e035316a3b9942a1f2b0",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/live-gemini-evaluation.test.ts": {
+    "mtime": 1787285505.08722,
+    "ast_hash": "861d2b6a0e9adb199fdf5adcd5bbf258",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/gemini-rate-scheduler.test.ts": {
+    "mtime": 1787284919.012797,
+    "ast_hash": "4623e166af316a9fd5530a3a4bf2ab74",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/gemini-rate-scheduler.ts": {
+    "mtime": 1787284890.1109972,
+    "ast_hash": "9dd6016628f4267cedadd98dff00f1e8",
+    "semantic_hash": ""
+  },
+  "src/lib/menu-import/live-evaluation-checkpoint.ts": {
+    "mtime": 1787284717.1332211,
+    "ast_hash": "23ec52f077b02dfb1100a10515a713ac",
     "semantic_hash": ""
   }
 }

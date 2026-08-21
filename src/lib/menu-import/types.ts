@@ -40,7 +40,8 @@ export type DocumentMetadata = { title?: string; language?: string; currency?: s
 export type AnalysisMetrics = {
   analyzerVersion?: string; promptVersion?: string; model?: string; pageCount?: number;
   providerCalls?: number; retryCount?: number; durationMs?: number; inputTokens?: number;
-  outputTokens?: number; suspiciousPages?: number[]; fallbackReasons?: string[];
+  outputTokens?: number; totalTokens?: number; nativeTextCharacters?: number; nonEmptyPages?: number;
+  textDocumentHash?: string; suspiciousPages?: number[]; fallbackReasons?: string[];
   semanticRetries?: number; regionalRetries?: number; providerTransientRetries?: number;
   recoveryRate?: number; attemptsPerPage?: Record<string, number>;
   validItemRate?: number; invalidFragmentRate?: number; pagesRequiringReview?: number;
@@ -145,7 +146,8 @@ export type ExtractedMenuItem = {
 };
 
 export type ImageSuggestion = { assetIndex: number; itemIndex?: number; confidence: Confidence; reason: string };
-export type StructureMetadata = { provider: 'gemini' | 'local-fallback'; model?: string; fallbackReason?: string };
+export type StructureFailureClass = 'provider_rate_limited' | 'visual_semantic_failure';
+export type StructureMetadata = { provider: 'gemini' | 'local-fallback'; model?: string; fallbackReason?: string; failureClass?: StructureFailureClass; textualFallbackUsed?: boolean };
 export type AnalysisResult = {
   items: ExtractedMenuItem[];
   images: ExtractedImage[];

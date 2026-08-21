@@ -7,7 +7,7 @@ import { ANALYZER_VERSION, processMenuImportExecution } from '@/lib/menu-import/
 
 // Node-only imports make this a server-only boundary. Do not import it from UI code.
 const LEASE_SECONDS = 10 * 60;
-type Job = { id: string; restaurant_id: string; source_storage_path: string; source_size_bytes: string | number; status: string };
+type Job = { id: string; restaurant_id: string; source_storage_path: string; source_size_bytes: string | number; status: string; analyzer_version?: string | null };
 export type MenuImportDispatchResult =
   | { accepted: true; claimed: true; importId: string; analysisExecutionId: string; outcome: Awaited<ReturnType<typeof processMenuImportExecution>> }
   | { accepted: true; claimed: false; reason: 'unknown_job' | 'already_claimed' }
@@ -39,7 +39,7 @@ async function readPrivatePdf(path: string) {
 export async function dispatchMenuImportAnalysis(jobId: string, correlationId?: string): Promise<MenuImportDispatchResult> {
   const client = await getPoolClient();
   try {
-    const found = await client.query<Job>('SELECT id, restaurant_id, source_storage_path, source_size_bytes, status FROM menu_import_jobs WHERE id = $1', [jobId]);
+    const found = await client.query<Job>('SELECT id, restaurant_id, source_storage_path, source_size_bytes, status, analyzer_version FROM menu_import_jobs WHERE id = $1', [jobId]);
     const job = found.rows[0];
     if (!job) return { accepted: true, claimed: false, reason: 'unknown_job' };
     if (!(await verifyPrivatePdf(job))) {
@@ -54,7 +54,7 @@ export async function dispatchMenuImportAnalysis(jobId: string, correlationId?: 
     const executionId = randomUUID();
     await client.query('BEGIN');
     const claimed = await client.query<Job>(`UPDATE menu_import_jobs
-      SET status = 'processing', analysis_execution_id = $2, analyzer_version = $3,
+      SET status = 'processing', analysis_execution_id = $2, analyzer_version = COALESCE(analyzer_version, $3),
           analysis_attempt_count = analysis_attempt_count + 1,
           analysis_lease_expires_at = now() + ($4 * interval '1 second'), updated_at = now()
       WHERE id = $1 AND status = 'pending' AND analysis_available_at <= now()

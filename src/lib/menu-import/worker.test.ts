@@ -56,7 +56,7 @@ describe('menu import execution ownership', () => {
   });
 
   it('schedules a bounded retry while retaining the same job and execution lineage', async () => {
-    const client = clientWith({ rows: [job] }, { rows: [] }, { rows: [] }, { rows: [] });
+    const client = clientWith({ rows: [job] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] });
 
     await expect(processMenuImportExecution(executionId, async () => { throw new Error('timeout'); }, provider)).rejects.toThrow('timeout');
 
@@ -64,6 +64,19 @@ describe('menu import execution ownership', () => {
     const retry = client.query.mock.calls.find(([sql]) => String(sql).includes('analysis_available_at') && String(sql).includes('menu_import_jobs'))!;
     expect(runFailure[1]).toEqual(expect.arrayContaining([executionId]));
     expect(retry[1]).toEqual(expect.arrayContaining([importId, 'pending', executionId]));
+    expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_'))).toBe(false);
+  });
+
+  it('keeps provider rate limits retryable and never persists textual fallback drafts', async () => {
+    const client = clientWith({ rows: [job] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] }, { rows: [] });
+    const rateLimitedProvider = {
+      ...provider,
+      structureDocument: vi.fn().mockResolvedValue({ items: [], sections: [], documentMetadata: { pageCount: 0 } }),
+      getStructureMetadata: vi.fn().mockReturnValue({ provider: 'local-fallback' as const, fallbackReason: 'GEMINI_RATE_LIMITED', failureClass: 'provider_rate_limited' as const, textualFallbackUsed: false }),
+    };
+    await expect(processMenuImportExecution(executionId, async () => new Uint8Array([1]), rateLimitedProvider)).rejects.toThrow('MENU_IMPORT_PROVIDER_RATE_LIMITED');
+    const retry = client.query.mock.calls.find(([sql]) => String(sql).includes('analysis_available_at') && String(sql).includes('menu_import_jobs'))!;
+    expect(retry[1]).toEqual(expect.arrayContaining([importId, 'pending', 'ANALYSIS_RATE_LIMITED', executionId]));
     expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_draft_'))).toBe(false);
   });
 

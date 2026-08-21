@@ -32,7 +32,7 @@ export async function GET(request: Request, context: RouteContext<'/api/admin/me
     const lineage = await query(`SELECT analysis_execution_id, attempt, status, source_sha256, analyzer_version,
       structure_provider, structure_model, structure_fallback_reason, prompt_version, page_count, provider_call_count,
       retry_count, duration_ms, input_tokens, output_tokens, suspicious_pages, extracted_item_count, review_item_count,
-      fallback_reasons, started_at, completed_at, error_code
+      fallback_reasons, structural_metrics, started_at, completed_at, error_code
       FROM menu_import_analysis_runs WHERE import_job_id = $1 AND restaurant_id = $2 ORDER BY attempt DESC`, [id, staff.restaurantId]);
     // Deliberately return nullable draft fields and raw evidence: review must not
     // manufacture a category, currency, or zero price for an incomplete item.

@@ -25,8 +25,9 @@ import { GET as publicSettings } from '@/app/api/public/settings/route';
 const staff = { userId: 'admin-1', name: 'Admin', role: 'admin', restaurantId: 'restaurant-a', isPlatformAdmin: false };
 const context = (id = 'import-a', itemId = 'item-a') => ({ params: Promise.resolve({ id, itemId }) });
 
-function uploadRequest(file: File) {
+function uploadRequest(file: File, analyzerVersion?: string) {
   const form = new FormData(); form.set('file', file);
+  if (analyzerVersion) form.set('analyzerVersion', analyzerVersion);
   return new Request('http://localhost/api/admin/menu-import', { method: 'POST', body: form });
 }
 
@@ -59,6 +60,67 @@ describe('PDF menu import APIs', () => {
     expect(response.status).toBe(201);
     expect(upload).toHaveBeenCalledWith(expect.stringContaining('restaurants/restaurant-a/sources/'), expect.any(Uint8Array), expect.objectContaining({ contentType: 'application/pdf' }));
     expect(query.mock.calls[0][1]).toEqual(expect.arrayContaining(['restaurant-a', 'admin-1', 'menu.pdf']));
+  });
+
+  it('stores an explicitly selected text-only analyzer only when the server rollout is enabled', async () => {
+    const originalEnabled = process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+    process.env.MENU_IMPORT_TEXT_ONLY_ENABLED = 'true';
+    try {
+      const upload = vi.fn().mockResolvedValue({ error: null });
+      ensureMenuImportBucket.mockResolvedValue({ storage: { from: vi.fn().mockReturnValue({ upload }) } });
+      query.mockResolvedValue({ rows: [{ id: 'import-v5', status: 'pending', analyzer_version: 'menu-import-v5-text' }] });
+
+      const response = await createImport(uploadRequest(new File(['%PDF-1.7'], 'menu.pdf', { type: 'application/pdf' }), 'menu-import-v5-text'));
+
+      expect(response.status).toBe(201);
+      expect(query.mock.calls[0][0]).toContain('analyzer_version');
+      expect(query.mock.calls[0][1]).toEqual(expect.arrayContaining(['menu-import-v5-text']));
+    } finally {
+      if (originalEnabled === undefined) delete process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+      else process.env.MENU_IMPORT_TEXT_ONLY_ENABLED = originalEnabled;
+    }
+  });
+
+  it('preserves an omitted visual default without implicitly creating a V5 job', async () => {
+    const originalVersion = process.env.MENU_IMPORT_ANALYZER_VERSION;
+    const originalEnabled = process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+    process.env.MENU_IMPORT_ANALYZER_VERSION = 'menu-import-v4-visual';
+    process.env.MENU_IMPORT_TEXT_ONLY_ENABLED = 'true';
+    try {
+      const upload = vi.fn().mockResolvedValue({ error: null });
+      ensureMenuImportBucket.mockResolvedValue({ storage: { from: vi.fn().mockReturnValue({ upload }) } });
+      query.mockResolvedValue({ rows: [{ id: 'import-v4', status: 'pending', analyzer_version: 'menu-import-v4-visual' }] });
+
+      const response = await createImport(uploadRequest(new File(['%PDF-1.7'], 'menu.pdf', { type: 'application/pdf' })));
+
+      expect(response.status).toBe(201);
+      expect(query.mock.calls[0][1]).toEqual(expect.arrayContaining(['menu-import-v4-visual']));
+    } finally {
+      if (originalVersion === undefined) delete process.env.MENU_IMPORT_ANALYZER_VERSION;
+      else process.env.MENU_IMPORT_ANALYZER_VERSION = originalVersion;
+      if (originalEnabled === undefined) delete process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+      else process.env.MENU_IMPORT_TEXT_ONLY_ENABLED = originalEnabled;
+    }
+  });
+
+  it('does not expose analyzer models or keys in the authorized import list metadata', async () => {
+    const originalEnabled = process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+    delete process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+    try {
+      query.mockResolvedValueOnce({ rows: [] });
+      const response = await listImports(new Request('http://localhost/api/admin/menu-import'));
+      const payload = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(payload.data.analyzerOptions).toEqual([
+        { version: 'menu-import-v3-visual', label: 'Visual V3' },
+        { version: 'menu-import-v4-visual', label: 'Visual V4' },
+      ]);
+      expect(JSON.stringify(payload.data.analyzerOptions)).not.toMatch(/model|key/i);
+    } finally {
+      if (originalEnabled === undefined) delete process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+      else process.env.MENU_IMPORT_TEXT_ONLY_ENABLED = originalEnabled;
+    }
   });
 
   it('does not disclose another restaurant’s draft or source document', async () => {
@@ -353,6 +415,55 @@ describe('deployment-safe menu import upload APIs', () => {
     expect(client.query.mock.calls[1][1]).toEqual(['auth-b', 'restaurant-a']);
     expect(menuImportStorage).not.toHaveBeenCalled();
     expect(client.release).toHaveBeenCalledOnce();
+  });
+
+  it('rejects text-only selection when its server rollout flag is disabled', async () => {
+    const originalEnabled = process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+    delete process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+    try {
+      const token = 'token-a';
+      const client = { query: vi.fn(), release: vi.fn() };
+      getPoolClient.mockResolvedValue(client);
+      client.query
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ id: 'auth-a', storage_path: 'restaurants/restaurant-a/pending/auth-a.pdf', source_filename: 'menu.pdf', expected_size_bytes: 100, expires_at: '2030-01-01T00:00:00.000Z', token_hash: createHash('sha256').update(token).digest('hex'), import_job_id: null }] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token, analyzerVersion: 'menu-import-v5-text' }));
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({ error: expect.objectContaining({ code: 'IMPORT_ANALYZER_UNAVAILABLE' }) });
+      expect(menuImportStorage).not.toHaveBeenCalled();
+      expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_jobs'))).toBe(false);
+    } finally {
+      if (originalEnabled === undefined) delete process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+      else process.env.MENU_IMPORT_TEXT_ONLY_ENABLED = originalEnabled;
+    }
+  });
+
+  it('keeps an existing stored text-only analyzer authoritative after rollout is disabled', async () => {
+    const originalEnabled = process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+    delete process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+    try {
+      const token = 'token-a';
+      const existing = { id: 'import-v5', status: 'pending', source_filename: 'menu.pdf', source_size_bytes: 100, analyzer_version: 'menu-import-v5-text', created_at: '2026-01-01T00:00:00.000Z' };
+      const client = { query: vi.fn(), release: vi.fn() };
+      getPoolClient.mockResolvedValue(client);
+      client.query
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ id: 'auth-a', storage_path: 'restaurants/restaurant-a/pending/auth-a.pdf', source_filename: 'menu.pdf', expected_size_bytes: 100, expires_at: '2030-01-01T00:00:00.000Z', token_hash: createHash('sha256').update(token).digest('hex'), import_job_id: existing.id }] })
+        .mockResolvedValueOnce({ rows: [existing] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const response = await finalizeUpload(jsonRequest('http://localhost/api/admin/menu-import/finalize', { authorizationId: 'auth-a', token, analyzerVersion: 'menu-import-v5-text' }));
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ data: { import: existing }, requestId: 'request-1' });
+      expect(client.query.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO menu_import_jobs'))).toBe(false);
+    } finally {
+      if (originalEnabled === undefined) delete process.env.MENU_IMPORT_TEXT_ONLY_ENABLED;
+      else process.env.MENU_IMPORT_TEXT_ONLY_ENABLED = originalEnabled;
+    }
   });
 
   it('rejects an expired authorization without creating an import job', async () => {

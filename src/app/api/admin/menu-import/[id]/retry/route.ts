@@ -13,7 +13,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       SET status = 'pending', failure_reason = NULL, analysis_available_at = now(),
           analysis_lease_expires_at = NULL, updated_at = now()
       WHERE id = $1 AND restaurant_id = $2
-        AND (status = 'pending' OR (status = 'failed' AND analysis_attempt_count < 3))
+        AND (status = 'pending' OR (status = 'failed' AND (analyzer_version = 'menu-import-v5-text' OR analysis_attempt_count < 3)))
       RETURNING id`, [id, staff.restaurantId]);
     if (!result.rows[0]) return jsonError(request, 'INVALID_REQUEST', 'La importación no puede reintentarse.', 409);
     const dispatched = await dispatchMenuImportAnalysis(id);

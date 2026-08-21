@@ -1,27 +1,27 @@
-# Graph Report - teburuapp  (2026-08-20)
+# Graph Report - teburuapp  (2026-08-21)
 
 ## Corpus Check
-- 197 files · ~99,015 words
+- 234 files · ~127,886 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1115 nodes · 2026 edges · 132 communities (90 shown, 42 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.5)
+- 1579 nodes · 2761 edges · 157 communities (112 shown, 45 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a3b8da77`
+- Built from commit: `ef249037`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- metrics.ts
+- full-document-evaluation.ts
 - Decisions
 - dependencies
 - compilerOptions
 - devDependencies
 - What You Must Do When Invoked
-- isAuthorizationFailure
+- finalize/route.ts
 - schema.sql
 - orders
 - eslint.config.mjs
@@ -50,7 +50,7 @@
 - graphify reference: transcribe video and audio
 - Subagents for OpenSpec changes
 - extraction-spec.md
-- getPoolClient
+- guest-session.ts
 - 202608050000_initial_schema.sql
 - order_items
 - worker.ts
@@ -62,7 +62,7 @@
 - vercel.json
 - verify-remote-security.mjs
 - openspec-explore/SKILL.md
-- menu-import-analysis/route.test.ts
+- live-gemini-evaluation.test.ts
 - session_tables
 - ADDED Requirements
 - menu_import_jobs
@@ -73,24 +73,24 @@
 - tables
 - menu-import-v3-visual-architecture/proposal.md
 - admin/page.tsx
-- api-client.ts
+- db.ts
 - MenuImportPanel.tsx
 - Requirement: Controlled auxiliary text
 - Requirement: Review-aware persistence and UI
 - scripts
 - public.menu_import_analysis_lineage_events
 - Requirement: Server-generated identity and canonical bounding boxes
-- Requirement: Bounded and observable call budgets
+- Requirement: Retry outcomes are not automatically accepted
 - Requirement: Canonical visual document extraction
 - package.json
 - Requirement: Centralized generic deduplication policy
 - Requirement: Conservative document-level reconciliation
 - Requirement: Deterministic and live evaluation separation
-- createPdfAnalysisProvider
-- Requirement: Durable extraction lineage
+- adapter.ts
+- ADDED Requirements
 - provider.ts
-- KitchenPanel.tsx
-- Requirement: Retry outcomes are not automatically accepted
+- provider.test.ts
+- isAuthorizationFailure
 - Requirement: Structured semantic validation states
 - Requirement: Targeted and spatially reconciled retries
 - Requirement: Text fallback isolation
@@ -106,21 +106,26 @@
 - index.ts
 - Event-driven menu analysis
 - visual-analysis.ts
-- isLocalDemo
+- createPdfAnalysisProvider
+- run-menu-import-live-evaluation.mjs
 - public.menu_import_analysis_runs
-- lineage.test.ts
+- menu-import-analysis/route.test.ts
 - menu-import-migration-recovery.md
-- createGeminiVisualStructurer
-- types.ts
-- provider.test.ts
-- @supabase/supabase-js
-- pdfjs-worker.d.ts
-- 2026-08-17-improve-menu-import-with-gemini/proposal.md
-- jspdf
-- 2026-08-17-improve-menu-import-with-gemini/tasks.md
-- worker.test.ts
 - Requirement: Lineage retention policy
-- PdfAnalysisProvider
+- Requirement: Durable extraction lineage
+- types.ts
+- Decisions
+- getPoolClient
+- pdfjs-worker.d.ts
+- ADDED Requirements
+- 2026-08-17-improve-menu-import-with-gemini/proposal.md
+- text-only-evaluation.ts
+- menu-import-full-document-evaluation-spike/tasks.md
+- 2026-08-17-improve-menu-import-with-gemini/tasks.md
+- extractTextDocument
+- ADDED Requirements
+- GeminiRateScheduler
+- lucide-react
 - 20260820223937_add_visual_menu_import_drafts.sql
 - error-context.md
 - public.menu_import_draft_items
@@ -129,48 +134,68 @@
 - public.menu_import_jobs
 - public.menu_import_analysis_runs
 - public.menu_import_analysis_runs
-- server-only
+- menu-import-full-document-evaluation-spike/proposal.md
+- Decisions
+- text-only-evaluation.test.ts
+- executeTextOnlyEvaluation
+- Requirement: Independent item and price contract
+- auth.ts
+- run-menu-import-full-pdf-experiment.mjs
+- menu-import-text-only-evaluation-spike/tasks.md
+- MODIFIED Requirements
+- menu-import-text-only-production/tasks.md
+- validateTextStructure
+- menu-import-text-only-evaluation-spike/proposal.md
+- Decisions
+- v5-text.adapter.test.ts
+- text-only-gemini-experiment.test.ts
+- menu-import-text-only-production/proposal.md
+- v5-v4-comparison.ts
+- run-menu-import-text-only-evaluation.mjs
+- run-menu-import-v5-text-live.mjs
+- menu-import-text-fixtures.md
+- menu-import-v5-rollout.md
 
 ## God Nodes (most connected - your core abstractions)
 1. `isAuthorizationFailure()` - 84 edges
 2. `requireRole()` - 76 edges
 3. `query()` - 68 edges
 4. `getPoolClient()` - 42 edges
-5. `jsonSuccess()` - 27 edges
-6. `jsonError()` - 26 edges
-7. `staffFetch()` - 25 edges
-8. `jsonAuthorizationError()` - 19 edges
-9. `processMenuImportExecution()` - 18 edges
-10. `ADDED Requirements` - 18 edges
+5. `analyzeV5Text()` - 31 edges
+6. `jsonSuccess()` - 27 edges
+7. `jsonError()` - 26 edges
+8. `staffFetch()` - 25 edges
+9. `createGeminiVisualStructurer()` - 22 edges
+10. `executeTextOnlyEvaluation()` - 20 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `TablesManagerPanel()` --references--> `jspdf`  [EXTRACTED]
   src/components/admin/TablesManagerPanel.tsx → package.json
+- `GET()` --calls--> `query()`  [EXTRACTED]
+  src/app/api/health/route.ts → src/lib/db.ts
 - `AdminDashboard()` --calls--> `isLocalDemo()`  [EXTRACTED]
   src/app/admin/page.tsx → src/lib/demo.ts
-- `AdminLogin()` --calls--> `isLocalDemo()`  [EXTRACTED]
-  src/app/admin/login/page.tsx → src/lib/demo.ts
-- `POST()` --calls--> `getPoolClient()`  [EXTRACTED]
-  src/app/api/admin/menu-import/[id]/publish/route.ts → src/lib/db.ts
-- `DELETE()` --calls--> `getPoolClient()`  [EXTRACTED]
-  src/app/api/admin/menu-import/[id]/route.ts → src/lib/db.ts
+- `PATCH()` --calls--> `isAuthorizationFailure()`  [EXTRACTED]
+  src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
+- `PATCH()` --calls--> `requireRole()`  [EXTRACTED]
+  src/app/api/admin/menu-import/[id]/draft-items/[itemId]/route.ts → src/lib/auth.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (132 total, 42 thin omitted)
+## Communities (157 total, 45 thin omitted)
 
-### Community 0 - "metrics.ts"
-Cohesion: 0.40
-Nodes (4): computeMenuImportMetrics(), AnalysisMetrics, ExtractedMenuItem, LineageEvent
+### Community 0 - "full-document-evaluation.ts"
+Cohesion: 0.08
+Nodes (37): baseReport(), buildFullDocumentRequest(), classifyFullDocument(), countFullDocumentPdfPages(), emptyMetrics(), errorClass(), EvaluationClassification, executeFullDocumentEvaluation() (+29 more)
 
 ### Community 1 - "Decisions"
 Cohesion: 0.11
 Nodes (18): 10. Persistence and storage strategy, 11. Compatibility and versioning, 12. Architecture diagrams, 1. Two-stage rollout: lineage before behavior, 2. Image-only primary Gemini contract with controlled text, 3. Server-generated IDs and one canonical bbox system, 4. Structured validation as a gate, not a boolean, 5. Explicit call budgets and reason-specific retries (+10 more)
 
 ### Community 2 - "dependencies"
-Cohesion: 0.11
-Nodes (19): html2canvas, lucide-react, @napi-rs/canvas, next, dependencies, html2canvas, lucide-react, @napi-rs/canvas (+11 more)
+Cohesion: 0.10
+Nodes (21): html2canvas, @napi-rs/canvas, next, dependencies, html2canvas, @napi-rs/canvas, next, pdfjs-dist (+13 more)
 
 ### Community 3 - "compilerOptions"
 Cohesion: 0.07
@@ -184,9 +209,9 @@ Nodes (19): eslint, eslint-config-next, devDependencies, eslint, eslint-config-n
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 6 - "isAuthorizationFailure"
-Cohesion: 0.05
-Nodes (106): POST(), { requireRole, query }, Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE() (+98 more)
+### Community 6 - "finalize/route.ts"
+Cohesion: 0.13
+Nodes (39): Authorization, POST(), StorageObjectInfo, validateStoredPdf(), verifyAuthorizedUpload(), DELETE(), PATCH(), POST() (+31 more)
 
 ### Community 7 - "schema.sql"
 Cohesion: 0.50
@@ -240,17 +265,17 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 Cohesion: 0.29
 Nodes (6): Available subagents, graphify, Subagents for OpenSpec changes, This is NOT the Next.js you know, Using subagents with `openspec apply`, When to spawn each subagent
 
-### Community 37 - "getPoolClient"
-Cohesion: 0.07
-Nodes (35): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions, nextStatuses, POST(), priorities, { getPoolClient, requireRole, client } (+27 more)
+### Community 37 - "guest-session.ts"
+Cohesion: 0.15
+Nodes (21): POST(), POST(), GET(), GET(), POST(), POST(), GET(), GET() (+13 more)
 
 ### Community 39 - "202608050000_initial_schema.sql"
 Cohesion: 0.13
 Nodes (22): snapshot_order_item_stations, menu_categories, menu_items, order_items, orders, restaurant_settings, session_users, sessions (+14 more)
 
 ### Community 41 - "worker.ts"
-Cohesion: 0.11
-Nodes (30): AnalysisResult, Confidence, ExtractedImage, ExtractedSection, ALLOWED_ASSET_TYPES, analysisMetrics(), AnalysisResultWithStructureLineage, ANALYZER_VERSION (+22 more)
+Cohesion: 0.06
+Nodes (48): isTextOnlyAnalyzerEnabled(), MENU_IMPORT_ANALYZER_V3, MENU_IMPORT_ANALYZER_V4, MENU_IMPORT_ANALYZER_V5, MenuImportAnalyzerOption, menuImportAnalyzerOptions(), MenuImportAnalyzerVersion, resolveAnalyzerVersion() (+40 more)
 
 ### Community 42 - "Operación de Teburu"
 Cohesion: 0.29
@@ -264,13 +289,17 @@ Nodes (12): 1. Contracts and compatibility baseline, 2. Stage 1 — lineage and 
 Cohesion: 0.18
 Nodes (10): Check for context, Ending Discovery, Guardrails, Handling Different Entry Points, OpenSpec Awareness, The Stance, What You Don't Have To Do, What You Might Do (+2 more)
 
+### Community 53 - "live-gemini-evaluation.test.ts"
+Cohesion: 0.13
+Nodes (15): createGeminiRateScheduler(), GeminiRateSchedulerOptions, QueueEntry, LiveEvaluationCheckpoint, liveEvaluationCheckpointKey(), readLiveEvaluationCheckpoints(), writeLiveEvaluationCheckpoint(), hasGemini (+7 more)
+
 ### Community 54 - "session_tables"
 Cohesion: 0.50
 Nodes (3): session_tables, sessions, tables
 
 ### Community 56 - "ADDED Requirements"
 Cohesion: 0.25
-Nodes (7): ADDED Requirements, Purpose, Requirement: Independent item and price contract, Requirement: Provenance survives normalization and persistence, Scenario: Multiple prices, Scenario: Review of a rejected or ambiguous item, Scenario: Single price
+Nodes (7): ADDED Requirements, Purpose, Requirement: Bounded and observable call budgets, Requirement: Provenance survives normalization and persistence, Scenario: Provider transient failure, Scenario: Review of a rejected or ambiguous item, Scenario: Semantic budget is exhausted
 
 ### Community 57 - "menu_import_jobs"
 Cohesion: 0.19
@@ -281,16 +310,16 @@ Cohesion: 0.29
 Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
 
 ### Community 64 - "admin/page.tsx"
-Cohesion: 0.14
-Nodes (17): AdminDashboard(), HistoryPanel(), MenuPanel(), OverviewPanel(), SettingsPanel(), StaffPanel(), Draft, MenuItem (+9 more)
+Cohesion: 0.05
+Nodes (56): jspdf, jspdf, accessDestination(), AdminLogin(), AuthStep, AdminDashboard(), MenuRow, OnboardingPage() (+48 more)
 
-### Community 70 - "api-client.ts"
-Cohesion: 0.18
-Nodes (12): accessDestination(), AdminLogin(), AuthStep, staffJson(), ApiClientError, ApiErrorBody, isJsonResponse(), readApiResponse() (+4 more)
+### Community 70 - "db.ts"
+Cohesion: 0.11
+Nodes (21): AccessRow, GET(), { requireAuthenticatedUser, query, logger }, dynamic, GET(), authorized(), GET(), POST (+13 more)
 
 ### Community 71 - "MenuImportPanel.tsx"
-Cohesion: 0.08
-Nodes (33): explicitStatus(), ExtractionIssue, ExtractionStatus, issueLabel(), issueReasons(), MenuImportProjection, ProjectableDraftItem, ProjectionInput (+25 more)
+Cohesion: 0.07
+Nodes (46): explicitStatus(), ExtractionIssue, ExtractionStatus, issueLabel(), issueReasons(), isTextOnlyV5Analyzer(), MenuImportProjection, nativeTextProvenance (+38 more)
 
 ### Community 72 - "Requirement: Controlled auxiliary text"
 Cohesion: 0.50
@@ -301,8 +330,8 @@ Cohesion: 0.50
 Nodes (4): Requirement: Review-aware persistence and UI, Scenario: Fragment presentation, Scenario: Human correction of review candidate, Scenario: Normal draft persistence
 
 ### Community 74 - "scripts"
-Cohesion: 0.15
-Nodes (13): scripts, build, dev, lint, start, test, test:e2e, test:integration (+5 more)
+Cohesion: 0.12
+Nodes (17): scripts, build, dev, lint, start, test, test:e2e, test:integration (+9 more)
 
 ### Community 75 - "public.menu_import_analysis_lineage_events"
 Cohesion: 0.50
@@ -312,9 +341,9 @@ Nodes (3): public.menu_import_analysis_lineage_events, public.menu_import_analys
 Cohesion: 0.50
 Nodes (4): Requirement: Server-generated identity and canonical bounding boxes, Scenario: Model repeats or changes an ID, Scenario: Provider bbox uses another coordinate system, Scenario: Regional bbox conversion
 
-### Community 77 - "Requirement: Bounded and observable call budgets"
+### Community 77 - "Requirement: Retry outcomes are not automatically accepted"
 Cohesion: 0.67
-Nodes (3): Requirement: Bounded and observable call budgets, Scenario: Provider transient failure, Scenario: Semantic budget is exhausted
+Nodes (3): Requirement: Retry outcomes are not automatically accepted, Scenario: Retries exhausted with invalid fragment, Scenario: Retries exhausted with unresolved ambiguity
 
 ### Community 78 - "Requirement: Canonical visual document extraction"
 Cohesion: 0.67
@@ -336,25 +365,25 @@ Nodes (3): Requirement: Conservative document-level reconciliation, Scenario: Ad
 Cohesion: 0.67
 Nodes (3): Requirement: Deterministic and live evaluation separation, Scenario: CI deterministic test run, Scenario: Live evaluation run
 
-### Community 83 - "createPdfAnalysisProvider"
-Cohesion: 0.22
-Nodes (11): boundedEnv(), confidence(), configuredOcr(), configuredRenderLimits(), createGeminiTextStructurer(), createPdfAnalysisProvider(), decodeGeminiItems(), isCategoryHeading() (+3 more)
+### Community 83 - "adapter.ts"
+Cohesion: 0.13
+Nodes (30): contentHash(), createMenuImportIdFactory(), safeLineageProjection(), sanitizeLineageEvent(), textMetrics, analyzeV5Text(), confidenceFor(), configuredModel() (+22 more)
 
-### Community 84 - "Requirement: Durable extraction lineage"
-Cohesion: 0.67
-Nodes (3): Requirement: Durable extraction lineage, Scenario: Defective item investigation, Scenario: Privacy and cost bounds
+### Community 84 - "ADDED Requirements"
+Cohesion: 0.07
+Nodes (26): ADDED Requirements, Purpose, Requirement: Canonical document decoding and server identity, Requirement: Deterministic and opt-in live verification, Requirement: Ephemeral evaluation report and lineage, Requirement: Evaluation-only fixture assessment and classification, Requirement: Isolated native-PDF full-document evaluation, Requirement: One-request hard invariant (+18 more)
 
 ### Community 85 - "provider.ts"
-Cohesion: 0.09
-Nodes (30): BOX_SCHEMA, CanvasModule, CONFIDENCE_VALUES, cropVisualPage(), decodedPrice(), decodeGeminiVisualDocument(), extractEmbeddedImages(), GeminiConfig (+22 more)
+Cohesion: 0.07
+Nodes (48): BOX_SCHEMA, buildGeminiRequestBody(), callGemini(), CanvasModule, confidence(), CONFIDENCE_VALUES, configuredOcr(), createGeminiVisualStructurer() (+40 more)
 
-### Community 86 - "KitchenPanel.tsx"
-Cohesion: 0.13
-Nodes (14): MenuRow, OnboardingPage(), parseMenu(), ConnectionState, KitchenItem, KitchenPanel(), KitchenStatus, lanes (+6 more)
+### Community 86 - "provider.test.ts"
+Cohesion: 0.28
+Nodes (8): analyzePdf(), installNodeCanvasGlobals(), installPdfJsWorkerHandler(), loadNodePdfJs(), selectPageEvidence(), renderedPage, visualOutput, DEFAULT_RETRY_BUDGET
 
-### Community 87 - "Requirement: Retry outcomes are not automatically accepted"
-Cohesion: 0.67
-Nodes (3): Requirement: Retry outcomes are not automatically accepted, Scenario: Retries exhausted with invalid fragment, Scenario: Retries exhausted with unresolved ambiguity
+### Community 87 - "isAuthorizationFailure"
+Cohesion: 0.14
+Nodes (30): POST(), { requireRole, query }, DELETE(), GET(), POST(), GET(), PATCH(), { requireRole, query } (+22 more)
 
 ### Community 88 - "Requirement: Structured semantic validation states"
 Cohesion: 0.67
@@ -405,44 +434,64 @@ Cohesion: 0.50
 Nodes (3): Event-driven menu analysis, Visual architecture rollout and provider boundary, Visual Gemini extraction and operational controls
 
 ### Community 102 - "visual-analysis.ts"
-Cohesion: 0.09
-Nodes (35): ANALYZER_PROMPT_VERSION, applyValidation(), bboxIoU(), bboxOverlap(), clipNormalizedBox(), DeduplicationPolicy, DEFAULT_DEDUPLICATION_POLICY, isNormalizedBox() (+27 more)
+Cohesion: 0.10
+Nodes (31): PageText, bboxIoU(), bboxOverlap(), clipNormalizedBox(), DeduplicationPolicy, DEFAULT_DEDUPLICATION_POLICY, isNormalizedBox(), itemSignals() (+23 more)
 
-### Community 103 - "isLocalDemo"
-Cohesion: 0.22
-Nodes (11): emptyForm, PlatformPage(), Restaurant, CartItem, TableMenu(), TableLogin(), DemoBar(), links (+3 more)
+### Community 103 - "createPdfAnalysisProvider"
+Cohesion: 0.16
+Nodes (8): boundedEnv(), configuredRenderLimits(), createGeminiTextStructurer(), createPdfAnalysisProvider(), decodeGeminiItems(), serverGeminiConfig(), PdfAnalysisProvider, flattenVisualDocument()
 
-### Community 106 - "lineage.test.ts"
-Cohesion: 0.24
-Nodes (10): MENU_IMPORT_ANALYZER_V3, MENU_IMPORT_ANALYZER_V4, MenuImportAnalyzerVersion, resolveAnalyzerVersion(), contentHash(), createMenuImportIdFactory(), isServerLineageId(), safeLineageProjection() (+2 more)
+### Community 104 - "run-menu-import-live-evaluation.mjs"
+Cohesion: 0.25
+Nodes (5): args, childEnv, fixture, loaded, pages
 
-### Community 108 - "createGeminiVisualStructurer"
-Cohesion: 0.18
-Nodes (12): buildGeminiRequestBody(), callGemini(), createGeminiVisualStructurer(), pageAuxiliaryText(), sha256Text(), assignServerIds(), createServerIdFactory(), difficultRegions() (+4 more)
+### Community 108 - "Requirement: Lineage retention policy"
+Cohesion: 0.67
+Nodes (3): Requirement: Lineage retention policy, Scenario: Lineage is inspected, Scenario: Raw payload expires
+
+### Community 109 - "Requirement: Durable extraction lineage"
+Cohesion: 0.67
+Nodes (3): Requirement: Durable extraction lineage, Scenario: Defective item investigation, Scenario: Privacy and cost bounds
 
 ### Community 110 - "types.ts"
-Cohesion: 0.08
-Nodes (30): MenuImportIdFactory, AnalysisAttemptId, AnalysisRunId, AuxiliaryTextEvidence, DocumentMetadata, ExtractedItemId, ExtractedModifier, ExtractedOption (+22 more)
+Cohesion: 0.07
+Nodes (35): MenuImportIdFactory, computeMenuImportMetrics(), AnalysisAttemptId, AnalysisMetrics, AnalysisRunId, AuxiliaryTextEvidence, DocumentMetadata, ExtractedImage (+27 more)
 
-### Community 112 - "provider.test.ts"
-Cohesion: 0.28
-Nodes (8): analyzePdf(), installNodeCanvasGlobals(), installPdfJsWorkerHandler(), loadNodePdfJs(), selectPageEvidence(), renderedPage, visualOutput, DEFAULT_RETRY_BUDGET
+### Community 112 - "Decisions"
+Cohesion: 0.14
+Nodes (13): 1. Dedicated evaluation boundary, 2. A consumable request-budget guard, 3. Preflight treats the payload as an artifact, 4. V4-compatible schema projection, 5. Structural result precedes semantic result, 6. Ephemeral, safe evaluation lineage, 7. Classification is evidence, not rollout control, Context (+5 more)
+
+### Community 113 - "getPoolClient"
+Cohesion: 0.09
+Nodes (17): BulkItem, POST(), { getPoolClient, requireRole, client }, transitions, nextStatuses, POST(), priorities, { getPoolClient, requireRole, client } (+9 more)
+
+### Community 117 - "ADDED Requirements"
+Cohesion: 0.08
+Nodes (24): ADDED Requirements, Purpose, Requirement: Explicit text-provider failure handling, Requirement: Native-text preflight and one-request extraction, Requirement: Review-aware text-only persistence, Requirement: Safe text-only lineage and metrics, Requirement: Selectable text-only production analyzer, Requirement: Text-only canonical structure and validation (+16 more)
 
 ### Community 118 - "2026-08-17-improve-menu-import-with-gemini/proposal.md"
 Cohesion: 0.29
 Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
 
+### Community 119 - "text-only-evaluation.ts"
+Cohesion: 0.06
+Nodes (34): adaptTextMenuDocument(), associationSchema, baseReport(), baseStructural(), GeminiFetch, itemSchema, JsonRecord, observedPrice() (+26 more)
+
+### Community 120 - "menu-import-full-document-evaluation-spike/tasks.md"
+Cohesion: 0.17
+Nodes (11): 10. Opt-in runner and live execution, 11. Verification and handoff, 1. Evaluation contract and compatible types, 2. Deterministic preflight and payload integrity, 3. One-request budget guard, 4. Native PDF request builder, 5. Structural document validation, 6. Canonical decode, server IDs, and semantic validation (+3 more)
+
 ### Community 121 - "2026-08-17-improve-menu-import-with-gemini/tasks.md"
 Cohesion: 0.40
 Nodes (4): 1. Configuration and provider boundary, 2. Validation and fallback, 3. Lineage and persistence, 4. Verification and rollout
 
-### Community 122 - "worker.test.ts"
-Cohesion: 0.40
-Nodes (3): { getPoolClient }, job, provider
+### Community 122 - "extractTextDocument"
+Cohesion: 0.29
+Nodes (7): applyTextValidation(), candidateReasons(), extractTextDocument(), loadTextOnlyPdfJs(), normalized(), TextCanonicalDocument, extractV5NativeText()
 
-### Community 123 - "Requirement: Lineage retention policy"
-Cohesion: 0.67
-Nodes (3): Requirement: Lineage retention policy, Scenario: Lineage is inspected, Scenario: Raw payload expires
+### Community 123 - "ADDED Requirements"
+Cohesion: 0.06
+Nodes (31): ADDED Requirements, Purpose, Requirement: Adjacent-only category continuity, Requirement: Deterministic and opt-in live verification, Requirement: Ephemeral evaluation report and fixture assessment, Requirement: Geometry-independent text-semantic validation, Requirement: Isolated native-text document evaluation, Requirement: One-request hard invariant (+23 more)
 
 ### Community 127 - "20260820223937_add_visual_menu_import_drafts.sql"
 Cohesion: 0.40
@@ -452,25 +501,89 @@ Nodes (4): public.menu_import_document_metadata, public.menu_import_draft_price_
 Cohesion: 0.40
 Nodes (4): Error details, Instructions, Test info, Test source
 
+### Community 135 - "menu-import-full-document-evaluation-spike/proposal.md"
+Cohesion: 0.29
+Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
+
+### Community 136 - "Decisions"
+Cohesion: 0.14
+Nodes (13): 1. Dedicated text-only evaluator boundary, 2. TextDocument preserves extraction evidence, not inferred layout, 3. Text-only transport DTO, canonical domain adapter, 4. One consumable request budget, 5. Structure before semantics and reconciliation, 6. Conservative uncertainty policy, 7. Evaluation-only scoring, Context (+5 more)
+
+### Community 137 - "text-only-evaluation.test.ts"
+Cohesion: 0.15
+Nodes (10): buildTextOnlyRequest(), serializeTextDocument(), TEXT_DOCUMENT_SERIALIZER_VERSION, TEXT_ONLY_API_VERSION, TEXT_ONLY_DEFAULT_MODEL, TEXT_ONLY_MAX_OUTPUT_TOKENS, TEXT_ONLY_RESPONSE_SCHEMA, TextMenuDocument (+2 more)
+
+### Community 138 - "executeTextOnlyEvaluation"
+Cohesion: 0.20
+Nodes (8): classifyTextOnly(), configuredTextOnlyModel(), errorClass(), executeTextOnlyEvaluation(), isTruncated(), reconcileTextDocument(), sanitize(), TextOnlyRequestBudget
+
+### Community 139 - "Requirement: Independent item and price contract"
+Cohesion: 0.67
+Nodes (3): Requirement: Independent item and price contract, Scenario: Multiple prices, Scenario: Single price
+
+### Community 141 - "auth.ts"
+Cohesion: 0.15
+Nodes (16): PATCH(), authAdmin(), GET(), POST(), slugify(), GET(), adminClient(), DELETE() (+8 more)
+
+### Community 143 - "menu-import-text-only-evaluation-spike/tasks.md"
+Cohesion: 0.17
+Nodes (11): 10. Opt-in live evaluation and handoff, 11. Verification and isolation proof, 1. Evaluation contracts and isolation, 2. Native TextDocument extraction, 3. Text serialization and request contract, 4. One-request execution boundary, 5. Transport decode and canonical adaptation, 6. Structural and continuity validation (+3 more)
+
+### Community 144 - "MODIFIED Requirements"
+Cohesion: 0.11
+Nodes (17): MODIFIED Requirements, Requirement: Provider lineage, Requirement: Safe fallback and bounded provider use, Requirement: Structured and validated menu output, Requirement: Text-only Gemini structuring, Scenario: Gemini is not configured, Scenario: Gemini request fails, Scenario: Gemini returns valid menu entries (+9 more)
+
+### Community 145 - "menu-import-text-only-production/tasks.md"
+Cohesion: 0.12
+Nodes (15): 10. Deterministic integration tests, 11. Subarashii regression fixture, 12. Generic fixture suite, 13. Production-equivalent live evaluation, 14. Controlled rollout comparison, 15. Final verification, 1. Production analyzer contract, 2. Reusable native-text primitives (+7 more)
+
+### Community 146 - "validateTextStructure"
+Cohesion: 0.54
+Nodes (8): association(), decodeItem(), decodeSection(), decodeTextMenuDocument(), onlyKeys(), record(), text(), validateTextStructure()
+
+### Community 147 - "menu-import-text-only-evaluation-spike/proposal.md"
+Cohesion: 0.29
+Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
+
+### Community 148 - "Decisions"
+Cohesion: 0.13
+Nodes (14): 1. Versioned opt-in analyzer: `menu-import-v5-text`, 2. Dedicated V5 production adapter over shared text-only primitives, 3. One automatic provider request per V5 job, 4. Separate V5 server configuration, 5. Structure and semantic gates precede persistence, 6. Native-text lineage without image lineage, 7. Existing UI with text-specific review affordances, 8. Fixture ladder before wider rollout (+6 more)
+
+### Community 149 - "v5-text.adapter.test.ts"
+Cohesion: 0.17
+Nodes (6): TextDocument, V5_TEXT_API_VERSION, V5_TEXT_DEFAULT_MODEL, V5_TEXT_MAX_OUTPUT_TOKENS, V5_TEXT_SERIALIZER_VERSION, V5_TEXT_TIMEOUT_MS
+
+### Community 150 - "text-only-gemini-experiment.test.ts"
+Cohesion: 0.18
+Nodes (8): MAX_GENERATE_CONTENT_REQUESTS, pageEvaluationReport(), preflightTextDocument(), readTextOnlyPdf(), TARGET_PAGES, describeV5NativeText(), V5_TEXT_ANALYZER_VERSION, SUBARASHII_REGRESSION
+
+### Community 154 - "menu-import-text-only-production/proposal.md"
+Cohesion: 0.29
+Nodes (6): Capabilities, Impact, Modified Capabilities, New Capabilities, What Changes, Why
+
+### Community 156 - "v5-v4-comparison.ts"
+Cohesion: 0.50
+Nodes (3): AnalyzerComparison, AnalyzerEvidence, compareV5WithV4()
+
 ## Knowledge Gaps
-- **431 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+426 more)
+- **662 isolated node(s):** `required`, `missing`, `eslintConfig`, `name`, `version` (+657 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **42 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **45 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getPoolClient()` connect `getPoolClient` to `activate/route.ts`, `isAuthorizationFailure`, `worker.ts`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `@supabase/supabase-js`, `server-only`, `jspdf`, `package.json`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
-- **Why does `jspdf` connect `jspdf` to `admin/page.tsx`, `dependencies`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `getPoolClient()` connect `getPoolClient` to `activate/route.ts`, `guest-session.ts`, `finalize/route.ts`, `db.ts`, `worker.ts`, `auth.ts`, `isAuthorizationFailure`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **Why does `query()` connect `isAuthorizationFailure` to `db.ts`, `guest-session.ts`, `auth.ts`, `finalize/route.ts`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `analyzeV5Text()` connect `adapter.ts` to `text-only-evaluation.test.ts`, `executeTextOnlyEvaluation`, `worker.ts`, `validateTextStructure`, `v5-text.adapter.test.ts`, `text-only-gemini-experiment.test.ts`, `text-only-evaluation.ts`, `extractTextDocument`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **What connects `required`, `missing`, `eslintConfig` to the rest of the system?**
-  _431 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _662 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `full-document-evaluation.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.08067375886524823 - nodes in this community are weakly interconnected._
 - **Should `Decisions` be split into smaller, more focused modules?**
   _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
-- **Should `compilerOptions` be split into smaller, more focused modules?**
-  _Cohesion score 0.06896551724137931 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._

@@ -13,6 +13,10 @@
     "test:menu-import-pg-net-migration": "node scripts/verify-menu-import-pg-net-migration.mjs",
     "test:menu-import-deterministic": "node scripts/verify-menu-import-deterministic.mjs",
     "test:menu-import-live": "node scripts/run-menu-import-live-evaluation.mjs",
+    "test:menu-import-full-pdf-live": "node scripts/run-menu-import-full-pdf-experiment.mjs --live",
+    "test:menu-import-text-only-deterministic": "npx vitest run src/lib/menu-import/text-only-evaluation.test.ts --reporter=dot",
+    "test:menu-import-text-only-live": "node scripts/run-menu-import-text-only-evaluation.mjs --live",
+    "test:menu-import-v5-text-live": "node scripts/run-menu-import-v5-text-live.mjs",
     "verify:remote-security": "node scripts/verify-remote-security.mjs",
     "test:e2e": "playwright test"
   },

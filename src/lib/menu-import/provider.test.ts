@@ -51,17 +51,60 @@ describe('menu-import visual provider', () => {
 
   it('rejects malformed page references and uses a generic fallback after provider errors', async () => {
     expect(decodeGeminiItems({ pages: [{ page: 9, sections: [] }] }, [renderedPage])).toBeUndefined();
-    const failing = createGeminiTextStructurer({ key: 'secret', fetch: vi.fn().mockResolvedValue(new Response('bad', { status: 429 })) });
+    const failing = createGeminiTextStructurer({ key: 'secret', maxRateRetries: 0, fetch: vi.fn().mockResolvedValue(new Response('bad', { status: 429 })) });
     const provider = createPdfAnalysisProvider({}, { geminiStructurer: failing });
     await expect(provider.structure([{ ...renderedPage, page: 1, text: 'SPECIALS\nMooncake 17.5' }])).resolves.toEqual([expect.objectContaining({ category: 'SPECIALS', name: 'Mooncake', price: 17.5 })]);
-    expect(provider.getStructureMetadata?.()).toEqual({ provider: 'local-fallback', fallbackReason: 'GEMINI_RATE_LIMITED' });
+    expect(provider.getStructureMetadata?.()).toMatchObject({ provider: 'local-fallback', fallbackReason: 'GEMINI_RATE_LIMITED', textualFallbackUsed: true });
   });
 
   it('honors the provider deadline with a safe timeout diagnostic', async () => {
     const fetcher = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => new Promise<Response>((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))));
-    const structurer = createGeminiTextStructurer({ key: 'secret', timeoutMs: 1000, fetch: fetcher });
+    const structurer = createGeminiTextStructurer({ key: 'secret', timeoutMs: 1000, sleep: async () => undefined, fetch: fetcher });
     await expect(structurer([renderedPage])).resolves.toBeUndefined();
     expect(structurer.lastFallbackReason).toBe('GEMINI_TIMEOUT'); expect(JSON.stringify(structurer.lastFallbackReason)).not.toContain('secret');
+  });
+
+  it('respects Retry-Info for 429 and keeps rate retries separate from semantic retries', async () => {
+    const waits: number[] = [];
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ error: { code: 429, status: 'RESOURCE_EXHAUSTED', details: [{ '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '2.5s' }, { '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: [{ quotaMetric: 'requests', quotaId: 'daily', quotaDimensions: { model: 'test' } }] }] } }), { status: 429 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(visualOutput) }] } }] })));
+    const structurer = createGeminiVisualStructurer({ key: 'secret', model: 'test', fetch: fetcher, architectureStage: 2, analyzerVersion: 'menu-import-v4-visual', maxRateRetries: 1, sleep: async (milliseconds) => { waits.push(milliseconds); } });
+    await expect(structurer([renderedPage])).resolves.toBeDefined();
+    expect(waits).toEqual([2500]); expect(structurer.lastProviderTransientRetries).toBe(0); expect(structurer.lastProviderDiagnostics?.[0]).toMatchObject({ status: 429, quotaMetric: 'requests', quotaLimit: 'daily', quotaDimensions: { model: 'test' } });
+  });
+
+  it('respects Retry-After headers and uses jittered exponential backoff for 503', async () => {
+    const headerWaits: number[] = [];
+    const headerFetcher = vi.fn()
+      .mockResolvedValueOnce(new Response('{}', { status: 429, headers: { 'retry-after': '3' } }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(visualOutput) }] } }] })));
+    const headerStructurer = createGeminiVisualStructurer({ key: 'secret', model: 'test', fetch: headerFetcher, architectureStage: 2, analyzerVersion: 'menu-import-v4-visual', maxRateRetries: 1, sleep: async (milliseconds) => { headerWaits.push(milliseconds); } });
+    await expect(headerStructurer([renderedPage])).resolves.toBeDefined();
+    expect(headerWaits).toEqual([3000]);
+
+    const backoffWaits: number[] = [];
+    const unavailableFetcher = vi.fn()
+      .mockResolvedValueOnce(new Response('{}', { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(visualOutput) }] } }] })));
+    const unavailableStructurer = createGeminiVisualStructurer({ key: 'secret', model: 'test', fetch: unavailableFetcher, architectureStage: 2, analyzerVersion: 'menu-import-v4-visual', random: () => 0, sleep: async (milliseconds) => { backoffWaits.push(milliseconds); } });
+    await expect(unavailableStructurer([renderedPage])).resolves.toBeDefined();
+    expect(backoffWaits).toEqual([750]); expect(unavailableStructurer.lastProviderTransientRetries).toBe(1);
+  });
+
+  it('keeps V4 provider rate limits out of textual fallback', async () => {
+    const failing = createGeminiVisualStructurer({ key: 'secret', model: 'test', architectureStage: 2, analyzerVersion: 'menu-import-v4-visual', maxRateRetries: 0, fetch: vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: { code: 429, status: 'RESOURCE_EXHAUSTED' } }), { status: 429 })) });
+    const provider = createPdfAnalysisProvider({ extractNative: vi.fn().mockResolvedValue({ pages: [renderedPage], images: [] }), ocr: vi.fn().mockResolvedValue([]) }, { geminiVisualStructurer: failing });
+    const result = await analyzePdf(new Uint8Array([1]), provider);
+    expect(result.items).toEqual([]); expect(result.structureMetadata).toMatchObject({ failureClass: 'provider_rate_limited', fallbackReason: 'GEMINI_RATE_LIMITED' });
+  });
+
+  it('does not wait or retry a daily quota exhaustion even when RetryInfo is present', async () => {
+    const waits: number[] = [];
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: { code: 429, status: 'RESOURCE_EXHAUSTED', details: [{ '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: [{ quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier' }] }, { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '35s' }] } }), { status: 429 }));
+    const structurer = createGeminiVisualStructurer({ key: 'secret', model: 'test', architectureStage: 2, analyzerVersion: 'menu-import-v4-visual', sleep: async (milliseconds) => { waits.push(milliseconds); }, fetch: fetcher });
+    await expect(structurer([renderedPage])).resolves.toBeUndefined();
+    expect(fetcher).toHaveBeenCalledOnce(); expect(waits).toEqual([]); expect(structurer.lastFallbackReason).toBe('GEMINI_RATE_LIMITED');
   });
 
   it('chooses OCR only for weak native pages and keeps both as auxiliary evidence', async () => {
@@ -93,6 +136,8 @@ describe('menu-import visual provider', () => {
     expect(stageTwo).toContain('VISUAL SOURCE OF TRUTH');
     expect(stageTwo).not.toContain('Arepa 10');
     expect(stageTwo).toContain('inlineData');
+    expect(JSON.parse(stageTwo).generationConfig).not.toHaveProperty('temperature');
+    expect(JSON.parse(stageOne).generationConfig).toHaveProperty('temperature', 0);
   });
 
   it('records a server-attributable Stage 1 trace for every decoded candidate', async () => {

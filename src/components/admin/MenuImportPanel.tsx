@@ -5,7 +5,7 @@ import { AlertTriangle, Check, FileText, ImageIcon, Loader2, Pencil, Trash2, Upl
 import { readApiResponse, requireApiSuccess, staffFetch } from '@/lib/api-client';
 import { uploadRecoveryMessage } from '@/lib/menu-import-upload-recovery';
 import { supabase } from '@/lib/supabase';
-import { issueLabel, issueReasons, projectMenuImport, type ExtractionIssue } from './menu-import-projection';
+import { isTextOnlyV5Analyzer, issueLabel, issueReasons, nativeTextProvenance, projectMenuImport, shouldShowSourceGeometry, type ExtractionIssue } from './menu-import-projection';
 
 type SourceBox = { x: number; y: number; width: number; height: number };
 type DraftCategory = {
@@ -44,7 +44,7 @@ type DraftItem = {
   image_suggestion?: { url?: string | null; confidence?: number | null; approved?: boolean } | null;
   approved?: boolean;
   validation_errors?: string[] | null;
-  review_reasons?: string[] | null;
+  review_reasons?: Array<string | { code?: string; message?: string }> | null;
   raw_price?: string | null;
   normalized_price?: number | string | null;
   price_currency?: string | null;
@@ -82,7 +82,7 @@ type ImportJob = {
   error_message?: string | null;
   failure_reason?: string | null;
   created_at?: string;
-  draft?: { categories?: DraftCategory[]; items?: DraftItem[]; evidence?: Evidence[]; extraction_issues?: ExtractionIssue[]; extractionIssues?: ExtractionIssue[]; invalid_fragments?: ExtractionIssue[]; invalidFragments?: ExtractionIssue[] };
+  draft?: { categories?: DraftCategory[]; items?: DraftItem[]; evidence?: Evidence[]; extraction_issues?: ExtractionIssue[]; extractionIssues?: ExtractionIssue[]; invalid_fragments?: ExtractionIssue[]; invalidFragments?: ExtractionIssue[]; metadata?: { attributes?: Record<string, unknown> | null } | null; native_text_provenance?: unknown; nativeTextProvenance?: unknown };
   categories?: DraftCategory[];
   items?: DraftItem[];
   validation_errors?: Array<{ item_id?: string; fields?: string[]; message?: string }>;
@@ -98,6 +98,8 @@ type ImportJob = {
   analysisStatus?: string | null;
   analysis_run?: AnalysisRun | null;
   analysisRun?: AnalysisRun | null;
+  native_text_provenance?: unknown;
+  nativeTextProvenance?: unknown;
 };
 type AnalysisRun = {
   analysis_execution_id?: string | null;
@@ -111,9 +113,52 @@ type AnalysisRun = {
   structure_provider?: 'gemini' | 'local-fallback' | null;
   structure_model?: string | null;
   structure_fallback_reason?: string | null;
+  structural_metrics?: unknown;
+  native_text_provenance?: unknown;
+  nativeTextProvenance?: unknown;
 };
 type UploadAuthorization = { id: string; objectPath: string; uploadToken: string; uploadUrl: string; token: string; expiresAt: string; maxBytes: number; contentType: string };
 type ImportReadiness = { available?: boolean; message?: string; maxPdfBytes?: number };
+type AnalyzerVersion = 'menu-import-v3-visual' | 'menu-import-v4-visual' | 'menu-import-v5-text';
+type AnalyzerOption = { version?: unknown; enabled?: unknown; default?: unknown };
+
+const analyzerLabels: Record<AnalyzerVersion, string> = {
+  'menu-import-v3-visual': 'Visual clásico',
+  'menu-import-v4-visual': 'Visual (recomendado)',
+  'menu-import-v5-text': 'Solo texto nativo (V5)',
+};
+const knownAnalyzerVersions = new Set<AnalyzerVersion>(Object.keys(analyzerLabels) as AnalyzerVersion[]);
+
+export function safeAnalyzerOptions(options: unknown): AnalyzerVersion[] {
+  if (!Array.isArray(options)) return [];
+  const safe: AnalyzerVersion[] = [];
+  for (const option of options) {
+    if (!option || typeof option !== 'object') continue;
+    const { version, enabled } = option as AnalyzerOption;
+    if (typeof version !== 'string' || !knownAnalyzerVersions.has(version as AnalyzerVersion)) continue;
+    // The admin API is the server-side allow-list. V5 only appears there when
+    // the server rollout is enabled; accept an explicit disabled marker too.
+    if (enabled === false) continue;
+    if (!safe.includes(version as AnalyzerVersion)) safe.push(version as AnalyzerVersion);
+  }
+  return safe;
+}
+
+export function defaultAnalyzerVersion(options: unknown): AnalyzerVersion | '' {
+  const safe = safeAnalyzerOptions(options);
+  const serverDefault = Array.isArray(options)
+    ? options.find((option) => option && typeof option === 'object' && (option as AnalyzerOption).default === true && safe.includes((option as AnalyzerOption).version as AnalyzerVersion)) as AnalyzerOption | undefined
+    : undefined;
+  return typeof serverDefault?.version === 'string'
+    ? serverDefault.version as AnalyzerVersion
+    : '';
+}
+
+export function finalizeImportBody(authorization: Pick<UploadAuthorization, 'id' | 'token'>, analyzerVersion: AnalyzerVersion | '') {
+  return analyzerVersion
+    ? { authorizationId: authorization.id, token: authorization.token, analyzerVersion }
+    : { authorizationId: authorization.id, token: authorization.token };
+}
 
 const menuImportBucket = 'menu-imports';
 const panelStyle = { background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' } as const;
@@ -128,7 +173,14 @@ function jobDraft(job: ImportJob | null) {
     extractionIssues: job?.draft?.extractionIssues,
     invalid_fragments: job?.draft?.invalid_fragments,
     invalidFragments: job?.draft?.invalidFragments,
+    metadata: job?.draft?.metadata,
+    native_text_provenance: job?.draft?.native_text_provenance,
+    nativeTextProvenance: job?.draft?.nativeTextProvenance,
   };
+}
+
+function reasonText(reason: string | { code?: string; message?: string }) {
+  return typeof reason === 'string' ? reason : reason.code ?? reason.message ?? '';
 }
 
 function asFinitePrice(value: unknown) {
@@ -177,7 +229,7 @@ function categoryPath(item: DraftItem, categories: DraftCategory[]) {
 }
 
 function fieldProblems(item: DraftItem) {
-  const problems = [...(item.confidence_flags ?? []), ...(item.validation_errors ?? []), ...(item.review_reasons ?? [])];
+  const problems = [...(item.confidence_flags ?? []), ...(item.validation_errors ?? []), ...(item.review_reasons ?? []).map(reasonText).filter(Boolean)];
   if (!item.name?.trim()) problems.push('Falta el nombre');
   if (asFinitePrice(item.normalized_price ?? item.price) === null) problems.push(priceVariants(item).length ? 'Elige un precio base para publicar' : item.raw_price?.trim() ? 'El precio requiere normalización' : 'Falta el precio');
   if (!item.draft_category_id && !item.category_id && !item.category_name) problems.push('Falta la categoría');
@@ -196,6 +248,21 @@ function lineageFor(job: ImportJob) {
     structureModel: run?.structure_model,
     structureFallbackReason: run?.structure_fallback_reason,
   };
+}
+
+function provenanceFor(job: ImportJob) {
+  const run = job.analysis_run ?? job.analysisRun;
+  const draft = jobDraft(job);
+  return nativeTextProvenance(
+    job.native_text_provenance
+      ?? job.nativeTextProvenance
+      ?? run?.native_text_provenance
+      ?? run?.nativeTextProvenance
+      ?? run?.structural_metrics
+      ?? draft.native_text_provenance
+      ?? draft.nativeTextProvenance
+      ?? draft.metadata?.attributes,
+  );
 }
 
 async function staffJson<T extends Record<string, unknown>>(input: RequestInfo | URL, init: RequestInit | undefined, fallback: string) {
@@ -245,6 +312,8 @@ export default function MenuImportPanel() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [readiness, setReadiness] = useState<ImportReadiness | null>(null);
+  const [analyzerOptions, setAnalyzerOptions] = useState<AnalyzerVersion[]>([]);
+  const [analyzerVersion, setAnalyzerVersion] = useState<AnalyzerVersion | ''>('');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -258,8 +327,12 @@ export default function MenuImportPanel() {
   }, []);
 
   const loadImports = useCallback(async (keepSelected = true) => {
-    const payload = await staffJson<{ imports?: ImportJob[]; data?: ImportJob[] }>('/api/admin/menu-import', undefined, 'No se pudieron cargar las importaciones. Inténtalo de nuevo.');
-    const jobs = (payload.imports ?? payload.data ?? []) as ImportJob[];
+    const payload = await staffJson<{ imports?: ImportJob[]; analyzerOptions?: unknown; data?: ImportJob[] | { imports?: ImportJob[]; analyzerOptions?: unknown } }>('/api/admin/menu-import', undefined, 'No se pudieron cargar las importaciones. Inténtalo de nuevo.');
+    const nested = payload.data && !Array.isArray(payload.data) ? payload.data : undefined;
+    const jobs = (payload.imports ?? (Array.isArray(payload.data) ? payload.data : nested?.imports) ?? []) as ImportJob[];
+    const safeOptions = safeAnalyzerOptions(payload.analyzerOptions ?? nested?.analyzerOptions);
+    setAnalyzerOptions(safeOptions);
+    setAnalyzerVersion((current) => current && safeOptions.includes(current) ? current : defaultAnalyzerVersion(payload.analyzerOptions ?? nested?.analyzerOptions));
     setImports(jobs);
     setSelected((current) => keepSelected && current ? jobs.find((job) => job.id === current.id) ?? current : jobs[0] ?? null);
     return jobs;
@@ -318,7 +391,7 @@ export default function MenuImportPanel() {
         throw new Error('El almacenamiento rechazó el PDF. Inténtalo de nuevo.');
       }
       const finalized = await staffJson<{ data?: { import?: ImportJob } }>('/api/admin/menu-import/finalize', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ authorizationId: authorization.id, token: authorization.token }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalizeImportBody(authorization, analyzerVersion)),
       }, 'El PDF se subió, pero no se pudo iniciar el análisis. Inténtalo de nuevo.');
       const created = finalized.data?.import;
       if (!created) throw new Error('No se pudo iniciar el análisis del PDF. Inténtalo de nuevo.');
@@ -413,6 +486,9 @@ export default function MenuImportPanel() {
   const { categories, evidence } = jobDraft(selected);
   const { validItems, reviewItems, issues } = draftProjection;
   const lineage = selected ? lineageFor(selected) : null;
+  const textOnlyV5 = isTextOnlyV5Analyzer(lineage?.analyzerVersion);
+  const showSourceGeometry = shouldShowSourceGeometry(lineage?.analyzerVersion);
+  const nativeProvenance = selected && textOnlyV5 ? provenanceFor(selected) : undefined;
   const canReplay = selected ? ['pending', 'failed'].includes(selected.status) : false;
   const canDelete = selected ? !['processing', 'published'].includes(selected.status) : false;
   return <section aria-label="Importar menú PDF" style={{ display: 'grid', gap: '20px' }}>
@@ -421,6 +497,12 @@ export default function MenuImportPanel() {
       <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>El menú actual no cambia hasta que revises y publiques este borrador.</p>
       <form onSubmit={upload} style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
         <input ref={fileInput} aria-label="Archivo PDF del menú" type="file" accept="application/pdf,.pdf" onChange={(event: ChangeEvent<HTMLInputElement>) => setFile(event.target.files?.[0] ?? null)} />
+        <label style={{ display: 'grid', gap: 4, color: 'var(--text-muted)' }}>Analizador
+          <select aria-label="Analizador para este PDF" value={analyzerVersion} onChange={(event) => setAnalyzerVersion(event.target.value as AnalyzerVersion)} disabled={submitting} style={inputStyle}>
+            <option value="">Predeterminado del servidor (visual)</option>
+            {analyzerOptions.map((version) => <option key={version} value={version}>{analyzerLabels[version]}</option>)}
+          </select>
+        </label>
         <button className="btn-primary" disabled={!file || submitting || !readiness || importUnavailable} type="submit"><Upload size={16} /> {submitting ? 'Subiendo...' : 'Analizar PDF'}</button>
         {submitting && uploadProgress !== null && <><span role="status">Subiendo: {uploadProgress}%</span><button className="btn-secondary" type="button" onClick={() => uploadAbort.current?.abort()}>Cancelar carga</button></>}
       </form>
@@ -451,18 +533,27 @@ export default function MenuImportPanel() {
         {lineage.attempt !== null && lineage.attempt !== undefined && <small>Intento: {lineage.attempt}</small>}
         {lineage.status && <small>Resultado: {lineage.status}</small>}
         {lineage.analyzerVersion && <small>Analizador: {lineage.analyzerVersion}</small>}
-        {lineage.structureProvider && <small>Estructurador: {lineage.structureProvider}{lineage.structureModel ? ` (${lineage.structureModel})` : ''}</small>}
+        {lineage.structureProvider && <small>Estructurador: {lineage.structureProvider}{!textOnlyV5 && lineage.structureModel ? ` (${lineage.structureModel})` : ''}</small>}
         {lineage.structureFallbackReason && <small>Motivo del fallback: {lineage.structureFallbackReason}</small>}
         {lineage.sourceHash && <small style={{ overflowWrap: 'anywhere' }}>Huella SHA-256: {lineage.sourceHash}</small>}
+      </div>}
+      {nativeProvenance && <div aria-label="Procedencia de texto nativo" style={{ padding: 12, borderRadius: 6, background: 'var(--bg-base)', display: 'grid', gap: 4 }}>
+        <strong>Procedencia de texto nativo</strong>
+        {nativeProvenance.inputKind && <small>Entrada: {nativeProvenance.inputKind}</small>}
+        {nativeProvenance.fallbackUsage && <small>Fallback: {nativeProvenance.fallbackUsage}</small>}
+        {nativeProvenance.serializerVersion && <small>Serializador: {nativeProvenance.serializerVersion}</small>}
+        {(nativeProvenance.pdfPages !== undefined || nativeProvenance.textDocumentPages !== undefined || nativeProvenance.textCharacters !== undefined) && <small>Páginas PDF/texto: {nativeProvenance.pdfPages ?? '—'} / {nativeProvenance.textDocumentPages ?? '—'}{nativeProvenance.textCharacters !== undefined ? ` · ${nativeProvenance.textCharacters} caracteres` : ''}</small>}
+        {nativeProvenance.pdfSha256 && <small style={{ overflowWrap: 'anywhere' }}>Huella PDF: {nativeProvenance.pdfSha256}</small>}
+        {nativeProvenance.textDocumentHash && <small style={{ overflowWrap: 'anywhere' }}>Huella del documento de texto: {nativeProvenance.textDocumentHash}</small>}
       </div>}
       {['pending', 'processing'].includes(selected.status) && <p role="status"><Loader2 size={16} className="spin" /> Analizando el documento; esta vista se actualiza automáticamente.</p>}
       {selected.status === 'failed' && <div role="alert" style={{ color: 'var(--primary)' }}>No fue posible analizar este archivo. {selected.error_message || selected.failure_reason}</div>}
       {selected.status === 'needs_review' && <>
         {(validationCount > 0 || publishErrors.length > 0) && <div role="alert" style={{ padding: 12, borderRadius: 6, background: 'rgba(255,71,87,.12)', color: 'var(--primary)' }}><AlertTriangle size={16} /> {validationCount ? `${validationCount} platillo(s) requieren corrección.` : null}{publishErrors.map((error) => <div key={error}>{error}</div>)}</div>}
         {validItems.length === 0 && reviewItems.length === 0 && issues.length === 0 ? <p>No se detectaron platillos. Consulta el PDF y vuelve a intentar el análisis.</p> : <>
-          {validItems.length > 0 && <section aria-label="Platos válidos" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Platos válidos ({validItems.length})</h4>{validItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>}
-          {reviewItems.length > 0 && <section aria-label="Candidatos para revisar" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Candidatos para revisar ({reviewItems.length})</h4><p style={{ margin: 0, color: 'var(--text-muted)' }}>Corrige, aprueba o elimina estos candidatos antes de publicarlos.</p>{reviewItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>}
-          {issues.length > 0 && <section aria-label="Incidencias de extracción" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Incidencias de extracción ({issues.length})</h4>{issues.map((issue, index) => <ExtractionIssueCard key={issue.id ?? issue.candidate_id ?? issue.candidateId ?? index} issue={issue} />)}</section>}
+          {validItems.length > 0 && <section aria-label="Platos válidos" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Platos válidos ({validItems.length})</h4>{validItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} showSourceGeometry={showSourceGeometry} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>}
+          {reviewItems.length > 0 && <section aria-label="Candidatos para revisar" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Candidatos para revisar ({reviewItems.length})</h4><p style={{ margin: 0, color: 'var(--text-muted)' }}>Corrige, confirma o elimina estos candidatos antes de publicarlos.</p>{reviewItems.map((item) => <DraftItemCard key={item.id} item={item} categories={categories} evidence={evidence.filter((entry) => entry.draft_item_id === item.id)} showSourceGeometry={showSourceGeometry} saving={savingId === item.id} onSave={saveItem} onRemove={removeItem} />)}</section>}
+          {issues.length > 0 && <section aria-label="Incidencias de extracción" style={{ display: 'grid', gap: 10 }}><h4 style={{ margin: 0 }}>Incidencias de extracción ({issues.length})</h4>{issues.map((issue, index) => <ExtractionIssueCard key={issue.id ?? issue.candidate_id ?? issue.candidateId ?? index} issue={issue} showSourceGeometry={showSourceGeometry} />)}</section>}
         </>}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}><button className="btn-primary" disabled={submitting || validationCount > 0} onClick={publish}><Check size={16} /> Publicar aprobados</button></div>
       </>}
@@ -470,19 +561,19 @@ export default function MenuImportPanel() {
   </section>;
 }
 
-function ExtractionIssueCard({ issue }: { issue: ExtractionIssue }) {
+function ExtractionIssueCard({ issue, showSourceGeometry }: { issue: ExtractionIssue; showSourceGeometry: boolean }) {
   const page = issue.source_page ?? issue.sourcePage;
   const box = issue.source_bbox ?? issue.sourceBbox;
   const reasons = issueReasons(issue);
   const retryExhausted = issue.retry_exhausted ?? issue.retryExhausted;
   return <article style={{ padding: 16, background: 'var(--bg-surface-elevated)', border: '1px solid rgba(255,71,87,.4)', borderRadius: 10 }}>
     <strong>{issueLabel(issue)}</strong>
-    <p style={{ margin: '6px 0 0', color: 'var(--text-muted)' }}>No se añadió como platillo.{page ? ` Página ${page}.` : ''}{formatBox(box) ? ` Región: ${formatBox(box)}.` : ''}</p>
+    <p style={{ margin: '6px 0 0', color: 'var(--text-muted)' }}>No se añadió como platillo.{page ? ` Página ${page}.` : ''}{showSourceGeometry && formatBox(box) ? ` Región: ${formatBox(box)}.` : ''}</p>
     <div role="alert" style={{ marginTop: 10, color: 'var(--primary)' }}><AlertTriangle size={14} /> {reasons.length ? reasons.join(' · ') : 'Fragmento rechazado durante la extracción'}{retryExhausted ? ' · Se agotaron los reintentos' : ''}</div>
   </article>;
 }
 
-function DraftItemCard({ item, categories, evidence, saving, onSave, onRemove }: { item: DraftItem; categories: DraftCategory[]; evidence: Evidence[]; saving: boolean; onSave: (item: DraftItem, patch: DraftItemPatch) => Promise<void>; onRemove: (item: DraftItem) => Promise<void> }) {
+function DraftItemCard({ item, categories, evidence, showSourceGeometry, saving, onSave, onRemove }: { item: DraftItem; categories: DraftCategory[]; evidence: Evidence[]; showSourceGeometry: boolean; saving: boolean; onSave: (item: DraftItem, patch: DraftItemPatch) => Promise<void>; onRemove: (item: DraftItem) => Promise<void> }) {
   const [editing, setEditing] = useState(false);
   const [values, setValues] = useState({ name: item.name ?? '', description: item.description ?? '', rawPrice: item.raw_price ?? '', price: (item.normalized_price ?? item.price)?.toString() ?? '', currency: item.price_currency ?? '', categoryId: item.draft_category_id ?? item.category_id ?? '', sharedProvenance: item.shared_price_provenance ?? item.shared_price?.provenance ?? '', variants: priceVariants(item).map((variant) => ({ label: variant.label ?? variant.variant_label ?? '', raw: variant.raw ?? '', amount: (variant.normalized_amount ?? variant.amount)?.toString() ?? '', currency: variant.currency ?? '' })) });
   useEffect(() => setValues({ name: item.name ?? '', description: item.description ?? '', rawPrice: item.raw_price ?? '', price: (item.normalized_price ?? item.price)?.toString() ?? '', currency: item.price_currency ?? '', categoryId: item.draft_category_id ?? item.category_id ?? '', sharedProvenance: item.shared_price_provenance ?? item.shared_price?.provenance ?? '', variants: priceVariants(item).map((variant) => ({ label: variant.label ?? variant.variant_label ?? '', raw: variant.raw ?? '', amount: (variant.normalized_amount ?? variant.amount)?.toString() ?? '', currency: variant.currency ?? '' })) }), [item]);
@@ -490,7 +581,8 @@ function DraftItemCard({ item, categories, evidence, saving, onSave, onRemove }:
   const variants = priceVariants(item);
   const suggestedImage = item.image_suggestion?.url ?? item.image_url;
   const reviewReasons = [...new Set([...problems, ...evidence.flatMap((entry) => entry.review_reasons ?? [])])];
-  const sourceBoxes = [...(item.source_bboxes ?? []), ...(item.source_bbox ? [item.source_bbox] : []), ...evidence.map((entry) => entry.source_bbox ?? entry.bounding_box).filter((box): box is SourceBox => Boolean(box))];
+  const sourceBoxes = showSourceGeometry ? [...(item.source_bboxes ?? []), ...(item.source_bbox ? [item.source_bbox] : []), ...evidence.map((entry) => entry.source_bbox ?? entry.bounding_box).filter((box): box is SourceBox => Boolean(box))] : [];
+  const ambiguousPrice = reviewReasons.includes('AMBIGUOUS_PRICE');
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -502,12 +594,12 @@ function DraftItemCard({ item, categories, evidence, saving, onSave, onRemove }:
   return <article style={{ padding: 16, background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', borderRadius: 10 }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'start' }}>
       <div><strong style={{ color: 'var(--text-main)', fontSize: '1.05rem' }}>{item.name || 'Platillo sin nombre'}</strong><p style={{ margin: '5px 0', color: 'var(--text-muted)', fontWeight: 600, lineHeight: 1.45 }}>{categoryPath(item, categories)} · {formatPrice(item)} · Página {evidence[0]?.page_number ?? item.source_page ?? 'sin referencia'}</p>{item.parent_section_name && <small style={{ color: 'var(--text-muted)' }}>Sección padre: {item.parent_section_name}</small>}</div>
-      <div style={{ display: 'flex', gap: 8 }}><button aria-label={`Aprobar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving || item.review_status === 'approved'} onClick={() => onSave(item, { approved: true })}><Check size={15} /></button><button aria-label={`Editar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => setEditing((value) => !value)}><Pencil size={15} /></button><button aria-label={`Eliminar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => onRemove(item)}><Trash2 size={15} /></button></div>
+      <div style={{ display: 'flex', gap: 8 }}><button aria-label={`${ambiguousPrice ? 'Confirmar precio de' : 'Aprobar'} ${item.name || 'platillo'}`} title={ambiguousPrice ? 'Confirma el candidato después de asignar un precio' : 'Aprobar'} className="btn-secondary" disabled={saving || item.review_status === 'approved'} onClick={() => onSave(item, { approved: true })}><Check size={15} /></button><button aria-label={`Editar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => setEditing((value) => !value)}><Pencil size={15} /></button><button aria-label={`Eliminar ${item.name || 'platillo'}`} className="btn-secondary" disabled={saving} onClick={() => onRemove(item)}><Trash2 size={15} /></button></div>
     </div>
     {variants.length > 0 && <div aria-label="Variantes de precio" style={{ display: 'grid', gap: 6, marginTop: 12, padding: 10, borderRadius: 6, background: 'var(--bg-base)' }}><strong>Variantes observadas</strong>{variants.map((variant, index) => <small key={`${variant.label ?? 'variante'}-${index}`} style={{ color: 'var(--text-muted)' }}>{variant.label ?? variant.variant_label ?? 'Sin etiqueta'}: {formatPrice(variant)}{variant.shared ? ' · precio compartido' : ''}</small>)}</div>}
     {(item.shared_price || item.shared_price_provenance) && <small style={{ display: 'block', marginTop: 10, color: 'var(--text-muted)' }}>Precio compartido{item.shared_price ? `: ${formatPrice(item.shared_price)}` : ''}{item.shared_price_provenance ? ` · Evidencia: ${item.shared_price_provenance}` : ''}</small>}
     {suggestedImage && <div style={{ marginTop: 10, display: 'flex', gap: 10, alignItems: 'center' }}><img src={suggestedImage} alt={`Imagen sugerida para ${item.name || 'platillo'}`} style={{ width: 72, height: 54, objectFit: 'cover', borderRadius: 5 }} /><small style={{ color: 'var(--text-muted)' }}><ImageIcon size={13} /> Imagen sugerida{item.image_suggestion?.confidence ? ` (${Math.round(item.image_suggestion.confidence * 100)}% confianza)` : ''}</small></div>}
-    {(evidence.length > 0 || sourceBoxes.length > 0) && <div aria-label="Evidencia de origen" style={{ marginTop: 10, display: 'grid', gap: 4 }}><strong style={{ fontSize: '.85rem' }}>Evidencia de origen</strong>{evidence.map((entry, index) => <small key={`${entry.page_number}-${index}`} style={{ color: 'var(--text-muted)' }}>Página {entry.page_number}{entry.excerpt ? ` · “${entry.excerpt}”` : ''}{formatBox(entry.source_bbox ?? entry.bounding_box) ? ` · ${formatBox(entry.source_bbox ?? entry.bounding_box)}` : ''}</small>)}{sourceBoxes.map((box, index) => <small key={`box-${index}`} style={{ color: 'var(--text-muted)' }}>Región {index + 1}: {formatBox(box)}</small>)}</div>}
+    {(evidence.length > 0 || sourceBoxes.length > 0) && <div aria-label="Evidencia de origen" style={{ marginTop: 10, display: 'grid', gap: 4 }}><strong style={{ fontSize: '.85rem' }}>Evidencia de origen</strong>{evidence.map((entry, index) => <small key={`${entry.page_number}-${index}`} style={{ color: 'var(--text-muted)' }}>Página {entry.page_number}{entry.excerpt ? ` · “${entry.excerpt}”` : ''}{showSourceGeometry && formatBox(entry.source_bbox ?? entry.bounding_box) ? ` · ${formatBox(entry.source_bbox ?? entry.bounding_box)}` : ''}</small>)}{sourceBoxes.map((box, index) => <small key={`box-${index}`} style={{ color: 'var(--text-muted)' }}>Región {index + 1}: {formatBox(box)}</small>)}</div>}
     {reviewReasons.length > 0 && <div role="alert" style={{ marginTop: 10, color: 'var(--primary)' }}><AlertTriangle size={14} /> {reviewReasons.join(' · ')}</div>}
     {editing && <form onSubmit={submit} style={{ display: 'grid', gap: 10, marginTop: 14 }}>
       <input aria-label="Nombre" value={values.name} onChange={(event) => setValues({ ...values, name: event.target.value })} style={inputStyle} />
